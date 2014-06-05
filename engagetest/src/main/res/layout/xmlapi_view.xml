@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    android:paddingTop="55dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="top"
+        android:text="Waiting for results ...."
+        android:id="@+id/xmlApiResultTextView"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/createanonymoususer_button"
+        android:enabled="true"
+        android:id="@+id/createAnonymousUserButton"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/upgradeanonymoususer_button"
+        android:enabled="true"
+        android:id="@+id/upgradeAnonymousUserButton"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/mergetoknownuser_button"
+        android:enabled="true"
+        android:id="@+id/mergeAnonymousUserButton"/>
+
+
+</LinearLayout>

@@ -1,0 +1,11 @@
+{
+  "logging": true,
+  "defaultRoute": {
+    "handlers": [
+        "engageDefaultHandler"
+    ]
+  },
+  "routes" : {
+
+  }
+}

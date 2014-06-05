@@ -1,0 +1,37 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.silverpop.engage">
+
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name ="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-feature android:required ="true" android:name ="android.hardware.location.gps" />
+
+    <application
+        android:allowBackup="true"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme"
+        android:enabled="true">
+
+        <activity
+            android:name="com.silverpop.engage.deeplinking.EngageDeepLinkManager"
+            android:theme="@android:style/Theme.NoDisplay"
+            android:noHistory="true">
+            <intent-filter>
+                <data android:scheme="makeandbuild"/>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+            </intent-filter>
+        </activity>
+
+        <receiver android:name=".location.EngageLocationReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.silverpop.engage.location.ACTION_LOCATION" />
+            </intent-filter>
+        </receiver>
+
+    </application>
+
+</manifest>

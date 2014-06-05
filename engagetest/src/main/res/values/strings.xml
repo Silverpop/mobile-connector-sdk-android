@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">EngageSDK-Demo</string>
+    <string name="hello_world">What up world?</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="createanonymoususer_button">Create Anonymous User</string>
+    <string name="upgradeanonymoususer_button">Upgrade Anonymous</string>
+    <string name="mergetoknownuser_button">Make Known User</string>
+
+</resources>

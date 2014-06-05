@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="MobileDeepLinking-Android-SDK">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/engage/libs/MobileDeepLinking-Android-SDK.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
