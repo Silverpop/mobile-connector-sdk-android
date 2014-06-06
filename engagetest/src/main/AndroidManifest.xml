@@ -18,6 +18,12 @@
             </intent-filter>
         </activity>
 
+        <!--<receiver android:name=".EngageNotificationReceiver">-->
+            <!--<intent-filter>-->
+                <!--<action android:name="com.silverpop.engage.demo.engagetest.fragment.NotificationFragment"-->
+            <!--</intent-filter>-->
+        <!--</receiver>-->
+
     </application>
 
 </manifest>

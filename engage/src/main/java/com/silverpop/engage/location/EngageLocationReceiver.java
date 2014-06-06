@@ -60,9 +60,6 @@ public class EngageLocationReceiver
                     EngageExpirationParser exp = new EngageExpirationParser(locAcqTimeout, currentAddressBirthDay);
                     EngageConfig.storeCurrentAddressCacheExpiration(exp.expirationDate());
 
-                    //TODO: Plug augmentation logic and update events from HOLD to NOT_POSTED logic here!!!
-                    //Perform the augmentation of the events.
-
                 } else {
                     Log.w(TAG, "Unable to Geocode address for Lat: "
                             + loc.getLatitude() + " - Long: " + loc.getLongitude());

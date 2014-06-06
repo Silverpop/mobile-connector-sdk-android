@@ -2,7 +2,6 @@ package com.silverpop.engage.demo.engagetest.fragment;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.ListFragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -35,7 +34,12 @@ public class EngageConfigFragment
     @Override
     public void onCreate(Bundle savedInstance) {
         super.onCreate(savedInstance);
+    }
 
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        View v = inflater.inflate(R.layout.engageconfig_view, container, false);
         Context context = getActivity().getApplicationContext();
         Map<String, String> m = new HashMap<String, String>();
         m.put("Device ID", EngageConfig.deviceId(context));
@@ -59,12 +63,6 @@ public class EngageConfigFragment
 
         KeyValueListAdaptor adaptor = new KeyValueListAdaptor(getActivity(), m);
         setListAdapter(adaptor);
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.engageconfig_view, container, false);
         return v;
     }
 

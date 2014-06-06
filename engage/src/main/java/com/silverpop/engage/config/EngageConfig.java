@@ -199,6 +199,10 @@ public class EngageConfig {
             }
         }
 
+        if (EngageConfig.currentAddressCache() == null) {
+            expired = true;
+        }
+
         return expired;
     }
 }

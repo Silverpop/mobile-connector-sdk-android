@@ -2,18 +2,16 @@ apply plugin: 'android'
 
 android {
     compileSdkVersion 19
-    buildToolsVersion "19.0.3"
-
+    buildToolsVersion '19.1.0'
     lintOptions {
         abortOnError false
     }
-
     defaultConfig {
-        packageName "com.silverpop.engage.demo.engagetest"
+        packageName 'com.silverpop.engage.demo.engagetest'
         minSdkVersion 14
         targetSdkVersion 19
         versionCode 1
-        versionName "1.0"
+        versionName '1.0'
     }
     buildTypes {
         release {
@@ -24,10 +22,12 @@ android {
     dexOptions {
         preDexLibraries = false
     }
+    productFlavors {
+    }
 }
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile project(":engage")
-    compile('com.android.support:appcompat-v7:19.+')
+    compile project(':engage')
+    compile 'com.android.support:appcompat-v7:19.+'
 }

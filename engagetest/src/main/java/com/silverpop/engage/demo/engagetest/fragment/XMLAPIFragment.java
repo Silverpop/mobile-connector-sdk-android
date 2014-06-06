@@ -14,6 +14,7 @@ import android.widget.Toast;
 
 import com.android.volley.VolleyError;
 import com.silverpop.engage.XMLAPIManager;
+import com.silverpop.engage.config.EngageConfig;
 import com.silverpop.engage.demo.engagetest.R;
 import com.silverpop.engage.domain.XMLAPI;
 import com.silverpop.engage.exception.XMLResponseParseException;
@@ -73,6 +74,7 @@ public class XMLAPIFragment
                             if (result.equalsIgnoreCase("true")) {
                                 String id = responseXML.valueForKeyPath("envelope.body.result.recipientid");
                                 recipientId = id;
+                                EngageConfig.storeAnonymousUserId(getActivity(), recipientId);
                                 xmlApiResultTextView.setText("Anonymous User RecipientID : " + id);
                                 mUpgradeAnonymousUserButton.setEnabled(true);
                                 mMergeAnonymousUserButton.setEnabled(true);

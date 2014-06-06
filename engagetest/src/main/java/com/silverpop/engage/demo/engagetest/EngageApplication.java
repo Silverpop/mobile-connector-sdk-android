@@ -11,6 +11,7 @@ import com.silverpop.engage.config.EngageConfig;
 import com.silverpop.engage.config.EngageConfigManager;
 import com.silverpop.engage.deeplinking.EngageDeepLinkManager;
 import com.silverpop.engage.domain.UBF;
+import com.silverpop.engage.location.EngageLocationManager;
 import com.silverpop.engage.util.EngageExpirationParser;
 
 import org.mobiledeeplinking.android.Handler;
@@ -36,6 +37,17 @@ public class EngageApplication
     @Override
     public void onCreate() {
         super.onCreate();
+
+        EngageConfigManager cm = EngageConfigManager.get(getApplicationContext());
+
+        if (cm.locationServicesEnabled()) {
+            EngageLocationManager locationManager = EngageLocationManager.get(getApplicationContext());
+            locationManager.startLocationUpdates();
+            Log.d(TAG, "Starting location services");
+        } else {
+            Log.d(TAG, "Location services are disabled");
+        }
+
         Log.d(TAG, "EngageApplication onCreate()");
 
         final UBFManager ubfManager = getUbfManager();
