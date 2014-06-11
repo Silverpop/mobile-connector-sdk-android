@@ -4,7 +4,6 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTabHost;
 import android.os.Bundle;
 import com.silverpop.engage.demo.engagetest.fragment.EngageConfigFragment;
-import com.silverpop.engage.demo.engagetest.fragment.NetworkLogFragment;
 import com.silverpop.engage.demo.engagetest.fragment.NotificationsFragment;
 import com.silverpop.engage.demo.engagetest.fragment.UBFAPIFragment;
 import com.silverpop.engage.demo.engagetest.fragment.XMLAPIFragment;
@@ -27,13 +26,10 @@ public class MainActivity extends FragmentActivity {
         mTabHost.addTab(mTabHost.newTabSpec("UBF Client").setIndicator("UBF Client"),
                 UBFAPIFragment.class, null);
 
-        mTabHost.addTab(mTabHost.newTabSpec("EngageConfig").setIndicator("EngageConfig"),
-                EngageConfigFragment.class, null);
-
         mTabHost.addTab(mTabHost.newTabSpec("Notifications").setIndicator("Notifications"),
                 NotificationsFragment.class, null);
 
-        mTabHost.addTab(mTabHost.newTabSpec("Network Log").setIndicator("Network Log"),
-                NetworkLogFragment.class, null);
+        mTabHost.addTab(mTabHost.newTabSpec("EngageConfig").setIndicator("EngageConfig"),
+                EngageConfigFragment.class, null);
     }
 }

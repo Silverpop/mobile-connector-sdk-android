@@ -6,5 +6,74 @@
     android:orientation="vertical"
     android:paddingTop="55dp">
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="top"
+        android:text=""
+        android:id="@+id/ubfTextView"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="top"
+        android:text=""
+        android:id="@+id/ubfCurrentCache"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Installed"
+        android:enabled="true"
+        android:id="@+id/ubfInstalledButton"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Session Start"
+        android:enabled="true"
+        android:id="@+id/ubfSessionStarted"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Session End"
+        android:enabled="true"
+        android:id="@+id/ubfSessionEnded"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Goal Start"
+        android:enabled="true"
+        android:id="@+id/ubfGoalStarted"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Goal End"
+        android:enabled="true"
+        android:id="@+id/ubfGoalAbandoned"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Named Event"
+        android:enabled="true"
+        android:id="@+id/ubfNamedEvent"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Rec. Notification"
+        android:enabled="true"
+        android:id="@+id/ubfReceivedNotification"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Open Notification"
+        android:enabled="true"
+        android:id="@+id/ubfOpenedNotification"/>
 
 </LinearLayout>

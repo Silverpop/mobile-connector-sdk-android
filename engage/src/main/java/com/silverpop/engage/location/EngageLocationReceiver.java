@@ -8,6 +8,7 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.silverpop.engage.config.EngageConfig;
 import com.silverpop.engage.config.EngageConfigManager;
@@ -44,28 +45,30 @@ public class EngageLocationReceiver
         EngageConfig.storeCurrentLocation(loc);
         EngageConfig.storeCurrentLocationCacheBirthday(new Date());
 
-        if (EngageConfig.addressCacheExpired(context)) {
-            Log.d(TAG, "Address cache is expired. ReverseGeocoding Location Lat: "
-                    + loc.getLatitude() + " - Long: " + loc.getLongitude());
-            Geocoder geocoder = new Geocoder(context, Locale.getDefault());
-            try {
-                List<Address> geoCodeAddresses = geocoder.getFromLocation(loc.getLatitude(), loc.getLongitude(), 1);
-                if (geoCodeAddresses != null && geoCodeAddresses.size() > 0) {
-                    EngageConfig.storeCurrentAddressCache(geoCodeAddresses.get(0));
+        if (Geocoder.isPresent()) {
+            if (EngageConfig.addressCacheExpired(context)) {
+                Log.d(TAG, "Address cache is expired. ReverseGeocoding Location Lat: "
+                        + loc.getLatitude() + " - Long: " + loc.getLongitude());
+                Geocoder geocoder = new Geocoder(context, Locale.getDefault());
 
-                    Date currentAddressBirthDay = new Date();
-                    EngageConfig.storeCurrentAddressCacheBirthday(currentAddressBirthDay);
+                try {
+                    List<Address> geoCodeAddresses = geocoder.getFromLocation(loc.getLatitude(), loc.getLongitude(), 1);
+                    if (geoCodeAddresses != null && geoCodeAddresses.size() > 0) {
+                        EngageConfig.storeCurrentAddressCache(geoCodeAddresses.get(0));
 
-                    String locAcqTimeout = EngageConfigManager.get(context).locationCacheLifespan();
-                    EngageExpirationParser exp = new EngageExpirationParser(locAcqTimeout, currentAddressBirthDay);
-                    EngageConfig.storeCurrentAddressCacheExpiration(exp.expirationDate());
+                        Date currentAddressBirthDay = new Date();
+                        EngageConfig.storeCurrentAddressCacheBirthday(currentAddressBirthDay);
 
-                } else {
-                    Log.w(TAG, "Unable to Geocode address for Lat: "
-                            + loc.getLatitude() + " - Long: " + loc.getLongitude());
+                        String locAcqTimeout = EngageConfigManager.get(context).locationCacheLifespan();
+                        EngageExpirationParser exp = new EngageExpirationParser(locAcqTimeout, currentAddressBirthDay);
+                        EngageConfig.storeCurrentAddressCacheExpiration(exp.expirationDate());
+                    } else {
+                        Log.w(TAG, "Unable to Geocode address for Lat: "
+                                + loc.getLatitude() + " - Long: " + loc.getLongitude());
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
             }
         }
     }

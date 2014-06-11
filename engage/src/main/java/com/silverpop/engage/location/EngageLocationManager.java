@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.location.LocationManager;
+import android.util.Log;
 
 /**
  * Created by jeremydyer on 6/2/14.
@@ -38,21 +39,32 @@ public class EngageLocationManager {
     }
 
     public void startLocationUpdates() {
-        String provider = LocationManager.GPS_PROVIDER;
+        if (mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+                //|| mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+                ){
 
-        //Get the last known location and broadcast it if you have one.
-        Location lastKnown = mLocationManager.getLastKnownLocation(provider);
+            PendingIntent pi = getLocationPendingIntent(true);
 
-        if (lastKnown != null) {
-            //Reset the time to now.
-            lastKnown.setTime(System.currentTimeMillis());
-            broadcastLocation(lastKnown);
+            //Get the last known location and broadcast it if you have one.
+            Location lastKnown = null;
+            if (mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                lastKnown = mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, pi);
+            }
+//            else {
+//                lastKnown = mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+//                mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, pi);
+//            }
+
+            if (lastKnown != null) {
+                //Reset the time to now.
+                lastKnown.setTime(System.currentTimeMillis());
+                broadcastLocation(lastKnown);
+            }
+
+        } else {
+            Log.w(TAG, "Neither GPS or Network provider is available to update location");
         }
-
-        //Start updates from the location manager.
-        PendingIntent pi = getLocationPendingIntent(true);
-        mLocationManager.requestLocationUpdates(provider, 0, 0, pi);
-        mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, pi);
     }
 
     private void broadcastLocation(Location location) {

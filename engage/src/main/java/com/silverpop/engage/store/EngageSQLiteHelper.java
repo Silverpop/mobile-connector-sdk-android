@@ -19,7 +19,7 @@ public class EngageSQLiteHelper
     public static final String COLUMN_EVENT_DATE = "eventDate";
     public static final String COLUMN_EVENT_FAILURE_COUNT = "eventFailureCount";
 
-    private static final String DATABASE_NAME = "EngageTesting.db";
+    public static final String DATABASE_NAME = "EngageTesting.db";
     private static final int DATABASE_VERSION = 2;
 
     // Database creation sql statement

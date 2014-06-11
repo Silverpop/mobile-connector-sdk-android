@@ -5,6 +5,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
 import com.silverpop.engage.demo.engagetest.R;
 
@@ -14,41 +15,23 @@ import com.silverpop.engage.demo.engagetest.R;
 public class UBFAPIFragment
     extends Fragment {
 
-    /** An array of items to display in ArrayList */
-    String apple_versions[] = new String[]{
-            "Mountain Lion",
-            "Lion",
-            "Snow Leopard",
-            "Leopard",
-            "Tiger",
-            "Panther",
-            "Jaguar",
-            "Puma"
-    };
+    private static final String TAG = UBFAPIFragment.class.getName();
 
-//    @Override
-//    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-//
-//        /** Creating array adapter to set data in listview */
-//        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity().getBaseContext(), android.R.layout.simple_list_item_multiple_choice, apple_versions);
-//
-//        /** Setting the array adapter to the listview */
-//        setListAdapter(adapter);
-//
-//        return super.onCreateView(inflater, container, savedInstanceState);
-//    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-
-//        /** Setting the multiselect choice mode for the listview */
-//        getListView().setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
-    }
+    private Button mInstalled;
+    private Button mSessionStart;
+    private Button mSessionEnd;
+    private Button mGoalStart;
+    private Button mGoalAbandoned;
+    private Button mNamedEvent;
+    private Button mReceivedNotification;
+    private Button mOpenedNotification;
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
         View v = inflater.inflate(R.layout.ubfapi_view, container, false);
+
+
+
         return v;
     }
 }
