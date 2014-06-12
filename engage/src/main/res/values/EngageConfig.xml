@@ -16,7 +16,7 @@
     <string name="paramCallToAction">CallToAction</string>
 
     <!-- Session -->
-    <string name="sessionLifecycleExpiration">5 minutes</string>
+    <string name="sessionLifecycleExpiration">15 seconds</string>
 
     <!-- Networking -->
     <integer name="maxNumRetries">3</integer>

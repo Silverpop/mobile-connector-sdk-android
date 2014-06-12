@@ -18,7 +18,7 @@
         jar="/Users/jeremydyer/Development/Android/EngageSDK-Test/EngageTest/engage/build/bundles/debug/classes.jar"
         jumboMode="false"
         revision="19.0.3"
-        sha1="10ffc6b8b762b87a451e63ea28a33f84581bb6ec"/>
+        sha1="04760fd728d4743f9d67437e7ab3a4ad3051aa88"/>
     <item
         dex="/Users/jeremydyer/Development/Android/EngageSDK-Test/EngageTest/engage/build/pre-dexed/test/debug/volley-19709e4e7b9b6a63dd7095111642bde7a3adeb85.jar"
         jar="/Users/jeremydyer/Development/Android/EngageSDK-Test/EngageTest/engage/libs/volley.jar"

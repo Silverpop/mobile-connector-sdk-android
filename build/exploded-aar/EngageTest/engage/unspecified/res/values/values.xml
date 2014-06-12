@@ -72,7 +72,7 @@
     <!-- From: file:/Users/jeremydyer/Development/Android/EngageSDK-Test/EngageTest/engage/src/main/res/values/EngageConfig.xml -->
     <eat-comment />
 
-    <string name="sessionLifecycleExpiration">5 minutes</string>
+    <string name="sessionLifecycleExpiration">15 seconds</string>
     <!-- From: file:/Users/jeremydyer/Development/Android/EngageSDK-Test/EngageTest/engage/src/main/res/values/styles.xml -->
     <eat-comment />
 
