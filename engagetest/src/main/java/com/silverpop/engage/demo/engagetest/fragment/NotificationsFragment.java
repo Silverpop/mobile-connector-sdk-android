@@ -13,7 +13,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 
 import com.silverpop.engage.UBFManager;
-import com.silverpop.engage.EngageApplication;
 import com.silverpop.engage.demo.engagetest.EngageNotificationReceiver;
 import com.silverpop.engage.demo.engagetest.R;
 
