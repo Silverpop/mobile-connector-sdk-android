@@ -236,7 +236,7 @@ public class EngageConfig {
         if (EngageConfig.currentAddressCache() != null) {
             Address address = EngageConfig.currentAddressCache();
             StringBuilder builder = new StringBuilder();
-            builder.append(address.getLocality() != null ? address.getAdminArea() : "");
+            builder.append(address.getLocality() != null ? address.getLocality() : "");
             builder.append(", ");
             builder.append(address.getAdminArea() != null ? address.getAdminArea() : "");
             builder.append(" ");

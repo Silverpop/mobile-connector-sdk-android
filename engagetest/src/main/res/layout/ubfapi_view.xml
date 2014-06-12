@@ -62,18 +62,4 @@
         android:enabled="true"
         android:id="@+id/ubfNamedEvent"/>
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Rec. Notification"
-        android:enabled="true"
-        android:id="@+id/ubfReceivedNotification"/>
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Open Notification"
-        android:enabled="true"
-        android:id="@+id/ubfOpenedNotification"/>
-
 </LinearLayout>

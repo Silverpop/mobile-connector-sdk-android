@@ -1,4 +1,4 @@
-package com.silverpop.engage.location;
+package com.silverpop.engage.location.manager.plugin;
 
 import android.app.PendingIntent;
 import android.content.Context;
@@ -7,35 +7,35 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.util.Log;
 
+import com.silverpop.engage.EngageApplication;
+import com.silverpop.engage.location.manager.EngageLocationManager;
+
 /**
- * Created by jeremydyer on 6/2/14.
+ * Created by jeremydyer on 6/12/14.
  */
-public class EngageLocationManager {
+public class EngageLocationManagerDefault
+    implements EngageLocationManager {
+
+    private EngageApplication engageApplicationInstance = null;
 
     private static final String TAG = EngageLocationManager.class.getName();
     public static final String ACTION_LOCATION = "com.silverpop.engage.location.ACTION_LOCATION";
 
-    private static EngageLocationManager sLocationManager;
-    private Context mAppContext;
+    private static EngageLocationManagerDefault sLocationManager;
     private LocationManager mLocationManager;
 
-    private EngageLocationManager(Context appContext) {
-        mAppContext = appContext;
-        mLocationManager = (LocationManager)mAppContext.getSystemService(Context.LOCATION_SERVICE);
+    @Override
+    public void setEngageApplication(EngageApplication engageApplication) {
+        engageApplicationInstance = engageApplication;
+        mLocationManager = (LocationManager) engageApplicationInstance.getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
     }
 
-    public static EngageLocationManager get(Context c) {
-        if (sLocationManager == null) {
-            //Use the application context to avoid leaking activities.
-            sLocationManager = new EngageLocationManager(c.getApplicationContext());
-        }
-        return sLocationManager;
-    }
+    public EngageLocationManagerDefault() {}
 
     private PendingIntent getLocationPendingIntent(boolean shouldCreate) {
         Intent broadcast = new Intent(ACTION_LOCATION);
         int flags = shouldCreate ? 0 : PendingIntent.FLAG_NO_CREATE;
-        return PendingIntent.getBroadcast(mAppContext, 0, broadcast, flags);
+        return PendingIntent.getBroadcast(engageApplicationInstance.getApplicationContext(), 0, broadcast, flags);
     }
 
     public void startLocationUpdates() {
@@ -64,7 +64,7 @@ public class EngageLocationManager {
     private void broadcastLocation(Location location) {
         Intent broadcast = new Intent(ACTION_LOCATION);
         broadcast.putExtra(LocationManager.KEY_LOCATION_CHANGED, location);
-        mAppContext.sendBroadcast(broadcast);
+        engageApplicationInstance.getApplicationContext().sendBroadcast(broadcast);
     }
 
     public void stopLocationUpdates() {

@@ -14,7 +14,8 @@ import com.silverpop.engage.config.EngageConfigManager;
 import com.silverpop.engage.deeplinking.EngageDeepLinkManager;
 import com.silverpop.engage.domain.UBF;
 import com.silverpop.engage.domain.XMLAPI;
-import com.silverpop.engage.location.EngageLocationManager;
+import com.silverpop.engage.location.manager.EngageLocationManager;
+import com.silverpop.engage.location.manager.plugin.EngageLocationManagerDefault;
 import com.silverpop.engage.util.EngageExpirationParser;
 
 import org.mobiledeeplinking.android.Handler;
@@ -47,9 +48,13 @@ public class EngageApplication
     private Date sessionExpires = null;
     private Date sessionBegan = null;
 
+    private EngageLocationManager locationManager;
+
     @Override
     public void onCreate() {
         super.onCreate();
+
+        Resources r = getResources();
 
         try {
             ApplicationInfo ai = getPackageManager().getApplicationInfo(
@@ -67,9 +72,32 @@ public class EngageApplication
         EngageConfigManager cm = EngageConfigManager.get(getApplicationContext());
 
         if (cm.locationServicesEnabled()) {
-            EngageLocationManager locationManager = EngageLocationManager.get(getApplicationContext());
+            String pluggableLocationClassname = r.getString(R.string.pluggableLocationManagerClassName);
+            if (pluggableLocationClassname != null) {
+                try {
+                    Class<?> clazz = Class.forName(pluggableLocationClassname);
+                    locationManager = (EngageLocationManager) clazz.newInstance();
+                    locationManager.setEngageApplication(this);
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                } catch (InstantiationException e) {
+                    e.printStackTrace();
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            if (locationManager == null) {
+                Log.w(TAG, "Unable to create PluggableLocationManager instance. Defaulting to : '"
+                        + EngageLocationManagerDefault.class.getName() + "'");
+                //Create the default EngageLocationManager instance.
+                locationManager = new EngageLocationManagerDefault();
+                locationManager.setEngageApplication(this);
+            }
+
             locationManager.startLocationUpdates();
             Log.d(TAG, "Starting location services");
+
         } else {
             Log.d(TAG, "Location services are disabled");
         }
@@ -94,13 +122,11 @@ public class EngageApplication
                 getSharedPreferences(EngageConfig.ENGAGE_CONFIG_PREF_ID, Context.MODE_PRIVATE);
 
         //Check if this is the first time the app has been ran or not
-        if (sharedPreferences.getString(APP_INSTALLED, null) == null || 1 == 1) {
+        if (sharedPreferences.getString(APP_INSTALLED, null) == null) {
             Log.d(TAG, "EngageSDK - Application has been installed/ran for the first time");
             sharedPreferences.edit().putString(APP_INSTALLED, "YES").commit();
             UBF appInstalled = UBF.installed(getApplicationContext(), null);
             ubfManager.postEvent(appInstalled);
-
-            Resources r = getResources();
 
             //Create the Last known user location database columns
             Map<String, Object> bodyElements = new HashMap<String, Object>();
@@ -121,15 +147,14 @@ public class EngageApplication
         }
 
         //Examine the session and determine if events should be posted.
-        handleSessionEvents();
+        handleSessionApplicationLaunch();
     }
 
-    private void handleSessionEvents() {
+    private void handleSessionApplicationLaunch() {
+        SharedPreferences sharedPreferences = getApplicationContext().
+                getSharedPreferences(EngageConfig.ENGAGE_CONFIG_PREF_ID, Context.MODE_PRIVATE);
         if (sessionBegan == null) {
-
             //Checks to see if a previous session has been persisted.
-            SharedPreferences sharedPreferences = getApplicationContext().
-                    getSharedPreferences(EngageConfig.ENGAGE_CONFIG_PREF_ID, Context.MODE_PRIVATE);
             long sessionStartedTimestamp = sharedPreferences.getLong(SESSION, -1);
             if (sessionStartedTimestamp == -1) {
                 //Start a session.
@@ -145,20 +170,26 @@ public class EngageApplication
             EngageExpirationParser parser = new EngageExpirationParser(cm.sessionLifecycleExpiration(), sessionBegan);
             sessionExpires = parser.expirationDate();
 
-            if (booleanIsSessionExpired()) {
+            if (isSessionExpired()) {
                 UBFManager.get().postEvent(UBF.sessionEnded(getApplicationContext(), null));
+                sharedPreferences.edit().putLong(SESSION, -1).commit();
+                UBFManager.get().postEvent(UBF.sessionStarted(getApplicationContext(),
+                        null, EngageConfig.currentCampaign(getApplicationContext())));
             }
 
         } else {
             //Compare the current time to the session began time.
-            if (booleanIsSessionExpired()) {
+            if (isSessionExpired()) {
                 UBFManager.get().postEvent(UBF.sessionEnded(getApplicationContext(), null));
+                sharedPreferences.edit().putLong(SESSION, -1).commit();
+                UBFManager.get().postEvent(UBF.sessionStarted(getApplicationContext(),
+                        null, EngageConfig.currentCampaign(getApplicationContext())));
             }
         }
     }
 
-    private boolean booleanIsSessionExpired() {
-        if (sessionExpires.compareTo(new Date()) > 0) {
+    private boolean isSessionExpired() {
+        if (sessionExpires.compareTo(new Date()) < 0) {
             return true;
         } else {
             return false;
@@ -168,7 +199,10 @@ public class EngageApplication
     @Override
     public void onTerminate() {
         super.onTerminate();
-        handleSessionEvents();
+
+        if (isSessionExpired()) {
+            UBFManager.get().postEvent(UBF.sessionEnded(getApplicationContext(), null));
+        }
     }
 }
 

@@ -15,6 +15,7 @@ import android.widget.Toast;
 import com.android.volley.VolleyError;
 import com.silverpop.engage.XMLAPIManager;
 import com.silverpop.engage.config.EngageConfig;
+import com.silverpop.engage.config.EngageConfigManager;
 import com.silverpop.engage.demo.engagetest.R;
 import com.silverpop.engage.domain.XMLAPI;
 import com.silverpop.engage.exception.XMLResponseParseException;
@@ -56,7 +57,7 @@ public class XMLAPIFragment
         mCreateAnonymousUserButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                xmlapiManager.createAnonymousUserList(r.getString(R.string.listId), new AsyncTask<EngageResponseXML, Void, Object>() {
+                xmlapiManager.createAnonymousUserList(EngageConfigManager.get(getActivity()).engageListId(), new AsyncTask<EngageResponseXML, Void, Object>() {
                     @Override
                     protected EngageResponseXML doInBackground(EngageResponseXML... engageResponseXMLs) {
                         return engageResponseXMLs[0];
@@ -107,7 +108,7 @@ public class XMLAPIFragment
             @Override
             public void onClick(View view) {
                 Log.w(TAG, "Ok gonna add the recipient now");
-                XMLAPI addRecipient = XMLAPI.addRecipient("jeremy.dyer@makeandbuild.com", r.getString(R.string.listId));
+                XMLAPI addRecipient = XMLAPI.addRecipient("jeremy.dyer@makeandbuild.com", EngageConfigManager.get(getActivity()).engageListId());
                 xmlapiManager.postXMLAPI(addRecipient, new AsyncTask<EngageResponseXML, Void, Object>() {
 
                     @Override
@@ -158,7 +159,7 @@ public class XMLAPIFragment
         mMergeAnonymousUserButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                XMLAPI mergeRecipient = XMLAPI.updateRecipient(recipientId, r.getString(R.string.listId));
+                XMLAPI mergeRecipient = XMLAPI.updateRecipient(recipientId, EngageConfigManager.get(getActivity()).engageListId());
                 xmlapiManager.postXMLAPI(mergeRecipient, new AsyncTask<EngageResponseXML, Void, Object>() {
 
                     @Override

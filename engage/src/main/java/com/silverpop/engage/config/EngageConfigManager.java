@@ -1,8 +1,14 @@
 package com.silverpop.engage.config;
 
 import android.content.Context;
+import android.util.Log;
 
-import com.silverpop.engage.R;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 /**
  * Manager class for reading Engage configuration values.
@@ -11,8 +17,12 @@ import com.silverpop.engage.R;
  */
 public class EngageConfigManager {
 
+    private static final String TAG = EngageConfigManager.class.getName();
+
     private Context mAppContext = null;
     private static EngageConfigManager configManager = null;
+
+    private static JSONObject configs = null;
 
     private EngageConfigManager(Context context) {
         mAppContext = context;
@@ -21,123 +31,347 @@ public class EngageConfigManager {
     public static EngageConfigManager get(Context context) {
         if (configManager == null) {
             configManager = new EngageConfigManager(context);
+
+            //Loads the SDK default configurations.
+            JSONObject sdkDefaults = null;
+            JSONObject userDefined = null;
+            try {
+                InputStream is = context.getResources().getAssets().open("EngageConfigDefault.json");
+                BufferedReader streamReader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+                StringBuilder responseStrBuilder = new StringBuilder();
+
+                String inputStr;
+                while ((inputStr = streamReader.readLine()) != null)
+                    responseStrBuilder.append(inputStr);
+
+                sdkDefaults =new JSONObject(responseStrBuilder.toString());
+            } catch (Exception ex) {
+                Log.e(TAG, "Error loading EngageSDK default configurations from : 'EngageConfigDefaults.json'");
+            }
+
+            //Loads the user defined configurations.
+            try {
+                InputStream is = context.getResources().getAssets().open("EngageConfig.json");
+                BufferedReader streamReader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+                StringBuilder responseStrBuilder = new StringBuilder();
+
+                String inputStr;
+                while ((inputStr = streamReader.readLine()) != null)
+                    responseStrBuilder.append(inputStr);
+
+                userDefined =new JSONObject(responseStrBuilder.toString());
+            } catch (Exception ex) {
+                Log.e(TAG, "Error loading EngageSDK default configurations from : 'EngageConfigDefaults.json'");
+            }
+
+            try {
+                if (sdkDefaults != null || userDefined != null) {
+                    if (sdkDefaults != null && userDefined != null) {
+                        if (sdkDefaults.names() != null) {
+                            String[] defaultNames = jsonObjectNames(sdkDefaults);
+                            JSONObject merged = new JSONObject(sdkDefaults, defaultNames);
+
+                            //Merges in the user values now.
+                            String[] userNames = jsonObjectNames(userDefined);
+
+                            for (String key : userNames) {
+                                merged.put(key, userDefined.get(key));
+                            }
+
+                            configs = merged;
+
+                        } else {
+                            Log.w(TAG, "No JSON values found in loaded configurations! " +
+                                    "Certain operations may not operate properly!");
+                        }
+                    } else if (userDefined != null) {
+                        configs = userDefined;
+                    } else {
+                        configs = sdkDefaults;
+                    }
+
+                } else {
+                    Log.e(TAG, "EngageSDK - Unable to load SDK configuration values. " +
+                            "Certain operations may not perform");
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
         return configManager;
     }
 
+    private static String[] jsonObjectNames(JSONObject object) {
+        try {
+            String[] names = new String[object.names().length()];
+            for (int i = 0; i < object.names().length(); i++) {
+                names[i] = object.names().getString(i);
+            }
+            return names;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return new String[0];
+        }
+    }
+
     public int expireLocalEventsAfterNumDays() {
-        return mAppContext.getResources().getInteger(R.integer.expireLocalEventsAfterNumDays);
+        try {
+            return configs.getJSONObject("LocalEventStore").getInt("expireLocalEventsAfterNumDays");
+        } catch (JSONException ex) {
+            Log.w(TAG, "Unable to find expireLocalEventsAfterNumDays configuration");
+            return -1;
+        }
     }
 
     public int ubfEventCacheSize() {
-        return mAppContext.getResources().getInteger(R.integer.ubfEventCacheSize);
+        try {
+            return configs.getJSONObject("General").getInt("ubfEventCacheSize");
+        } catch (JSONException ex) {
+            Log.w(TAG, "Unable to find ubfEventCacheSize configuration");
+            return -1;
+        }
     }
 
     public String defaultCurrentCampaignExpiration() {
-        return mAppContext.getResources().getString(R.string.defaultCurrentCampaignExpiration);
+        try {
+            return configs.getJSONObject("General").getString("defaultCurrentCampaignExpiration");
+        } catch (JSONException ex) {
+            Log.w(TAG, "Unable to find defaultCurrentCampaignExpiration configuration");
+            return null;
+        }
     }
 
     public String paramCampaignValidFor() {
-        return mAppContext.getResources().getString(R.string.paramCampaignValidFor);
+        try {
+            return configs.getJSONObject("ParamFieldNames").getString("paramCampaignValidFor");
+        } catch (JSONException ex) {
+            Log.w(TAG, "Unable to find paramCampaignValidFor configuration");
+            return null;
+        }
     }
 
     public String paramCampaignExpiresAt() {
-        return mAppContext.getResources().getString(R.string.paramCampaignExpiresAt);
+        try {
+            return configs.getJSONObject("ParamFieldNames").getString("paramCampaignExpiresAt");
+        } catch (JSONException ex) {
+            Log.w(TAG, "Unable to find paramCampaignExpiresAt configuration");
+            return null;
+        }
     }
 
     public String paramCurrentCampaign() {
-        return mAppContext.getResources().getString(R.string.paramCurrentCampaign);
+        try {
+            return configs.getJSONObject("ParamFieldNames").getString("paramCurrentCampaign");
+        } catch (JSONException ex) {
+            Log.w(TAG, "Unable to find paramCurrentCampaign configuration");
+            return null;
+        }
     }
 
     public String paramCallToAction() {
-        return mAppContext.getResources().getString(R.string.paramCallToAction);
+        try {
+            return configs.getJSONObject("ParamFieldNames").getString("paramCallToAction");
+        } catch (JSONException ex) {
+            Log.w(TAG, "Unable to find paramCallToAction configuration");
+            return null;
+        }
     }
 
     public String sessionLifecycleExpiration() {
-        return mAppContext.getResources().getString(R.string.sessionLifecycleExpiration);
+        try {
+            return configs.getJSONObject("Session").getString("sessionLifecycleExpiration");
+        } catch (JSONException ex) {
+            Log.w(TAG, "Unable to find sessionLifecycleExpiration configuration");
+            return null;
+        }
     }
 
     public int maxNumRetries() {
-        return mAppContext.getResources().getInteger(R.integer.maxNumRetries);
+        try {
+            return configs.getJSONObject("Networking").getInt("maxNumRetries");
+        } catch (JSONException ex) {
+            Log.w(TAG, "Unable to find maxNumRetries configuration");
+            return -1;
+        }
     }
 
     public String ubfSessionDurationFieldName() {
-        return mAppContext.getResources().getString(R.string.UBFSessionDurationFieldName);
+        try {
+            return configs.getJSONObject("UBFFieldNames").getString("UBFSessionDurationFieldName");
+        } catch (JSONException ex) {
+            Log.w(TAG, "Unable to find UBFSessionDurationFieldName configuration");
+            return null;
+        }
     }
 
     public String ubfTagsFieldName() {
-        return mAppContext.getResources().getString(R.string.UBFTagsFieldName);
+        try {
+            return configs.getJSONObject("UBFFieldNames").getString("UBFTagsFieldName");
+        } catch (JSONException ex) {
+            Log.w(TAG, "Unable to find UBFTagsFieldName configuration");
+            return null;
+        }
     }
 
     public String ubfDisplayedMessageFieldName() {
-        return mAppContext.getResources().getString(R.string.UBFDisplayedMessageFieldName);
+        try {
+            return configs.getJSONObject("UBFFieldNames").getString("UBFDisplayedMessageFieldName");
+        } catch (JSONException ex) {
+            Log.w(TAG, "Unable to find UBFDisplayedMessageFieldName configuration");
+            return null;
+        }
     }
 
     public String ubfCallToActionFieldName() {
-        return mAppContext.getResources().getString(R.string.UBFCallToActionFieldName);
+        try {
+            return configs.getJSONObject("UBFFieldNames").getString("UBFCallToActionFieldName");
+        } catch (JSONException ex) {
+            Log.w(TAG, "Unable to find UBFCallToActionFieldName configuration");
+            return null;
+        }
     }
 
     public String ubfEventNameFieldName() {
-        return mAppContext.getResources().getString(R.string.UBFEventNameFieldName);
+        try {
+            return configs.getJSONObject("UBFFieldNames").getString("UBFEventNameFieldName");
+        } catch (JSONException ex) {
+            Log.w(TAG, "Unable to find UBFEventNameFieldName configuration");
+            return null;
+        }
     }
 
     public String ubfGoalNameFieldName() {
-        return mAppContext.getResources().getString(R.string.UBFGoalNameFieldName);
+        try {
+            return configs.getJSONObject("UBFFieldNames").getString("UBFGoalNameFieldName");
+        } catch (JSONException ex) {
+            Log.w(TAG, "Unable to find UBFGoalNameFieldName configuration");
+            return null;
+        }
     }
 
     public String ubfCurrentCampaignFieldName() {
-        return mAppContext.getResources().getString(R.string.UBFCurrentCampaignFieldName);
+        try {
+            return configs.getJSONObject("UBFFieldNames").getString("UBFCurrentCampaignFieldName");
+        } catch (JSONException ex) {
+            Log.w(TAG, "Unable to find UBFCurrentCampaignFieldName configuration");
+            return null;
+        }
     }
 
     public String ubfLastCampaignFieldName() {
-        return mAppContext.getResources().getString(R.string.UBFLastCampaignFieldName);
+        try {
+            return configs.getJSONObject("UBFFieldNames").getString("UBFLastCampaignFieldName");
+        } catch (JSONException ex) {
+            Log.w(TAG, "Unable to find UBFLastCampaignFieldName configuration");
+            return null;
+        }
     }
 
     public String ubfLocationAddressFieldName() {
-        return mAppContext.getResources().getString(R.string.UBFLocationAddressFieldName);
+        try {
+            return configs.getJSONObject("UBFFieldNames").getString("UBFLocationAddressFieldName");
+        } catch (JSONException ex) {
+            Log.w(TAG, "Unable to find UBFLocationAddressFieldName configuration");
+            return null;
+        }
     }
 
     public String ubfLocationNameFieldName() {
-        return mAppContext.getResources().getString(R.string.UBFLocationNameFieldName);
+        try {
+            return configs.getJSONObject("UBFFieldNames").getString("UBFLocationNameFieldName");
+        } catch (JSONException ex) {
+            Log.w(TAG, "Unable to find UBFLocationNameFieldName configuration");
+            return null;
+        }
     }
 
     public String ubfLatitudeFieldName() {
-        return mAppContext.getResources().getString(R.string.UBFLatitudeFieldName);
+        try {
+            return configs.getJSONObject("UBFFieldNames").getString("UBFLatitudeFieldName");
+        } catch (JSONException ex) {
+            Log.w(TAG, "Unable to find UBFLatitudeFieldName configuration");
+            return null;
+        }
     }
 
     public String ubfLongitudeFieldName() {
-        return mAppContext.getResources().getString(R.string.UBFLongitudeFieldName);
+        try {
+            return configs.getJSONObject("UBFFieldNames").getString("UBFLongitudeFieldName");
+        } catch (JSONException ex) {
+            Log.w(TAG, "Unable to find UBFLongitudeFieldName configuration");
+            return null;
+        }
     }
 
     public int locationDistanceFilter() {
-        return mAppContext.getResources().getInteger(R.integer.locationDistanceFilter);
+        try {
+            return configs.getJSONObject("LocationServices").getInt("locationDistanceFilter");
+        } catch (JSONException ex) {
+            Log.w(TAG, "Unable to find locationDistanceFilter configuration");
+            return -1;
+        }
     }
 
     public int locationMilliUpdateInterval() {
-        return mAppContext.getResources().getInteger(R.integer.locationMilliUpdateInterval);
+        try {
+            return configs.getJSONObject("LocationServices").getInt("locationMilliUpdateInterval");
+        } catch (JSONException ex) {
+            Log.w(TAG, "Unable to find locationMilliUpdateInterval configuration");
+            return -1;
+        }
     }
 
     public String locationCacheLifespan() {
-        return mAppContext.getResources().getString(R.string.locationCacheLifespan);
+        try {
+            return configs.getJSONObject("LocationServices").getString("locationCacheLifespan");
+        } catch (JSONException ex) {
+            Log.w(TAG, "Unable to find locationCacheLifespan configuration");
+            return null;
+        }
     }
 
     public String augmentationTimeout() {
-        return mAppContext.getResources().getString(R.string.augmentationTimeout);
+        try {
+            return configs.getJSONObject("Augmentation").getString("augmentationTimeout");
+        } catch (JSONException ex) {
+            Log.w(TAG, "Unable to find augmentationTimeout configuration");
+            return null;
+        }
     }
 
-//    public String coordinatesAddressAcquisitionTimeout() {
-//        return mAppContext.getResources().getString(R.string.coordinatesAddressAcquisitionTimeout);
-//    }
-//
-//    public String coordinatesLongLatAcquisitionTimeout() {
-//        return mAppContext.getResources().getString(R.string.coordinatesLongLatAcquisitionTimeout);
-//    }
-
     public boolean locationServicesEnabled() {
-        return mAppContext.getResources().getBoolean(R.bool.locationServicesEnabled);
+        try {
+            return configs.getJSONObject("LocationServices").getBoolean("locationServicesEnabled");
+        } catch (JSONException ex) {
+            Log.w(TAG, "Unable to find locationServicesEnabled configuration");
+            return true;
+        }
     }
 
     public String deepLinkScheme() {
-        return mAppContext.getResources().getString(R.string.deepLinkScheme);
+        try {
+            return configs.getJSONObject("General").getString("deepLinkScheme");
+        } catch (JSONException ex) {
+            Log.w(TAG, "Unable to find deepLinkScheme configuration");
+            return null;
+        }
+    }
+
+    public String engageListId() {
+        try {
+            return configs.getJSONObject("General").getString("engageListId");
+        } catch (JSONException ex) {
+            Log.w(TAG, "Unable to find engageListId configuration");
+            return null;
+        }
+    }
+
+    public boolean secureConnection() {
+        try {
+            return configs.getJSONObject("Networking").getBoolean("secureConnection");
+        } catch (JSONException ex) {
+            Log.w(TAG, "Unable to find secureConnection configuration");
+            return true;
+        }
     }
 }

@@ -1,0 +1,53 @@
+{
+	"LocalEventStore": {
+		"expireLocalEventsAfterNumDays": 30
+	},
+	"General" : {
+		"ubfEventCacheSize": 1,
+		"defaultCurrentCampaignExpiration": "1 day",
+		"deepLinkScheme": "MakeAndBuild",
+		"engageListId": "23949"
+	},
+	"ParamFieldNames" : {
+		"paramCampaignValidFor" : "CampaignValidFor",
+		"paramCampaignExpiresAt": "CampaignExpiresAt",
+		"paramCurrentCampaign": "CurrentCampaign",
+		"paramCallToAction": "CallToAction"
+	},
+	"Session" : {
+		"sessionLifecycleExpiration": "15 seconds"
+	},
+	"Networking" : {
+		"maxNumRetries": 3,
+		"secureConnection": true
+	},
+	"UBFFieldNames" : {
+		"UBFSessionDurationFieldName": "Session Duration",
+		"UBFTagsFieldName": "Tags",
+		"UBFDisplayedMessageFieldName": "Displayed Message",
+		"UBFCallToActionFieldName": "Call To Action",
+		"UBFEventNameFieldName": "Event Name",
+		"UBFGoalNameFieldName": "Goal Name",
+		"UBFCurrentCampaignFieldName": "Campaign Name",
+		"UBFLastCampaignFieldName": "Last Campaign",
+		"UBFLocationAddressFieldName": "Location Address",
+		"UBFLocationNameFieldName": "Location Name",
+		"UBFLatitudeFieldName": "Latitude",
+		"UBFLongitudeFieldName": "Longitude"
+	},
+	"LocationServices" : {
+		"locationDistanceFilter": 10,
+		"locationMilliUpdateInterval": 30000,
+		"locationCacheLifespan": "1 hr",
+		"locationServicesEnabled": true,
+		"lastKnownLocationDateFormat": "MM-dd-yyyy",
+		"lastKnownLocationTimestampColumn": "Last Location Address Time",
+		"lastKnownLocationColumn": "Last Location Address"
+	},
+	"PluggableServices" : {
+		"pluggableLocationManagerClassName": "com.silverpop.engage.location.manager.plugin.EngageLocationManagerDefault"
+	},
+	"Augmentation" : {
+		"augmentationTimeout": "15 seconds"
+	}
+}

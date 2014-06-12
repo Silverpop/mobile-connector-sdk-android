@@ -15,6 +15,9 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.silverpop.engage.config.EngageConfig;
+import com.silverpop.engage.config.EngageConfigManager;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -32,7 +35,7 @@ public abstract class EngageClient
 
     private static final String TAG = EngageClient.class.getName();
 
-    private static Context mAppContext;
+    protected static Context mAppContext;
     protected String clientId, clientSecret, refreshToken, host;
     protected static RequestQueue requestQueue;
     private static RequestQueue authenticationQueue;
@@ -233,7 +236,11 @@ public abstract class EngageClient
     }
 
     private URI getOauthUri() throws Exception {
-        return new URI("http", host, oauthEndpoint, null);
+        if (EngageConfigManager.get(mAppContext).secureConnection()) {
+            return new URI("https", host, oauthEndpoint, null);
+        } else {
+            return new URI("http", host, oauthEndpoint, null);
+        }
     }
 
     protected String getClientId() {
