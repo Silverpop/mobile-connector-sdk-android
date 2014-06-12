@@ -3,8 +3,6 @@ package com.silverpop.engage.config;
 import android.content.Context;
 import android.util.Log;
 
-import com.silverpop.engage.R;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
