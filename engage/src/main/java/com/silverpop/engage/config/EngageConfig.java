@@ -23,6 +23,7 @@ public class EngageConfig {
     public static final String PRIMARY_USER_ID = "PRIMARY_USER_ID";
     public static final String ANONYMOUS_ID = "ANONYMOUS_ID";
     public static final String CURRENT_CAMPAIGN = "CURRENT_CAMPAIGN";
+    public static final String CURRENT_CAMPAIGN_EXPIRATION_TIMESTAMP = "CURRENT_CAMPAIGN_EXPIRATION_TIMESTAMP";
 
     private static Location currentLocationCache;
     private static Date currentLocationCacheBirthday;
@@ -31,6 +32,8 @@ public class EngageConfig {
     private static Date currentAddressExpirationDate = null;
 
     private static Date campaignExpirationDate = null;
+
+    private static boolean hasCheckedForExpirationFromDisk = false;
 
     public static String deviceName() {
         String manufacturer = Build.MANUFACTURER;
@@ -112,11 +115,27 @@ public class EngageConfig {
             if (campaignExpirationDate.compareTo(new Date()) > 0) {
                 return context.getSharedPreferences(ENGAGE_CONFIG_PREF_ID, Context.MODE_PRIVATE).getString(CURRENT_CAMPAIGN, "");
             } else {
+                campaignExpirationDate = null;
+                context.getSharedPreferences(ENGAGE_CONFIG_PREF_ID, Context.MODE_PRIVATE).edit().putLong(CURRENT_CAMPAIGN_EXPIRATION_TIMESTAMP, -1).commit();
                 return "";
             }
         } else {
             //If the campaign expiration date is null that means the campaign never expires.
-            return context.getSharedPreferences(ENGAGE_CONFIG_PREF_ID, Context.MODE_PRIVATE).getString(CURRENT_CAMPAIGN, "");
+            //We should load the stored expiration time to check this isn't after an app relaunch however and the campaign expired while it was closed.
+            long expirationTimeStamp = context.getSharedPreferences(ENGAGE_CONFIG_PREF_ID, Context.MODE_PRIVATE).getLong(CURRENT_CAMPAIGN_EXPIRATION_TIMESTAMP, -1);
+            if (expirationTimeStamp > -1) {
+                Date expDate = new Date(expirationTimeStamp);
+                if (expDate.compareTo(new Date()) > 0) {
+                    campaignExpirationDate = new Date(expirationTimeStamp);
+                    return currentCampaign(context);
+                } else {
+                    return "";
+                }
+            } else if (expirationTimeStamp == 0) {
+                return context.getSharedPreferences(ENGAGE_CONFIG_PREF_ID, Context.MODE_PRIVATE).getString(CURRENT_CAMPAIGN, "");
+            } else {
+                return "";
+            }
         }
     }
 
@@ -126,13 +145,19 @@ public class EngageConfig {
 
         if (expirationTimestamp > 0) {
             campaignExpirationDate = new Date(expirationTimestamp);
+            sharedPreferences.edit().putLong(CURRENT_CAMPAIGN_EXPIRATION_TIMESTAMP, campaignExpirationDate.getTime()).commit();
         } else {
             campaignExpirationDate = null;
+            sharedPreferences.edit().putLong(CURRENT_CAMPAIGN_EXPIRATION_TIMESTAMP, 0).commit();
         }
     }
 
     public static String lastCampaign(Context context) {
         return context.getSharedPreferences(ENGAGE_CONFIG_PREF_ID, Context.MODE_PRIVATE).getString(CURRENT_CAMPAIGN, null);
+    }
+
+    public static Date currentCampaignExpirationDate() {
+        return campaignExpirationDate;
     }
 
     public static void storeCurrentLocation(Location location) {
@@ -204,5 +229,27 @@ public class EngageConfig {
         }
 
         return expired;
+    }
+
+    public static String buildLocationAddress() {
+
+        //Sets the location name and address.
+        if (EngageConfig.currentAddressCache() != null) {
+            Address address = EngageConfig.currentAddressCache();
+            StringBuilder builder = new StringBuilder();
+            builder.append(address.getLocality() != null ? address.getAdminArea() : "");
+            builder.append(", ");
+            builder.append(address.getAdminArea() != null ? address.getAdminArea() : "");
+            builder.append(" ");
+            builder.append(address.getPostalCode() != null ? address.getPostalCode() : "");
+            builder.append(" ");
+            builder.append(address.getCountryName() != null ? address.getCountryName() : "");
+            builder.append(" ");
+            builder.append(address.getCountryCode() != null ? "(" + address.getCountryCode() + ")" : "");
+
+            return builder.toString();
+        } else {
+            return "";
+        }
     }
 }

@@ -49,11 +49,7 @@ public class XMLAPIFragment
 
         final Resources r = getActivity().getResources();
 
-        xmlapiManager = new XMLAPIManager(getActivity().getApplicationContext(),
-                r.getString(R.string.clientID),
-                r.getString(R.string.clientSecret),
-                r.getString(R.string.refreshToken),
-                r.getString(R.string.host));
+        xmlapiManager = XMLAPIManager.get();
 
         xmlApiResultTextView = (TextView)v.findViewById(R.id.xmlApiResultTextView);
         mCreateAnonymousUserButton = (Button)v.findViewById(R.id.createAnonymousUserButton);

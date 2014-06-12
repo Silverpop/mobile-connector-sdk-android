@@ -1,9 +1,7 @@
 {
   "logging": true,
   "defaultRoute": {
-    "handlers": [
-        "engageDefaultHandler"
-    ]
+    "class": "com.silverpop.engage.demo.engagetest.MainActivity"
   },
   "routes" : {
 

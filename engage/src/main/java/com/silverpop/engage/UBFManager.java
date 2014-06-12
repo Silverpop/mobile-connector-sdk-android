@@ -3,6 +3,7 @@ package com.silverpop.engage;
 import android.app.Notification;
 import android.content.Context;
 import android.os.AsyncTask;
+import android.util.Log;
 
 import com.android.volley.Response;
 import com.silverpop.engage.augmentation.UBFAugmentationService;
@@ -59,12 +60,30 @@ public class UBFManager {
         new RePostFailedEventsTask().execute();
     }
 
-
-    public static UBFManager get(Context context, String clientId, String clientSecret, String refreshToken, String host) {
+    /**
+     * Create the initial instance of the UBFManager.
+     *
+     * @param context
+     * @param clientId
+     * @param clientSecret
+     * @param refreshToken
+     * @param host
+     * @return
+     */
+    public static UBFManager initialize(Context context, String clientId, String clientSecret, String refreshToken, String host) {
         if (ubfManager == null) {
             ubfManager = new UBFManager(context, clientId, clientSecret, refreshToken, host);
         }
         return ubfManager;
+    }
+
+    public static UBFManager get() {
+        if (ubfManager == null) {
+            Log.e(TAG, "EngageSDK - You have not yet initialized your UBFManager instance! Null UBFManager will be returned!");
+            return null;
+        } else {
+            return ubfManager;
+        }
     }
 
     public void postEventCache() {
@@ -156,21 +175,18 @@ public class UBFManager {
         if (params.containsKey(cm.paramCurrentCampaign())) {
             Object value = params.get(cm.paramCurrentCampaign());
 
-            if (!EngageConfig.currentCampaign(context).equalsIgnoreCase((String)value)) {
-
-                //Check for a user defined campaign expiration
-                if (params.containsKey(cm.paramCampaignExpiresAt())) {
-                    EngageExpirationParser parser = new EngageExpirationParser((String)params.get(cm.paramCampaignExpiresAt()), null);
-                    EngageConfig.storeCurrentCampaignWithExpirationTimestamp(context,
-                            (String)value, parser.expirationTimeStamp());
-                } else if (params.containsKey(cm.paramCampaignValidFor())) {
-                    EngageExpirationParser parser = new EngageExpirationParser((String)params.get(cm.paramCampaignExpiresAt()), null);
-                    EngageConfig.storeCurrentCampaignWithExpirationTimestamp(context,
-                            (String)value, parser.expirationTimeStamp());
-                } else {
-                    EngageConfig.storeCurrentCampaignWithExpirationTimestamp(context,
-                            (String)value, -1);
-                }
+            //Check for a user defined campaign expiration
+            if (params.containsKey(cm.paramCampaignExpiresAt())) {
+                EngageExpirationParser parser = new EngageExpirationParser((String)params.get(cm.paramCampaignExpiresAt()), null);
+                EngageConfig.storeCurrentCampaignWithExpirationTimestamp(context,
+                        (String)value, parser.expirationTimeStamp());
+            } else if (params.containsKey(cm.paramCampaignValidFor())) {
+                EngageExpirationParser parser = new EngageExpirationParser((String)params.get(cm.paramCampaignValidFor()), null);
+                EngageConfig.storeCurrentCampaignWithExpirationTimestamp(context,
+                        (String)value, parser.expirationTimeStamp());
+            } else {
+                EngageConfig.storeCurrentCampaignWithExpirationTimestamp(context,
+                        (String)value, -1);
             }
 
             refactoredParams.remove(value);

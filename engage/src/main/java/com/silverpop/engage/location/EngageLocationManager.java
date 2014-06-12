@@ -39,9 +39,7 @@ public class EngageLocationManager {
     }
 
     public void startLocationUpdates() {
-        if (mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
-                //|| mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
-                ){
+        if (mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
 
             PendingIntent pi = getLocationPendingIntent(true);
 
@@ -51,10 +49,6 @@ public class EngageLocationManager {
                 lastKnown = mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
                 mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, pi);
             }
-//            else {
-//                lastKnown = mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-//                mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, pi);
-//            }
 
             if (lastKnown != null) {
                 //Reset the time to now.

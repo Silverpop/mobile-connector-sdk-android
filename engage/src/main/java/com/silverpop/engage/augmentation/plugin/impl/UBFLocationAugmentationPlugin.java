@@ -60,13 +60,7 @@ public class UBFLocationAugmentationPlugin
                 ubfEvent.addParam(cm.ubfLocationNameFieldName(), locationName);
             }
             if (!ubfEvent.getParams().containsKey(cm.ubfLocationAddressFieldName())) {
-                StringBuilder builder = new StringBuilder();
-                builder.append(address.getSubAdminArea());
-                builder.append(", ");
-                builder.append(address.getAdminArea());
-                builder.append(" ");
-                builder.append(address.getPostalCode());
-                ubfEvent.addParam(cm.ubfLocationAddressFieldName(), builder.toString());
+                ubfEvent.addParam(cm.ubfLocationAddressFieldName(), EngageConfig.buildLocationAddress());
             }
         }
 

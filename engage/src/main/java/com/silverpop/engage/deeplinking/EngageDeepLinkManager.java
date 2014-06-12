@@ -32,6 +32,9 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.silverpop.engage.EngageApplication;
+
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.mobiledeeplinking.android.Constants;
@@ -106,30 +109,32 @@ public class EngageDeepLinkManager extends Activity
             return;
         }
 
-        Iterator<String> keys = config.getRoutes().keys();
-        while (keys.hasNext())
-        {
-            String route = keys.next();
-            JSONObject routeOptions = (JSONObject) config.getRoutes().get(route);
-            try
+        if (config.getRoutes() != null) {
+            Iterator<String> keys = config.getRoutes().keys();
+            while (keys.hasNext())
             {
-                Map<String, String> routeParameters = new HashMap<String, String>();
-                routeParameters = DeeplinkMatcher.match(route, routeOptions, routeParameters, deeplink);
-                if (routeParameters != null)
+                String route = keys.next();
+                JSONObject routeOptions = (JSONObject) config.getRoutes().get(route);
+                try
                 {
-                    handleRoute(routeOptions, routeParameters);
-                    return;
+                    Map<String, String> routeParameters = new HashMap<String, String>();
+                    routeParameters = DeeplinkMatcher.match(route, routeOptions, routeParameters, deeplink);
+                    if (routeParameters != null)
+                    {
+                        handleRoute(routeOptions, routeParameters);
+                        return;
+                    }
                 }
-            }
-            catch (JSONException e)
-            {
-                MDLLog.e("MobileDeepLinking", "Error parsing JSON!", e);
-                break;
-            }
-            catch (Exception e)
-            {
-                MDLLog.e("MobileDeepLinking", "Error matching and handling route", e);
-                break;
+                catch (JSONException e)
+                {
+                    MDLLog.e("MobileDeepLinking", "Error parsing JSON!", e);
+                    break;
+                }
+                catch (Exception e)
+                {
+                    MDLLog.e("MobileDeepLinking", "Error matching and handling route", e);
+                    break;
+                }
             }
         }
 
@@ -211,11 +216,16 @@ public class EngageDeepLinkManager extends Activity
     {
         try {
             HandlerExecutor.executeHandlers(routeOptions, routeParameters, handlers);
-            if (routeOptions.getString(Constants.CLASS_JSON_NAME) == null) {
-                IntentBuilder.buildAndFireIntent(routeOptions, routeParameters, this);
+            if (routeOptions != null) {
+                if (routeOptions.getString(Constants.CLASS_JSON_NAME) != null) {
+                    IntentBuilder.buildAndFireIntent(routeOptions, routeParameters, this);
+                } else {
+                    Log.w(TAG, "No Activity class defined. Application cannot be opened but " +
+                            "Engage deep link processing still happened!");
+                }
             } else {
-                Log.w(TAG, "No Activity class defined. Application cannot be opened but " +
-                        "Engage deep link processing still happened!");
+                Log.d(TAG, "No Route options present. Activity couldn't " +
+                        "not be opened but deeplink was processed");
             }
         } catch (Exception ex) {
             Log.w(TAG, "No Activity class defined. Application cannot be opened but Engage " +
@@ -227,13 +237,38 @@ public class EngageDeepLinkManager extends Activity
     {
         try
         {
-            String jsonString = readConfigFile();
+            //First attempts to find the SDK user defined file
+            String jsonString = readConfigFile("MobileDeepLinkingConfig.json");
             JSONObject json = new JSONObject(jsonString);
             return new MobileDeepLinkingConfig(json);
         }
         catch (IOException e)
         {
-            e.printStackTrace();
+            //Builds a default internal JSONObject to save having an extra file in the project that doesn't really do anythign.
+            try {
+                JSONObject json = new JSONObject();
+                try {
+                    json = json.put(Constants.LOGGING_JSON_NAME, false);
+                } catch (JSONException e1) {
+                    e1.printStackTrace();
+                }
+
+                //We don't want any routes by default but the object is required.
+                JSONObject routes = new JSONObject();
+                json = json.put(Constants.ROUTES_JSON_NAME, routes);
+
+                //No class and just add the default Engage query parameters handler
+                JSONObject defaultRoute = new JSONObject();
+                JSONArray handlers = new JSONArray();
+                handlers.put(EngageDeepLinkManager.DEFAULT_HANDLER_NAME);
+                defaultRoute.put("handlers", handlers);
+
+                json = json.put("defaultRoute", defaultRoute);
+
+                return new MobileDeepLinkingConfig(json);
+            } catch (JSONException ex) {
+                ex.printStackTrace();
+            }
         }
         catch (JSONException e)
         {
@@ -245,12 +280,12 @@ public class EngageDeepLinkManager extends Activity
         return null;
     }
 
-    private String readConfigFile() throws IOException
+    private String readConfigFile(String configFileName) throws IOException
     {
         Resources resources = this.getApplicationContext().getResources();
         AssetManager assetManager = resources.getAssets();
 
-        InputStream inputStream = assetManager.open("MobileDeepLinkingConfigDefault.json");
+        InputStream inputStream = assetManager.open(configFileName);
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"), 8);
         StringBuilder sb = new StringBuilder();
 

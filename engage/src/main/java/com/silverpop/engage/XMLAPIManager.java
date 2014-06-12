@@ -21,9 +21,28 @@ public class XMLAPIManager {
     private Context context;
     private XMLAPIClient xmlapiClient;
 
-    public XMLAPIManager(Context context, String clientId, String clientSecret, String refreshToken, String host) {
+    private static XMLAPIManager xmlapiManager = null;
+
+    private XMLAPIManager(Context context, String clientId, String clientSecret, String refreshToken, String host) {
         setContext(context);
         xmlapiClient = XMLAPIClient.init(context, clientId, clientSecret, refreshToken, host);
+    }
+
+    public static XMLAPIManager initialize(Context context, String clientId, String clientSecret, String refreshToken, String host) {
+        if (xmlapiManager == null) {
+            xmlapiManager = new XMLAPIManager(context, clientId, clientSecret, refreshToken, host);
+        }
+        return xmlapiManager;
+    }
+
+    public static XMLAPIManager get() {
+        if (xmlapiManager == null) {
+            Log.e(TAG, "EngageSDK - You have not yet initialized your XMLAPIManager instance! " +
+                    "A null XMLAPIManager instance will be returned!");
+            return null;
+        } else {
+            return xmlapiManager;
+        }
     }
 
     /**

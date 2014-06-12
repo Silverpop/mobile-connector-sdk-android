@@ -18,7 +18,7 @@ public class XMLAPIManagerTests
     private XMLAPIManager xmlapiManager;
 
     public void setUp() throws Exception {
-        xmlapiManager = new XMLAPIManager(getContext(), TestingValues.clientId, TestingValues.clientSecret, TestingValues.refreshToken, TestingValues.host);
+        xmlapiManager = XMLAPIManager.initialize(getContext(), TestingValues.clientId, TestingValues.clientSecret, TestingValues.refreshToken, TestingValues.host);
     }
 
     public void testPostXMLAPIDefault() {

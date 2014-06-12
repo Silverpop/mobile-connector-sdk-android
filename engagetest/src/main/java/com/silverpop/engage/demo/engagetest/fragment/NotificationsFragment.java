@@ -7,14 +7,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.NotificationCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
 import com.silverpop.engage.UBFManager;
-import com.silverpop.engage.demo.engagetest.EngageApplication;
+import com.silverpop.engage.EngageApplication;
 import com.silverpop.engage.demo.engagetest.EngageNotificationReceiver;
 import com.silverpop.engage.demo.engagetest.R;
 
@@ -47,8 +46,7 @@ public class NotificationsFragment
 
 
                 notificationManager.notify(YOURAPP_NOTIFICATION_ID, notification);
-                EngageApplication application = (EngageApplication) getActivity().getApplication();
-                UBFManager ubfManager = application.getUbfManager();
+                UBFManager ubfManager = UBFManager.get();
                 ubfManager.handleNotificationReceivedEvents(getActivity(), notification, null);
             }
         });

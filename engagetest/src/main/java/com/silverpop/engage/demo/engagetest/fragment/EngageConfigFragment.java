@@ -16,6 +16,7 @@ import com.silverpop.engage.demo.engagetest.R;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -25,6 +26,8 @@ public class EngageConfigFragment
         extends ListFragment {
 
     private static final String TAG = EngageConfigFragment.class.getName();
+
+    private KeyValueListAdaptor mAdaptor;
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
@@ -40,8 +43,11 @@ public class EngageConfigFragment
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.engageconfig_view, container, false);
-        Context context = getActivity().getApplicationContext();
-        Map<String, String> m = new HashMap<String, String>();
+        return v;
+    }
+
+    public Map<String, String> updateListData(Context context) {
+        Map<String, String> m = new LinkedHashMap<String, String>();
         m.put("Device ID", EngageConfig.deviceId(context));
         m.put("Device Name", EngageConfig.deviceName());
         m.put("Device Version", EngageConfig.deviceVersion());
@@ -52,18 +58,29 @@ public class EngageConfigFragment
         m.put("App Name", EngageConfig.appName(context));
         m.put("App Version", EngageConfig.appVersion(context));
         m.put("Current Campaign", EngageConfig.currentCampaign(context));
+        m.put("Expiration Time", EngageConfig.currentCampaignExpirationDate() != null ? EngageConfig.currentCampaignExpirationDate().toString() : "-");
         m.put("Last Campaign", EngageConfig.lastCampaign(context));
         if (EngageConfig.currentLocationCache() != null) {
-            m.put("Current Location", "Lat :" + EngageConfig.currentLocationCache().getLatitude()
-                    + " Long: " + EngageConfig.currentLocationCache().getLongitude());
+            m.put("Longitude", new Double(EngageConfig.currentLocationCache().getLongitude()).toString());
+            m.put("Latitude", new Double(EngageConfig.currentLocationCache().getLatitude()).toString());
         }
         if (EngageConfig.currentAddressCache() != null) {
-            m.put("Location Address", EngageConfig.currentAddressCache().toString());
+            m.put("Location Address", EngageConfig.buildLocationAddress());
+        } else {
+            m.put("Location Address", "Not yet acquired");
         }
 
-        KeyValueListAdaptor adaptor = new KeyValueListAdaptor(getActivity(), m);
-        setListAdapter(adaptor);
-        return v;
+        return m;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        //Hard refresh the view since we want the new EngageConfig values to show.
+        Context context = getActivity().getApplicationContext();
+        mAdaptor = new KeyValueListAdaptor(getActivity(), updateListData(context));
+        setListAdapter(mAdaptor);
     }
 
     @Override

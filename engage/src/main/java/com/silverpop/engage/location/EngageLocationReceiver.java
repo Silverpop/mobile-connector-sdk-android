@@ -67,7 +67,7 @@ public class EngageLocationReceiver
                                 + loc.getLatitude() + " - Long: " + loc.getLongitude());
                     }
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    Log.d(TAG, "Geocoder network service offline");
                 }
             }
         }
