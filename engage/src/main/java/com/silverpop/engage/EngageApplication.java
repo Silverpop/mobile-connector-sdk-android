@@ -14,8 +14,8 @@ import com.silverpop.engage.config.EngageConfigManager;
 import com.silverpop.engage.deeplinking.EngageDeepLinkManager;
 import com.silverpop.engage.domain.UBF;
 import com.silverpop.engage.domain.XMLAPI;
-import com.silverpop.engage.location.EngageLocationManager;
-import com.silverpop.engage.location.plugin.EngageLocationManagerDefault;
+import com.silverpop.engage.location.manager.EngageLocationManager;
+import com.silverpop.engage.location.manager.plugin.EngageLocationManagerDefault;
 import com.silverpop.engage.util.EngageExpirationParser;
 
 import org.mobiledeeplinking.android.Handler;

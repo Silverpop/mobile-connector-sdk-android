@@ -1,4 +1,4 @@
-package com.silverpop.engage.location.plugin;
+package com.silverpop.engage.location.manager.plugin;
 
 import android.app.PendingIntent;
 import android.content.Context;
@@ -8,7 +8,7 @@ import android.location.LocationManager;
 import android.util.Log;
 
 import com.silverpop.engage.EngageApplication;
-import com.silverpop.engage.location.EngageLocationManager;
+import com.silverpop.engage.location.manager.EngageLocationManager;
 
 /**
  * Created by jeremydyer on 6/12/14.

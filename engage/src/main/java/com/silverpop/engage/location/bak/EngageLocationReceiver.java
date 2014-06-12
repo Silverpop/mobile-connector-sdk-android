@@ -9,19 +9,16 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.silverpop.engage.R;
 import com.silverpop.engage.XMLAPIManager;
 import com.silverpop.engage.config.EngageConfig;
 import com.silverpop.engage.config.EngageConfigManager;
 import com.silverpop.engage.domain.XMLAPI;
-import com.silverpop.engage.location.*;
 import com.silverpop.engage.util.EngageExpirationParser;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.AbstractMap;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -34,7 +31,7 @@ import java.util.Map;
 public class EngageLocationReceiver
         extends BroadcastReceiver {
 
-    private static final String TAG = com.silverpop.engage.location.EngageLocationManager.class.getName();
+    private static final String TAG = com.silverpop.engage.location.manager.EngageLocationManager.class.getName();
 
     @Override
     public void onReceive(Context context, Intent intent) {
