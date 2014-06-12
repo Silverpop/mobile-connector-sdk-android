@@ -140,4 +140,8 @@ public class EngageConfigManager {
     public String deepLinkScheme() {
         return mAppContext.getResources().getString(R.string.deepLinkScheme);
     }
+
+    public String engageListId() {
+        return mAppContext.getResources().getString(R.string.engageListId);
+    }
 }

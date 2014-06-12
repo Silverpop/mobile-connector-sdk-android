@@ -7,6 +7,7 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.util.Log;
 
 import com.silverpop.engage.R;
@@ -46,30 +47,52 @@ public class EngageLocationReceiverGeocode
             if (EngageConfig.addressCacheExpired(context)) {
                 Log.d(TAG, "Address cache is expired. ReverseGeocoding Location Lat: "
                         + loc.getLatitude() + " - Long: " + loc.getLongitude());
-                Geocoder geocoder = new Geocoder(context, Locale.getDefault());
 
-                try {
-                    List<Address> geoCodeAddresses = geocoder.getFromLocation(loc.getLatitude(), loc.getLongitude(), 1);
-                    if (geoCodeAddresses != null && geoCodeAddresses.size() > 0) {
-                        EngageConfig.storeCurrentAddressCache(geoCodeAddresses.get(0));
-
-                        Date currentAddressBirthDay = new Date();
-                        EngageConfig.storeCurrentAddressCacheBirthday(currentAddressBirthDay);
-
-                        String locAcqTimeout = EngageConfigManager.get(context).locationCacheLifespan();
-                        EngageExpirationParser exp = new EngageExpirationParser(locAcqTimeout, currentAddressBirthDay);
-                        EngageConfig.storeCurrentAddressCacheExpiration(exp.expirationDate());
-
-                        updateUserLastKnownLocation(context);
-
-                    } else {
-                        Log.w(TAG, "Unable to Geocode address for Lat: "
-                                + loc.getLatitude() + " - Long: " + loc.getLongitude());
-                    }
-                } catch (IOException e) {
-                    Log.d(TAG, "Geocoder network service offline");
-                }
+                GeocoderAsyncTask geocoderAsyncTask = new GeocoderAsyncTask(context);
+                geocoderAsyncTask.execute(loc.getLongitude(), loc.getLatitude());
             }
+        }
+    }
+
+    private class GeocoderAsyncTask
+            extends AsyncTask<Double, Void, Address> {
+
+        private Context context;
+
+        public GeocoderAsyncTask(Context context) {
+            this.context = context;
+        }
+
+        protected Address doInBackground(Double... loc) {
+            Geocoder geocoder = new Geocoder(context, Locale.getDefault());
+
+            Double longitude = loc[0];
+            Double latitude = loc[1];
+            try {
+                List<android.location.Address> geoCodeAddresses = geocoder.getFromLocation(latitude, longitude, 1);
+                if (geoCodeAddresses != null && geoCodeAddresses.size() > 0) {
+                    EngageConfig.storeCurrentAddressCache(geoCodeAddresses.get(0));
+
+                    Date currentAddressBirthDay = new Date();
+                    EngageConfig.storeCurrentAddressCacheBirthday(currentAddressBirthDay);
+
+                    String locAcqTimeout = EngageConfigManager.get(context).locationCacheLifespan();
+                    EngageExpirationParser exp = new EngageExpirationParser(locAcqTimeout, currentAddressBirthDay);
+                    EngageConfig.storeCurrentAddressCacheExpiration(exp.expirationDate());
+
+                    updateUserLastKnownLocation(context);
+
+                    return EngageConfig.currentAddressCache();
+
+                } else {
+                    Log.w(TAG, "Unable to Geocode address for Lat: "
+                            + latitude + " - Long: " + longitude);
+                }
+            } catch (IOException e) {
+                Log.d(TAG, "Geocoder network service offline");
+            }
+
+            return null;
         }
     }
 
@@ -83,8 +106,7 @@ public class EngageLocationReceiverGeocode
 
         //Make XMLAPI request to update the last known location.
         Map<String, Object> bodyElements = new HashMap<String, Object>();
-        bodyElements.put("LIST_ID", "listid");
-        bodyElements.put("VISITOR_KEY", "example visitor id");
+        bodyElements.put("LIST_ID", r.getString(R.string.engageListId));
         bodyElements.put("CREATED_FROM", "1");
         XMLAPI updateLastKnownLocation = new XMLAPI("UpdateRecipient", bodyElements);
         Map<String, Object> syncFields = new HashMap<String, Object>();

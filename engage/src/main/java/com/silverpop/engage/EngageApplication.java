@@ -72,9 +72,6 @@ public class EngageApplication
         EngageConfigManager cm = EngageConfigManager.get(getApplicationContext());
 
         if (cm.locationServicesEnabled()) {
-//            EngageLocationManager locationManager = EngageLocationManager.get(getApplicationContext());
-//            locationManager.startLocationUpdates();
-//            Log.d(TAG, "Starting location services");
             String pluggableLocationClassname = r.getString(R.string.pluggableLocationManagerClassName);
             if (pluggableLocationClassname != null) {
                 try {
@@ -125,7 +122,7 @@ public class EngageApplication
                 getSharedPreferences(EngageConfig.ENGAGE_CONFIG_PREF_ID, Context.MODE_PRIVATE);
 
         //Check if this is the first time the app has been ran or not
-        if (sharedPreferences.getString(APP_INSTALLED, null) == null || 1 == 1) {
+        if (sharedPreferences.getString(APP_INSTALLED, null) == null) {
             Log.d(TAG, "EngageSDK - Application has been installed/ran for the first time");
             sharedPreferences.edit().putString(APP_INSTALLED, "YES").commit();
             UBF appInstalled = UBF.installed(getApplicationContext(), null);

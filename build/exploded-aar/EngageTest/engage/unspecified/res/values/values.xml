@@ -53,7 +53,7 @@
     <!-- From: file:/Users/jeremydyer/Development/Android/EngageSDK-Test/EngageTest/engage/src/main/res/values/Locations.xml -->
     <eat-comment />
 
-    <string name="locality">Blairsville</string>
+    <string name="locality">Atlanta</string>
     <!-- From: file:/Users/jeremydyer/Development/Android/EngageSDK-Test/EngageTest/engage/src/main/res/values/EngageConfig.xml -->
     <eat-comment />
 
@@ -62,11 +62,11 @@
     <string name="paramCampaignExpiresAt">CampaignExpiresAt</string>
     <string name="paramCampaignValidFor">CampaignValidFor</string>
     <string name="paramCurrentCampaign">CurrentCampaign</string>
-    <string name="pluggableLocationManagerClassName">com.silverpop.engage.location.plugin.EngageLocationManagerDefault</string>
+    <string name="pluggableLocationManagerClassName">com.silverpop.engage.location.manager.plugin.EngageLocationManagerDefault</string>
     <!-- From: file:/Users/jeremydyer/Development/Android/EngageSDK-Test/EngageTest/engage/src/main/res/values/Locations.xml -->
     <eat-comment />
 
-    <string name="postalCode">30512</string>
+    <string name="postalCode">30306</string>
     <!-- From: file:/Users/jeremydyer/Development/Android/EngageSDK-Test/EngageTest/engage/src/main/res/values/EngageConfig.xml -->
     <eat-comment />
 

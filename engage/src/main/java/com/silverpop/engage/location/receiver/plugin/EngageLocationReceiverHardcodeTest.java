@@ -70,8 +70,7 @@ public class EngageLocationReceiverHardcodeTest
 
         //Make XMLAPI request to update the last known location.
         Map<String, Object> bodyElements = new HashMap<String, Object>();
-        bodyElements.put("LIST_ID", "listid");
-        bodyElements.put("VISITOR_KEY", "example visitor id");
+        bodyElements.put("LIST_ID", r.getString(R.string.engageListId));
         bodyElements.put("CREATED_FROM", "1");
         XMLAPI updateLastKnownLocation = new XMLAPI("UpdateRecipient", bodyElements);
         Map<String, Object> syncFields = new HashMap<String, Object>();
