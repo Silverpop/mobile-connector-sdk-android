@@ -32,8 +32,6 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.silverpop.engage.EngageApplication;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -54,7 +52,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+
 
 public class EngageDeepLinkManager extends Activity
 {
@@ -121,7 +119,7 @@ public class EngageDeepLinkManager extends Activity
                     routeParameters = DeeplinkMatcher.match(route, routeOptions, routeParameters, deeplink);
                     if (routeParameters != null)
                     {
-                        handleRoute(routeOptions, routeParameters);
+                        handleRoute(routeOptions, routeParameters, deeplink);
                         return;
                     }
                 }
@@ -145,7 +143,7 @@ public class EngageDeepLinkManager extends Activity
     private void routeToDefault(Uri deeplink) throws JSONException
     {
         MDLLog.d("MobileDeepLinking", "Routing to Default Route.");
-        handleRoute(config.getDefaultRoute(), parseQueryParameters(deeplink));
+        handleRoute(config.getDefaultRoute(), null, deeplink);
     }
 
     private Map<String, String> parseQueryParameters(Uri deeplink) {
@@ -212,10 +210,20 @@ public class EngageDeepLinkManager extends Activity
         return builder.build();
     }
 
-    private void handleRoute(JSONObject routeOptions, Map<String, String> routeParameters) throws JSONException
+    private void handleRoute(JSONObject routeOptions, Map<String, String> routeParameters, Uri deeplink) throws JSONException
     {
         try {
-            HandlerExecutor.executeHandlers(routeOptions, routeParameters, handlers);
+            if (routeParameters != null) {
+                routeParameters.putAll(HandlerExecutor.executeHandlers(routeOptions, routeParameters, handlers));
+                routeParameters.putAll(parseQueryParameters(deeplink));
+            } else {
+                routeParameters = HandlerExecutor.executeHandlers(routeOptions, routeParameters, handlers);
+                if (routeParameters == null) {
+                    routeParameters = new HashMap<String, String>();
+                }
+                routeParameters.putAll(parseQueryParameters(deeplink));
+            }
+
             if (routeOptions != null) {
                 if (routeOptions.getString(Constants.CLASS_JSON_NAME) != null) {
                     IntentBuilder.buildAndFireIntent(routeOptions, routeParameters, this);

@@ -82,7 +82,7 @@ public class EngageApplication
         EngageDeepLinkManager.registerHandler(EngageDeepLinkManager.DEFAULT_HANDLER_NAME, new Handler() {
             @Override
             public Map<String, String> execute(Map<String, String> paramsMap) {
-                ubfManager.handleExternalURLOpenedEvents(getApplicationContext(), paramsMap);
+                UBFManager.get().handleExternalURLOpenedEvents(getApplicationContext(), paramsMap);
                 return paramsMap;
             }
         });
