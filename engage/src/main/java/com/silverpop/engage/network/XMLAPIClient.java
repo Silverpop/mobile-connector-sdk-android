@@ -8,8 +8,10 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
+import com.silverpop.engage.config.EngageConfigManager;
 import com.silverpop.engage.domain.XMLAPI;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -63,11 +65,16 @@ public class XMLAPIClient
     }
 
     private String getXMLAPIURL() {
-        if (getHost().startsWith("http")) {
-            return getHost() + "/XMLAPI";
-        } else {
-            return "http://" + getHost() + "/XMLAPI";
+        try {
+            if (EngageConfigManager.get(mAppContext).secureConnection()) {
+                return new URI("https", getHost(), "/XMLAPI", null).toString();
+            } else {
+                return new URI("http", getHost(), "/XMLAPI", null).toString();
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
+        return "";
     }
 
     public void postResource(final XMLAPI api, Response.Listener<String> successListener, Response.ErrorListener errorListener) {

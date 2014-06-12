@@ -16,6 +16,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.net.URI;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
@@ -73,12 +74,17 @@ public class UBFClient
         return ubfClient;
     }
 
-    private String getUBfURL() {
-        if (getHost().startsWith("http")) {
-            return getHost() + "/rest/events/submission";
-        } else {
-            return "http://" + getHost() + "/rest/events/submission";
+    private String getUBFURL() {
+        try {
+            if (EngageConfigManager.get(mAppContext).secureConnection()) {
+                return new URI("https", getHost(), "/rest/events/submission", null).toString();
+            } else {
+                return new URI("http", getHost(), "/rest/events/submission", null).toString();
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
+        return "";
     }
 
     public void postUBFEngageEvents(Response.Listener<JSONObject> success,
@@ -100,7 +106,7 @@ public class UBFClient
                     events.put("events", eventsArray);
 
                     final JsonObjectRequest jsonRequest = new JsonObjectRequest(Request.Method.POST,
-                            getUBfURL(), events,
+                            getUBFURL(), events,
                             new Response.Listener<JSONObject>() {
                                 public void onResponse(JSONObject response) {
                                     //TODO: Add extra logic to make sure that the message was successful based on response payload

@@ -4,7 +4,7 @@
     <integer name="expireLocalEventsAfterNumDays">30</integer>
 
     <!-- General -->
-    <integer name="ubfEventCacheSize">3</integer>
+    <integer name="ubfEventCacheSize">1</integer>
     <string name="defaultCurrentCampaignExpiration">1 day</string>
     <string name="deepLinkScheme">MakeAndBuild</string>
     <string name="engageListId">23949</string>
@@ -16,10 +16,11 @@
     <string name="paramCallToAction">CallToAction</string>
 
     <!-- Session -->
-    <string name="sessionLifecycleExpiration">30 minutes</string>
+    <string name="sessionLifecycleExpiration">5 minutes</string>
 
     <!-- Networking -->
     <integer name="maxNumRetries">3</integer>
+    <bool name="secureConnection">false</bool>
 
     <!-- UBF Field Names -->
     <string name="UBFSessionDurationFieldName">Session Duration</string>
@@ -48,5 +49,7 @@
 
     <!-- Event Augmentation -->
     <string name="augmentationTimeout">15 seconds</string>
+
+    <string name="defaultPrimaryUserId">jeremy.dyer@makeandbuild.com</string>
 
 </resources>

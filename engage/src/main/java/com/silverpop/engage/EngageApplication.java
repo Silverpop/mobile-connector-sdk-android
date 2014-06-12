@@ -147,15 +147,14 @@ public class EngageApplication
         }
 
         //Examine the session and determine if events should be posted.
-        handleSessionEvents();
+        handleSessionApplicationLaunch();
     }
 
-    private void handleSessionEvents() {
+    private void handleSessionApplicationLaunch() {
+        SharedPreferences sharedPreferences = getApplicationContext().
+                getSharedPreferences(EngageConfig.ENGAGE_CONFIG_PREF_ID, Context.MODE_PRIVATE);
         if (sessionBegan == null) {
-
             //Checks to see if a previous session has been persisted.
-            SharedPreferences sharedPreferences = getApplicationContext().
-                    getSharedPreferences(EngageConfig.ENGAGE_CONFIG_PREF_ID, Context.MODE_PRIVATE);
             long sessionStartedTimestamp = sharedPreferences.getLong(SESSION, -1);
             if (sessionStartedTimestamp == -1) {
                 //Start a session.
@@ -171,20 +170,26 @@ public class EngageApplication
             EngageExpirationParser parser = new EngageExpirationParser(cm.sessionLifecycleExpiration(), sessionBegan);
             sessionExpires = parser.expirationDate();
 
-            if (booleanIsSessionExpired()) {
+            if (isSessionExpired()) {
                 UBFManager.get().postEvent(UBF.sessionEnded(getApplicationContext(), null));
+                sharedPreferences.edit().putLong(SESSION, -1).commit();
+                UBFManager.get().postEvent(UBF.sessionStarted(getApplicationContext(),
+                        null, EngageConfig.currentCampaign(getApplicationContext())));
             }
 
         } else {
             //Compare the current time to the session began time.
-            if (booleanIsSessionExpired()) {
+            if (isSessionExpired()) {
                 UBFManager.get().postEvent(UBF.sessionEnded(getApplicationContext(), null));
+                sharedPreferences.edit().putLong(SESSION, -1).commit();
+                UBFManager.get().postEvent(UBF.sessionStarted(getApplicationContext(),
+                        null, EngageConfig.currentCampaign(getApplicationContext())));
             }
         }
     }
 
-    private boolean booleanIsSessionExpired() {
-        if (sessionExpires.compareTo(new Date()) > 0) {
+    private boolean isSessionExpired() {
+        if (sessionExpires.compareTo(new Date()) < 0) {
             return true;
         } else {
             return false;
@@ -194,7 +199,10 @@ public class EngageApplication
     @Override
     public void onTerminate() {
         super.onTerminate();
-        handleSessionEvents();
+
+        if (isSessionExpired()) {
+            UBFManager.get().postEvent(UBF.sessionEnded(getApplicationContext(), null));
+        }
     }
 }
 

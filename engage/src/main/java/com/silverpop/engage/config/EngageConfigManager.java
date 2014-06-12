@@ -144,4 +144,12 @@ public class EngageConfigManager {
     public String engageListId() {
         return mAppContext.getResources().getString(R.string.engageListId);
     }
+
+    public boolean secureConnection() {
+        return mAppContext.getResources().getBoolean(R.bool.secureConnection);
+    }
+
+    public String defaultPrimaryUserId() {
+        return mAppContext.getResources().getString(R.string.defaultPrimaryUserId);
+    }
 }
