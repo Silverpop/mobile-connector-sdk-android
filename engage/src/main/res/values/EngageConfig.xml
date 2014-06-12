@@ -44,6 +44,8 @@
     <string name="lastKnownLocationTimestampColumn">Last Location Address Time</string>
     <string name="lastKnownLocationColumn">Last Location Address</string>
 
+    <string name="pluggableLocationManagerClassName">com.silverpop.engage.location.plugin.EngageLocationManagerDefault</string>
+
     <!-- Event Augmentation -->
     <string name="augmentationTimeout">15 seconds</string>
 

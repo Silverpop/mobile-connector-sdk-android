@@ -10,9 +10,5 @@ import com.silverpop.engage.location.EngageLocationManager;
 public class EngageLocationManagerTests
     extends AndroidTestCase {
 
-    public void testSomething() {
-        EngageLocationManager locationManager = EngageLocationManager.get(getContext());
-        locationManager.startLocationUpdates();
-        assertTrue(locationManager.isTrackingLocation());
-    }
+
 }

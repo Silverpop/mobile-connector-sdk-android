@@ -43,6 +43,7 @@
     <string name="paramCampaignExpiresAt">CampaignExpiresAt</string>
     <string name="paramCampaignValidFor">CampaignValidFor</string>
     <string name="paramCurrentCampaign">CurrentCampaign</string>
+    <string name="pluggableLocationManagerClassName">com.silverpop.engage.location.plugin.EngageLocationManagerDefault</string>
     <string name="sessionLifecycleExpiration">30 minutes</string>
     <!-- From: file:/Users/jeremydyer/Development/Android/EngageSDK-Test/EngageTest/engage/src/main/res/values/styles.xml -->
     <eat-comment />

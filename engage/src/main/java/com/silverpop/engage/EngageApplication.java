@@ -15,6 +15,7 @@ import com.silverpop.engage.deeplinking.EngageDeepLinkManager;
 import com.silverpop.engage.domain.UBF;
 import com.silverpop.engage.domain.XMLAPI;
 import com.silverpop.engage.location.EngageLocationManager;
+import com.silverpop.engage.location.plugin.EngageLocationManagerDefault;
 import com.silverpop.engage.util.EngageExpirationParser;
 
 import org.mobiledeeplinking.android.Handler;
@@ -47,9 +48,13 @@ public class EngageApplication
     private Date sessionExpires = null;
     private Date sessionBegan = null;
 
+    private EngageLocationManager locationManager;
+
     @Override
     public void onCreate() {
         super.onCreate();
+
+        Resources r = getResources();
 
         try {
             ApplicationInfo ai = getPackageManager().getApplicationInfo(
@@ -67,9 +72,35 @@ public class EngageApplication
         EngageConfigManager cm = EngageConfigManager.get(getApplicationContext());
 
         if (cm.locationServicesEnabled()) {
-            EngageLocationManager locationManager = EngageLocationManager.get(getApplicationContext());
+//            EngageLocationManager locationManager = EngageLocationManager.get(getApplicationContext());
+//            locationManager.startLocationUpdates();
+//            Log.d(TAG, "Starting location services");
+            String pluggableLocationClassname = r.getString(R.string.pluggableLocationManagerClassName);
+            if (pluggableLocationClassname != null) {
+                try {
+                    Class<?> clazz = Class.forName(pluggableLocationClassname);
+                    locationManager = (EngageLocationManager) clazz.newInstance();
+                    locationManager.setEngageApplication(this);
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                } catch (InstantiationException e) {
+                    e.printStackTrace();
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            if (locationManager == null) {
+                Log.w(TAG, "Unable to create PluggableLocationManager instance. Defaulting to : '"
+                        + EngageLocationManagerDefault.class.getName() + "'");
+                //Create the default EngageLocationManager instance.
+                locationManager = new EngageLocationManagerDefault();
+                locationManager.setEngageApplication(this);
+            }
+
             locationManager.startLocationUpdates();
             Log.d(TAG, "Starting location services");
+
         } else {
             Log.d(TAG, "Location services are disabled");
         }
@@ -99,8 +130,6 @@ public class EngageApplication
             sharedPreferences.edit().putString(APP_INSTALLED, "YES").commit();
             UBF appInstalled = UBF.installed(getApplicationContext(), null);
             ubfManager.postEvent(appInstalled);
-
-            Resources r = getResources();
 
             //Create the Last known user location database columns
             Map<String, Object> bodyElements = new HashMap<String, Object>();
