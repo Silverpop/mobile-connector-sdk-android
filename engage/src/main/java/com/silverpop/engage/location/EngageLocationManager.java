@@ -47,7 +47,7 @@ public class EngageLocationManager {
             Location lastKnown = null;
             if (mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
                 lastKnown = mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, pi);
+                mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 10, pi);
             }
 
             if (lastKnown != null) {
