@@ -12,19 +12,6 @@
         android:theme="@style/AppTheme"
         android:enabled="true">
 
-        <activity
-            android:name="com.silverpop.engage.deeplinking.EngageDeepLinkManager"
-            android:theme="@android:style/Theme.NoDisplay"
-            android:noHistory="true">
-            <intent-filter>
-                <data android:scheme="makeandbuild"/>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-            </intent-filter>
-        </activity>
-
         <receiver android:name=".location.EngageLocationReceiver"
             android:exported="true">
             <intent-filter>

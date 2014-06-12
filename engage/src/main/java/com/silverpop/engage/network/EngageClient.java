@@ -39,7 +39,7 @@ public abstract class EngageClient
 
     //Authentication
     private final String oauthEndpoint = "/oauth/token";
-    private static Credential credential = null;
+    private Credential credential = null;
 
     public EngageClient(Context context, String clientId, String secret, String refreshToken, String host) {
         if (mAppContext == null) {
@@ -81,20 +81,18 @@ public abstract class EngageClient
      * Handles authenticating the client.
      */
     protected void authenticateClient(final Response.Listener<String> authSuccess, final Response.ErrorListener authFailure) {
-        if (!credential.isCurrentlyAttemptingAuth()) {
-            credential.setCurrentlyAttemptingAuth(true);
             StringRequest authRequest = new StringRequest(Request.Method.POST,
                     getOauthEndpoint(),
                     new Response.Listener<String>() {
                         public void onResponse(String response) {
                             try {
                                 JSONObject authResponse = new JSONObject(response);
-                                EngageClient.credential.setOauthToken(authResponse.getString("access_token"));
+                                credential.setOauthToken(authResponse.getString("access_token"));
                                 int expiresInSeconds = authResponse.getInt("expires_in");
 
                                 Calendar now = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
                                 now.add(Calendar.SECOND, expiresInSeconds);
-                                EngageClient.credential.setOauthTokenExpirationTimeStamp(now.getTimeInMillis());
+                                credential.setOauthTokenExpirationTimeStamp(now.getTimeInMillis());
 
                                 //Start the request operation queue if the network is active.
                                 if (isNetworkActive(mAppContext)) {
@@ -107,7 +105,7 @@ public abstract class EngageClient
                                     authSuccess.onResponse(response);
                                 }
 
-                                EngageClient.credential.setCurrentlyAttemptingAuth(false);
+                                credential.setCurrentlyAttemptingAuth(false);
 
                             } catch (JSONException e) {
                                 e.printStackTrace();
@@ -123,7 +121,7 @@ public abstract class EngageClient
                                 authFailure.onErrorResponse(error);
                             }
 
-                            EngageClient.credential.setCurrentlyAttemptingAuth(false);
+                            credential.setCurrentlyAttemptingAuth(false);
                         }
                     }
             ) {
@@ -138,20 +136,12 @@ public abstract class EngageClient
                 }
             };
             authenticationQueue.add(authRequest);
-        } else {
-            Log.d(TAG, "Client Authentication attempt is already in progress");
-        }
     }
 
     protected boolean isAuthenticated() {
         if (credential.getOauthToken() != null && !isAuthTokenExpired()) {
             return true;
         } else {
-            if (isAuthTokenExpired()) {
-                if (!credential.isCurrentlyAttemptingAuth()) {
-                    authenticateClient(null, null);
-                }
-            }
             return false;
         }
     }

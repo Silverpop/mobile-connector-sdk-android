@@ -34,6 +34,10 @@
     <string name="augmentationTimeout">15 seconds</string>
     <string name="deepLinkScheme">MakeAndBuild</string>
     <string name="defaultCurrentCampaignExpiration">1 day</string>
+    <string name="engageListId">23949</string>
+    <string name="lastKnownLocationColumn">Last Location Address</string>
+    <string name="lastKnownLocationDateFormat">MM-dd-yyyy</string>
+    <string name="lastKnownLocationTimestampColumn">Last Location Address Time</string>
     <string name="locationCacheLifespan">1 hr</string>
     <string name="paramCallToAction">CallToAction</string>
     <string name="paramCampaignExpiresAt">CampaignExpiresAt</string>

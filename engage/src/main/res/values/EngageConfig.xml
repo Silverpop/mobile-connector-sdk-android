@@ -7,6 +7,7 @@
     <integer name="ubfEventCacheSize">3</integer>
     <string name="defaultCurrentCampaignExpiration">1 day</string>
     <string name="deepLinkScheme">MakeAndBuild</string>
+    <string name="engageListId">23949</string>
 
     <!-- Param field names -->
     <string name="paramCampaignValidFor">CampaignValidFor</string>
@@ -38,9 +39,10 @@
     <integer name="locationDistanceFilter">10</integer>
     <integer name="locationMilliUpdateInterval">30000</integer>
     <string name="locationCacheLifespan">1 hr</string>
-    <!--<string name="coordinatesAddressAcquisitionTimeout">15 seconds</string>-->
-    <!--<string name="coordinatesLongLatAcquisitionTimeout">15 seconds</string>-->
     <bool name="locationServicesEnabled">true</bool>
+    <string name="lastKnownLocationDateFormat">MM-dd-yyyy</string>
+    <string name="lastKnownLocationTimestampColumn">Last Location Address Time</string>
+    <string name="lastKnownLocationColumn">Last Location Address</string>
 
     <!-- Event Augmentation -->
     <string name="augmentationTimeout">15 seconds</string>

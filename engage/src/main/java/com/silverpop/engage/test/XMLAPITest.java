@@ -306,4 +306,16 @@ public class XMLAPITest
 
         assertEquals(expected, api.envelope());
     }
+
+    public void testCreateLastKnownLocationXMLAPI() {
+        Map<String, Object> bodyElements = new HashMap<String, Object>();
+        bodyElements.put("LIST_ID", "samplelistid");
+        bodyElements.put("COLUMN_NAME", "Last Known Address");
+        bodyElements.put("COLUMN_TYPE", 3);
+        bodyElements.put("DEFAULT", "");
+        XMLAPI createLastKnownLocationColumns = new XMLAPI("AddListColumn", bodyElements);
+
+        String env = createLastKnownLocationColumns.envelope();
+        System.out.println(env);
+    }
 }

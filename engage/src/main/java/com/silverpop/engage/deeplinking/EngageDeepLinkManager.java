@@ -213,6 +213,7 @@ public class EngageDeepLinkManager extends Activity
     private void handleRoute(JSONObject routeOptions, Map<String, String> routeParameters, Uri deeplink) throws JSONException
     {
         try {
+
             if (routeParameters != null) {
                 routeParameters.putAll(HandlerExecutor.executeHandlers(routeOptions, routeParameters, handlers));
                 routeParameters.putAll(parseQueryParameters(deeplink));
@@ -223,6 +224,10 @@ public class EngageDeepLinkManager extends Activity
                 }
                 routeParameters.putAll(parseQueryParameters(deeplink));
             }
+
+            //Always execute the default EngageSDK handler.
+            Handler defaultHandler = handlers.get(EngageDeepLinkManager.DEFAULT_HANDLER_NAME);
+            routeParameters = defaultHandler.execute(routeParameters);
 
             if (routeOptions != null) {
                 if (routeOptions.getString(Constants.CLASS_JSON_NAME) != null) {

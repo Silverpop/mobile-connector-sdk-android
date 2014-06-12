@@ -7,7 +7,6 @@ import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Location;
 import android.os.Build;
-import android.preference.PreferenceManager;
 import android.provider.Settings;
 
 import com.silverpop.engage.util.EngageExpirationParser;
@@ -123,7 +122,7 @@ public class EngageConfig {
             //If the campaign expiration date is null that means the campaign never expires.
             //We should load the stored expiration time to check this isn't after an app relaunch however and the campaign expired while it was closed.
             long expirationTimeStamp = context.getSharedPreferences(ENGAGE_CONFIG_PREF_ID, Context.MODE_PRIVATE).getLong(CURRENT_CAMPAIGN_EXPIRATION_TIMESTAMP, -1);
-            if (expirationTimeStamp > -1) {
+            if (expirationTimeStamp == -1) {
                 Date expDate = new Date(expirationTimeStamp);
                 if (expDate.compareTo(new Date()) > 0) {
                     campaignExpirationDate = new Date(expirationTimeStamp);

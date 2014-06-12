@@ -43,7 +43,7 @@ public class XMLAPIClient
                     }
                     xmlapiClient.apiCache.removeAll(postedAPI);
                 }
-            }, new Response.ErrorListener(){
+            }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError volleyError) {
                     Log.w(TAG, "XMLAPIClient authentication failed");

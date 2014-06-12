@@ -2,100 +2,94 @@
 <pre-dex-items>
 
     <item
-        dex="/Users/jeremydyer/Development/Android/EngageSDK-Test/EngageTest/engagetest/build/pre-dexed/release/google-oauth-client-java6-1.15.0-rc-d48934c7b40d1f20b0177acd2f505e65c18d2df2.jar"
-        jar="/Users/jeremydyer/.gradle/caches/modules-2/files-2.1/com.google.oauth-client/google-oauth-client-java6/1.15.0-rc/43f887355f67498501ff3d139c0bc53591244520/google-oauth-client-java6-1.15.0-rc.jar"
-        jumboMode="false"
-        revision="19.0.3"
-        sha1="43f887355f67498501ff3d139c0bc53591244520"/>
-    <item
-        dex="/Users/jeremydyer/Development/Android/EngageSDK-Test/EngageTest/engagetest/build/pre-dexed/release/google-api-client-1.15.0-rc-ffd5a266080e6446100c120ef3e0baf3d3345e45.jar"
-        jar="/Users/jeremydyer/.gradle/caches/modules-2/files-2.1/com.google.api-client/google-api-client/1.15.0-rc/52194b4bd5137be8a10f6ccb224c73a7bc4d4737/google-api-client-1.15.0-rc.jar"
-        jumboMode="false"
-        revision="19.0.3"
-        sha1="52194b4bd5137be8a10f6ccb224c73a7bc4d4737"/>
-    <item
-        dex="/Users/jeremydyer/Development/Android/EngageSDK-Test/EngageTest/engagetest/build/pre-dexed/release/google-http-client-1.15.0-rc-518abdbe4e4c498a0b091f0c5ac0af610a55ca93.jar"
+        dex="/Users/jeremydyer/Development/Android/EngageSDK-Test/EngageTest/engage/build/pre-dexed/test/debug/google-http-client-1.15.0-rc-518abdbe4e4c498a0b091f0c5ac0af610a55ca93.jar"
         jar="/Users/jeremydyer/.gradle/caches/modules-2/files-2.1/com.google.http-client/google-http-client/1.15.0-rc/ab70279505f72c5501463ff6f4efcd1c70a72625/google-http-client-1.15.0-rc.jar"
         jumboMode="false"
         revision="19.0.3"
         sha1="ab70279505f72c5501463ff6f4efcd1c70a72625"/>
     <item
-        dex="/Users/jeremydyer/Development/Android/EngageSDK-Test/EngageTest/engagetest/build/pre-dexed/release/support-v4-19.1.0-fe930dc68beb1e566675ce71b270d4091c6c249b.jar"
-        jar="/Applications/Android Studio.app/sdk/extras/android/m2repository/com/android/support/support-v4/19.1.0/support-v4-19.1.0.jar"
+        dex="/Users/jeremydyer/Development/Android/EngageSDK-Test/EngageTest/engage/build/pre-dexed/test/debug/google-oauth-client-java6-1.15.0-rc-d48934c7b40d1f20b0177acd2f505e65c18d2df2.jar"
+        jar="/Users/jeremydyer/.gradle/caches/modules-2/files-2.1/com.google.oauth-client/google-oauth-client-java6/1.15.0-rc/43f887355f67498501ff3d139c0bc53591244520/google-oauth-client-java6-1.15.0-rc.jar"
         jumboMode="false"
         revision="19.0.3"
-        sha1="85f201b380937e61a9dce6ca90ccf6872abbfb67"/>
+        sha1="43f887355f67498501ff3d139c0bc53591244520"/>
     <item
-        dex="/Users/jeremydyer/Development/Android/EngageSDK-Test/EngageTest/engagetest/build/pre-dexed/release/volley-4e16d11a7168fdc4333c941fa529a7ec7a9498cf.jar"
-        jar="/Users/jeremydyer/Development/Android/EngageSDK-Test/EngageTest/build/exploded-aar/EngageTest/engage/unspecified/libs/volley.jar"
+        dex="/Users/jeremydyer/Development/Android/EngageSDK-Test/EngageTest/engage/build/pre-dexed/test/debug/classes-54bd24e1579a291e63def28e84f41f77ac65c2f4.jar"
+        jar="/Users/jeremydyer/Development/Android/EngageSDK-Test/EngageTest/engage/build/bundles/debug/classes.jar"
+        jumboMode="false"
+        revision="19.0.3"
+        sha1="10ffc6b8b762b87a451e63ea28a33f84581bb6ec"/>
+    <item
+        dex="/Users/jeremydyer/Development/Android/EngageSDK-Test/EngageTest/engage/build/pre-dexed/test/debug/volley-19709e4e7b9b6a63dd7095111642bde7a3adeb85.jar"
+        jar="/Users/jeremydyer/Development/Android/EngageSDK-Test/EngageTest/engage/libs/volley.jar"
         jumboMode="false"
         revision="19.0.3"
         sha1="2ed46feb608e727918fc9dfd465af99ef8a01ec3"/>
     <item
-        dex="/Users/jeremydyer/Development/Android/EngageSDK-Test/EngageTest/engagetest/build/pre-dexed/release/MobileDeepLinking-Android-SDK-1d2228f3b1bd6d556859742f021bbfc8d8d989ce.jar"
-        jar="/Users/jeremydyer/Development/Android/EngageSDK-Test/EngageTest/build/exploded-aar/EngageTest/engage/unspecified/libs/MobileDeepLinking-Android-SDK.jar"
-        jumboMode="false"
-        revision="19.0.3"
-        sha1="420becde599d8bd75af4765fe39767a219512b37"/>
-    <item
-        dex="/Users/jeremydyer/Development/Android/EngageSDK-Test/EngageTest/engagetest/build/pre-dexed/release/support-v4-r7-0b2327ea38358bedbef2e3689759b5edb1822c6f.jar"
+        dex="/Users/jeremydyer/Development/Android/EngageSDK-Test/EngageTest/engage/build/pre-dexed/test/debug/support-v4-r7-0b2327ea38358bedbef2e3689759b5edb1822c6f.jar"
         jar="/Users/jeremydyer/.gradle/caches/modules-2/files-2.1/com.google.android/support-v4/r7/24d0f6da34c3a2bfcf736ab42d51c91ac821ee22/support-v4-r7.jar"
         jumboMode="false"
         revision="19.0.3"
         sha1="24d0f6da34c3a2bfcf736ab42d51c91ac821ee22"/>
     <item
-        dex="/Users/jeremydyer/Development/Android/EngageSDK-Test/EngageTest/engagetest/build/pre-dexed/release/google-http-client-android-1.15.0-rc-be3ecc7c45ca06db24107e8942696f05a424f271.jar"
+        dex="/Users/jeremydyer/Development/Android/EngageSDK-Test/EngageTest/engage/build/pre-dexed/test/debug/MobileDeepLinking-Android-SDK-4dad2c569f9b6121d79bfc8288f012f531df6780.jar"
+        jar="/Users/jeremydyer/Development/Android/EngageSDK-Test/EngageTest/engage/libs/MobileDeepLinking-Android-SDK.jar"
+        jumboMode="false"
+        revision="19.0.3"
+        sha1="420becde599d8bd75af4765fe39767a219512b37"/>
+    <item
+        dex="/Users/jeremydyer/Development/Android/EngageSDK-Test/EngageTest/engage/build/pre-dexed/test/debug/google-http-client-android-1.15.0-rc-be3ecc7c45ca06db24107e8942696f05a424f271.jar"
         jar="/Users/jeremydyer/.gradle/caches/modules-2/files-2.1/com.google.http-client/google-http-client-android/1.15.0-rc/421c895ef9f2b3df70de11912620e25a256e8afc/google-http-client-android-1.15.0-rc.jar"
         jumboMode="false"
         revision="19.0.3"
         sha1="421c895ef9f2b3df70de11912620e25a256e8afc"/>
     <item
-        dex="/Users/jeremydyer/Development/Android/EngageSDK-Test/EngageTest/engagetest/build/pre-dexed/release/classes-304171845ff0db6dc215b9b0fc3eaf2b01ae5c14.jar"
-        jar="/Users/jeremydyer/Development/Android/EngageSDK-Test/EngageTest/build/exploded-aar/EngageTest/engage/unspecified/classes.jar"
-        jumboMode="false"
-        revision="19.0.3"
-        sha1="0b000fcc18d86d66670ee90ce047ab97a4bce330"/>
-    <item
-        dex="/Users/jeremydyer/Development/Android/EngageSDK-Test/EngageTest/engagetest/build/pre-dexed/release/android-oauth-client-0.0.3-7f7207d33c8290a8346445f1579bc8846cc9205d.jar"
+        dex="/Users/jeremydyer/Development/Android/EngageSDK-Test/EngageTest/engage/build/pre-dexed/test/debug/android-oauth-client-0.0.3-7f7207d33c8290a8346445f1579bc8846cc9205d.jar"
         jar="/Users/jeremydyer/.gradle/caches/modules-2/files-2.1/com.wu-man/android-oauth-client/0.0.3/ff6342a876a5bf7d4bb1e6f750e080e6881401af/android-oauth-client-0.0.3.jar"
         jumboMode="false"
         revision="19.0.3"
         sha1="ff6342a876a5bf7d4bb1e6f750e080e6881401af"/>
     <item
-        dex="/Users/jeremydyer/Development/Android/EngageSDK-Test/EngageTest/engagetest/build/pre-dexed/release/jackson-core-asl-1.9.11-9de4b0ee0842a5e7af1b394cef2e2f8db9b270f3.jar"
+        dex="/Users/jeremydyer/Development/Android/EngageSDK-Test/EngageTest/engage/build/pre-dexed/test/debug/jackson-core-asl-1.9.11-9de4b0ee0842a5e7af1b394cef2e2f8db9b270f3.jar"
         jar="/Users/jeremydyer/.gradle/caches/modules-2/files-2.1/org.codehaus.jackson/jackson-core-asl/1.9.11/e32303ef8bd18a5c9272780d49b81c95e05ddf43/jackson-core-asl-1.9.11.jar"
         jumboMode="false"
         revision="19.0.3"
         sha1="e32303ef8bd18a5c9272780d49b81c95e05ddf43"/>
     <item
-        dex="/Users/jeremydyer/Development/Android/EngageSDK-Test/EngageTest/engagetest/build/pre-dexed/release/jsr305-1.3.9-043fdf4df484775a3cca23dc66c07d1bd8978181.jar"
+        dex="/Users/jeremydyer/Development/Android/EngageSDK-Test/EngageTest/engage/build/pre-dexed/test/debug/google-api-client-1.15.0-rc-ffd5a266080e6446100c120ef3e0baf3d3345e45.jar"
+        jar="/Users/jeremydyer/.gradle/caches/modules-2/files-2.1/com.google.api-client/google-api-client/1.15.0-rc/52194b4bd5137be8a10f6ccb224c73a7bc4d4737/google-api-client-1.15.0-rc.jar"
+        jumboMode="false"
+        revision="19.0.3"
+        sha1="52194b4bd5137be8a10f6ccb224c73a7bc4d4737"/>
+    <item
+        dex="/Users/jeremydyer/Development/Android/EngageSDK-Test/EngageTest/engage/build/pre-dexed/test/debug/jsr305-1.3.9-043fdf4df484775a3cca23dc66c07d1bd8978181.jar"
         jar="/Users/jeremydyer/.gradle/caches/modules-2/files-2.1/com.google.code.findbugs/jsr305/1.3.9/40719ea6961c0cb6afaeb6a921eaa1f6afd4cfdf/jsr305-1.3.9.jar"
         jumboMode="false"
         revision="19.0.3"
         sha1="40719ea6961c0cb6afaeb6a921eaa1f6afd4cfdf"/>
     <item
-        dex="/Users/jeremydyer/Development/Android/EngageSDK-Test/EngageTest/engagetest/build/pre-dexed/release/google-api-client-android-1.15.0-rc-10673b87f590be7d917a60c0beeab0229f480651.jar"
+        dex="/Users/jeremydyer/Development/Android/EngageSDK-Test/EngageTest/engage/build/pre-dexed/test/debug/google-api-client-android-1.15.0-rc-10673b87f590be7d917a60c0beeab0229f480651.jar"
         jar="/Users/jeremydyer/.gradle/caches/modules-2/files-2.1/com.google.api-client/google-api-client-android/1.15.0-rc/f7218f7aa2da59e34ec7f9f25942332833a6ce9d/google-api-client-android-1.15.0-rc.jar"
         jumboMode="false"
         revision="19.0.3"
         sha1="f7218f7aa2da59e34ec7f9f25942332833a6ce9d"/>
     <item
-        dex="/Users/jeremydyer/Development/Android/EngageSDK-Test/EngageTest/engagetest/build/pre-dexed/release/google-oauth-client-1.15.0-rc-56da6d9837953771fbd1066c68e378a092c30e6b.jar"
+        dex="/Users/jeremydyer/Development/Android/EngageSDK-Test/EngageTest/engage/build/pre-dexed/test/debug/google-oauth-client-1.15.0-rc-56da6d9837953771fbd1066c68e378a092c30e6b.jar"
         jar="/Users/jeremydyer/.gradle/caches/modules-2/files-2.1/com.google.oauth-client/google-oauth-client/1.15.0-rc/490b8d24391d94dafaeb21bc5d51741231d2bd43/google-oauth-client-1.15.0-rc.jar"
         jumboMode="false"
         revision="19.0.3"
         sha1="490b8d24391d94dafaeb21bc5d51741231d2bd43"/>
     <item
-        dex="/Users/jeremydyer/Development/Android/EngageSDK-Test/EngageTest/engagetest/build/pre-dexed/release/classes-194884740731bb9001b5958a7bfc21ba9decf735.jar"
-        jar="/Users/jeremydyer/Development/Android/EngageSDK-Test/EngageTest/build/exploded-aar/com.android.support/appcompat-v7/19.1.0/classes.jar"
-        jumboMode="false"
-        revision="19.0.3"
-        sha1="3499ceba05ca1f6037c6a2fad73df8f636224a28"/>
-    <item
-        dex="/Users/jeremydyer/Development/Android/EngageSDK-Test/EngageTest/engagetest/build/pre-dexed/release/google-http-client-jackson-1.15.0-rc-749f135d508df505f94a9a9048b7da7d33b793e9.jar"
+        dex="/Users/jeremydyer/Development/Android/EngageSDK-Test/EngageTest/engage/build/pre-dexed/test/debug/google-http-client-jackson-1.15.0-rc-749f135d508df505f94a9a9048b7da7d33b793e9.jar"
         jar="/Users/jeremydyer/.gradle/caches/modules-2/files-2.1/com.google.http-client/google-http-client-jackson/1.15.0-rc/77f6f2076dff445432bf77e43a83d77be65b22ae/google-http-client-jackson-1.15.0-rc.jar"
         jumboMode="false"
         revision="19.0.3"
         sha1="77f6f2076dff445432bf77e43a83d77be65b22ae"/>
+    <item
+        dex="/Users/jeremydyer/Development/Android/EngageSDK-Test/EngageTest/engage/build/pre-dexed/test/debug/classes-194884740731bb9001b5958a7bfc21ba9decf735.jar"
+        jar="/Users/jeremydyer/Development/Android/EngageSDK-Test/EngageTest/build/exploded-aar/com.android.support/appcompat-v7/19.1.0/classes.jar"
+        jumboMode="false"
+        revision="19.0.3"
+        sha1="3499ceba05ca1f6037c6a2fad73df8f636224a28"/>
 
 </pre-dex-items>

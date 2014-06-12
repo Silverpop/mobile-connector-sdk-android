@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -12,12 +13,14 @@ import com.silverpop.engage.config.EngageConfig;
 import com.silverpop.engage.config.EngageConfigManager;
 import com.silverpop.engage.deeplinking.EngageDeepLinkManager;
 import com.silverpop.engage.domain.UBF;
+import com.silverpop.engage.domain.XMLAPI;
 import com.silverpop.engage.location.EngageLocationManager;
 import com.silverpop.engage.util.EngageExpirationParser;
 
 import org.mobiledeeplinking.android.Handler;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -72,8 +75,8 @@ public class EngageApplication
         }
 
         //Initializes the UBFManager and XMLAPIManager instances.
-        UBFManager.initialize(getApplicationContext(), clientId, clientSecret, refreshToken, host);
         XMLAPIManager.initialize(getApplicationContext(), clientId, clientSecret, refreshToken, host);
+        UBFManager.initialize(getApplicationContext(), clientId, clientSecret, refreshToken, host);
 
 
         final UBFManager ubfManager = UBFManager.get();
@@ -91,11 +94,30 @@ public class EngageApplication
                 getSharedPreferences(EngageConfig.ENGAGE_CONFIG_PREF_ID, Context.MODE_PRIVATE);
 
         //Check if this is the first time the app has been ran or not
-        if (sharedPreferences.getString(APP_INSTALLED, null) == null) {
+        if (sharedPreferences.getString(APP_INSTALLED, null) == null || 1 == 1) {
             Log.d(TAG, "EngageSDK - Application has been installed/ran for the first time");
             sharedPreferences.edit().putString(APP_INSTALLED, "YES").commit();
             UBF appInstalled = UBF.installed(getApplicationContext(), null);
             ubfManager.postEvent(appInstalled);
+
+            Resources r = getResources();
+
+            //Create the Last known user location database columns
+            Map<String, Object> bodyElements = new HashMap<String, Object>();
+            bodyElements.put("LIST_ID", r.getString(R.string.engageListId));
+            bodyElements.put("COLUMN_NAME", r.getString(R.string.lastKnownLocationColumn));
+            bodyElements.put("COLUMN_TYPE", 0);
+            bodyElements.put("DEFAULT", "");
+            XMLAPI createLastKnownLocationColumns = new XMLAPI("AddListColumn", bodyElements);
+            XMLAPIManager.get().postXMLAPI(createLastKnownLocationColumns, null, null);
+
+            bodyElements = new HashMap<String, Object>();
+            bodyElements.put("LIST_ID", r.getString(R.string.engageListId));
+            bodyElements.put("COLUMN_NAME", r.getString(R.string.lastKnownLocationTimestampColumn));
+            bodyElements.put("COLUMN_TYPE", 3);
+            bodyElements.put("DEFAULT", "");
+            createLastKnownLocationColumns = new XMLAPI("AddListColumn", bodyElements);
+            XMLAPIManager.get().postXMLAPI(createLastKnownLocationColumns, null, null);
         }
 
         //Examine the session and determine if events should be posted.
