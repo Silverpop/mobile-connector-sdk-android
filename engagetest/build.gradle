@@ -1,33 +1,44 @@
 apply plugin: 'android'
 
 android {
-    compileSdkVersion 19
-    buildToolsVersion '19.1.0'
-    lintOptions {
-        abortOnError false
-    }
-    defaultConfig {
-        packageName 'com.silverpop.engage.demo.engagetest'
-        minSdkVersion 14
-        targetSdkVersion 19
-        versionCode 1
-        versionName '1.0'
-    }
-    buildTypes {
-        release {
-            runProguard false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-        }
-    }
-    dexOptions {
-        preDexLibraries = false
-    }
-    productFlavors {
-    }
+	compileSdkVersion 19
+	buildToolsVersion '19.1.0'
+	lintOptions {
+		abortOnError false
+	}
+	defaultConfig {
+		packageName 'com.silverpop.engage.demo.engagetest'
+		minSdkVersion 14
+		targetSdkVersion 19
+		versionCode 1
+		versionName '1.0'
+	}
+	signingConfigs {
+		release {
+			storeFile file("engagetest-001.keystore")
+			storePassword "engagesdk"
+			keyAlias "engagetest-001"
+			keyPassword "engagesdk"
+		}
+	}
+
+	buildTypes {
+		release {
+			runProguard false
+			proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+			signingConfig signingConfigs.release
+		}
+	}
+	dexOptions {
+		preDexLibraries = false
+	}
+	productFlavors {
+	}
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile project(':engage')
-    compile 'com.android.support:appcompat-v7:19.+'
+	compile fileTree(dir: 'libs', include: ['*.jar'])
+	compile project(':engage')
+	compile 'com.android.support:appcompat-v7:19.+'
+	compile files('libs/urbanairship-lib-4.0.2.jar')
 }
