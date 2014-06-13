@@ -1,5 +1,9 @@
 apply plugin: 'android'
 
+repositories {
+    mavenCentral()
+}
+
 android {
 	compileSdkVersion 19
 	buildToolsVersion '19.1.0'
@@ -38,8 +42,8 @@ android {
 
 dependencies {
 	compile fileTree(dir: 'libs', include: ['*.jar'])
-	//compile project(':engage')
-    compile 'engage:engage:1.0.0-SNAPSHOT'
+	compile project(':engage')
+    //compile group: 'engage', name: 'engage', version: '1.0.0-20140613.054905-1', ext: "aar"
 	compile 'com.android.support:appcompat-v7:19.+'
 	compile files('libs/urbanairship-lib-4.0.2.jar')
 }
