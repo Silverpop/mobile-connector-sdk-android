@@ -2,7 +2,9 @@ package com.silverpop.engage;
 
 import android.app.Notification;
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.util.Log;
 
 import com.android.volley.Response;
@@ -21,6 +23,7 @@ import org.json.JSONObject;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.SimpleTimeZone;
 
 /**
  * Created by jeremydyer on 5/19/14.
@@ -126,6 +129,44 @@ public class UBFManager {
         } else {
             return -1l;
         }
+    }
+
+    public long handlePushTest(Intent intent) {
+        UBF pushNotification = null;
+        if (intent != null && intent.getExtras() != null) {
+            Map<String, Object> params = monitorForEvents(intent.getExtras());
+            pushNotification = UBF.receivedNotification(context, params);
+        } else {
+            pushNotification = UBF.receivedNotification(context, null);
+        }
+        return postEvent(pushNotification);
+    }
+
+    private Map<String, Object> monitorForEvents(Bundle bundle) {
+        Map<String, Object> refactoredParams = new HashMap<String, Object>();
+
+        EngageConfigManager cm = EngageConfigManager.get(context);
+
+        if (bundle.containsKey(cm.paramCurrentCampaign())) {
+            String currentCampaign = bundle.getString(cm.paramCurrentCampaign());
+
+            if (bundle.containsKey(cm.paramCampaignExpiresAt())) {
+                EngageExpirationParser parser = new EngageExpirationParser(bundle.getString(cm.paramCampaignExpiresAt()), null);
+                EngageConfig.storeCurrentCampaignWithExpirationTimestamp(context,
+                        currentCampaign, parser.expirationTimeStamp());
+            } else if (bundle.containsKey(cm.paramCampaignValidFor())) {
+                EngageExpirationParser parser = new EngageExpirationParser(bundle.getString(cm.paramCampaignValidFor()), null);
+                EngageConfig.storeCurrentCampaignWithExpirationTimestamp(context,
+                        currentCampaign, parser.expirationTimeStamp());
+            } else {
+                EngageConfig.storeCurrentCampaignWithExpirationTimestamp(context,
+                        currentCampaign, -1);
+            }
+
+            refactoredParams.put(cm.ubfCurrentCampaignFieldName(), currentCampaign);
+        }
+
+        return refactoredParams;
     }
 
     public long handleNotificationReceivedEvents(Context context, Notification notification, Map<String, Object> params) {

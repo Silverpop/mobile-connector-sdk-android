@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
+import com.silverpop.engage.UBFManager;
 import com.urbanairship.push.PushManager;
 
 public class PushReceiver extends BroadcastReceiver {
@@ -13,6 +14,7 @@ public class PushReceiver extends BroadcastReceiver {
 
         if (PushManager.ACTION_PUSH_RECEIVED.equals(intent.getAction())) {
             Log.e("engagetest", "recieved notification");
+            UBFManager.get().handlePushTest(intent);
         } else if (PushManager.ACTION_NOTIFICATION_OPENED.equals(intent.getAction())) {
             Log.e("engagetest", "opened notification");
         }

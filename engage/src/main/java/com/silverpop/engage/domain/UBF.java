@@ -174,6 +174,21 @@ public class UBF
         return new UBF(context, NAMED_EVENT, params);
     }
 
+    public static UBF receivedNotification(Context context, Map<String, Object> params) {
+        EngageConfigManager cm = EngageConfigManager.get(context);
+        params = populateEventCommonParams(context, params);
+
+        if (!params.containsKey(cm.ubfCurrentCampaignFieldName())) {
+            params.put(cm.ubfCurrentCampaignFieldName(), EngageConfig.currentCampaign(context));
+        }
+        if (!params.containsKey(cm.ubfCallToActionFieldName())) {
+            params.put(cm.ubfCallToActionFieldName(), params.get(cm.ubfCallToActionFieldName()));   //User must provide the Call To Action.
+        }
+
+        UBF ubf = new UBF(context, RECEIVED_NOTIFICATION, params);
+        return ubf;
+    }
+
     public static UBF receivedNotification(Context context, Notification notification, Map<String, Object> params) {
         EngageConfigManager cm = EngageConfigManager.get(context);
         params = populateEventCommonParams(context, params);

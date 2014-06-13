@@ -13,6 +13,7 @@ import android.widget.TextView;
 
 import com.silverpop.engage.config.EngageConfig;
 import com.silverpop.engage.demo.engagetest.R;
+import com.urbanairship.push.PushManager;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -69,6 +70,7 @@ public class EngageConfigFragment
         } else {
             m.put("Location Address", "Not yet acquired");
         }
+        m.put("UAS App ID", PushManager.shared().getAPID());
 
         return m;
     }
