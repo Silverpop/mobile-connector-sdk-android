@@ -1,10 +1,9 @@
-package com.silverpop.engage.augmentation.plugin.impl;
+package com.silverpop.engage.augmentation.plugin;
 
 import android.content.Context;
 import android.location.Address;
 import android.location.Location;
 
-import com.silverpop.engage.augmentation.plugin.UBFAugmentationPlugin;
 import com.silverpop.engage.config.EngageConfig;
 import com.silverpop.engage.config.EngageConfigManager;
 import com.silverpop.engage.domain.UBF;
@@ -24,6 +23,11 @@ public class UBFLocationAugmentationPlugin
     }
 
     @Override
+    public void setContext(Context context) {
+        mAppContext = context;
+    }
+
+    @Override
     public boolean isSupplementalDataReady() {
         if (EngageConfig.currentLocationCache() == null
                 || EngageConfig.currentAddressCache() == null
@@ -31,6 +35,11 @@ public class UBFLocationAugmentationPlugin
             return false;
         }
         return true;
+    }
+
+    @Override
+    public boolean processSyncronously() {
+        return false;
     }
 
     @Override

@@ -3,6 +3,7 @@ package com.silverpop.engage.config;
 import android.content.Context;
 import android.util.Log;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -73,9 +74,14 @@ public class EngageConfigManager {
 
                             //Merges in the user values now.
                             String[] userNames = jsonObjectNames(userDefined);
+                            Log.d(TAG, userNames.toString());
 
                             for (String key : userNames) {
-                                merged.put(key, userDefined.get(key));
+                                if (userDefined.get(key) instanceof JSONObject) {
+
+                                } else {
+                                    merged.put(key, userDefined.get(key));
+                                }
                             }
 
                             configs = merged;
@@ -330,6 +336,33 @@ public class EngageConfigManager {
         }
     }
 
+    public String lastKnownLocationColumn() {
+        try {
+            return configs.getJSONObject("LocationServices").getString("lastKnownLocationColumn");
+        } catch (JSONException ex) {
+            Log.w(TAG, "Unable to find lastKnownLocationColumn configuration");
+            return null;
+        }
+    }
+
+    public String lastKnownLocationTimestampColumn() {
+        try {
+            return configs.getJSONObject("LocationServices").getString("lastKnownLocationTimestampColumn");
+        } catch (JSONException ex) {
+            Log.w(TAG, "Unable to find lastKnownLocationTimestampColumn configuration");
+            return null;
+        }
+    }
+
+    public String lastKnownLocationDateFormat() {
+        try {
+            return configs.getJSONObject("LocationServices").getString("lastKnownLocationDateFormat");
+        } catch (JSONException ex) {
+            Log.w(TAG, "Unable to find lastKnownLocationDateFormat configuration");
+            return null;
+        }
+    }
+
     public String augmentationTimeout() {
         try {
             return configs.getJSONObject("Augmentation").getString("augmentationTimeout");
@@ -372,6 +405,43 @@ public class EngageConfigManager {
         } catch (JSONException ex) {
             Log.w(TAG, "Unable to find secureConnection configuration");
             return true;
+        }
+    }
+
+    public String pluggableLocationManagerClassName() {
+        try {
+            return configs.getJSONObject("PluggableServices").getString("pluggableLocationManagerClassName");
+        } catch (JSONException ex) {
+            Log.w(TAG, "Unable to find pluggableLocationManagerClassName configuration");
+            return null;
+        }
+    }
+
+    public String[] augmentationPluginClasses() {
+        try {
+            String[] augmentationClasses = jsonArrayToStringArray(
+                    configs.getJSONObject("Augmentation").getJSONArray("ubfAugmentorClassNames"));
+            return augmentationClasses;
+        } catch (JSONException ex) {
+            Log.w(TAG, "Unable to find augmentationPluginClasses configuration");
+            return null;
+        }
+    }
+
+    private String[] jsonArrayToStringArray(JSONArray jsonArray) {
+        try {
+            if (jsonArray != null) {
+                String[] values = new String[jsonArray.length()];
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    values[i] = jsonArray.getString(i);
+                }
+                return values;
+            } else {
+                return new String[0];
+            }
+        } catch (JSONException ex) {
+            Log.w(TAG, "Error converting JSONArray to String[]. Returning empty String[0]");
+            return new String[0];
         }
     }
 }

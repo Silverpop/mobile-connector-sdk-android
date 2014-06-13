@@ -1,30 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- From: file:/Users/jeremydyer/Development/Android/EngageSDK-Test/EngageTest/engage/src/main/res/values/EngageConfig.xml -->
-    <eat-comment />
-
-    <bool name="locationServicesEnabled">true</bool>
-    <bool name="secureConnection">false</bool>
-
-    <integer name="expireLocalEventsAfterNumDays">30</integer>
-    <integer name="locationDistanceFilter">10</integer>
-    <integer name="locationMilliUpdateInterval">30000</integer>
-    <integer name="maxNumRetries">3</integer>
-    <integer name="ubfEventCacheSize">1</integer>
-
-    <string name="UBFCallToActionFieldName">Call To Action</string>
-    <string name="UBFCurrentCampaignFieldName">Campaign Name</string>
-    <string name="UBFDisplayedMessageFieldName">Displayed Message</string>
-    <string name="UBFEventNameFieldName">Event Name</string>
-    <string name="UBFGoalNameFieldName">Goal Name</string>
-    <string name="UBFLastCampaignFieldName">Last Campaign</string>
-    <string name="UBFLatitudeFieldName">Latitude</string>
-    <string name="UBFLocationAddressFieldName">Location Address</string>
-    <string name="UBFLocationNameFieldName">Location Name</string>
-    <string name="UBFLongitudeFieldName">Longitude</string>
-    <string name="UBFSessionDurationFieldName">Session Duration</string>
-    <string name="UBFTagsFieldName">Tags</string>
     <!-- From: file:/Users/jeremydyer/Development/Android/EngageSDK-Test/EngageTest/engage/src/main/res/values/Locations.xml -->
     <eat-comment />
 
@@ -33,46 +9,13 @@
     <eat-comment />
 
     <string name="app_name">Engage</string>
-    <!-- From: file:/Users/jeremydyer/Development/Android/EngageSDK-Test/EngageTest/engage/src/main/res/values/EngageConfig.xml -->
-    <eat-comment />
-
-    <string name="augmentationTimeout">15 seconds</string>
     <!-- From: file:/Users/jeremydyer/Development/Android/EngageSDK-Test/EngageTest/engage/src/main/res/values/Locations.xml -->
     <eat-comment />
 
     <string name="countryCode">US</string>
     <string name="countryName">United States</string>
-    <!-- From: file:/Users/jeremydyer/Development/Android/EngageSDK-Test/EngageTest/engage/src/main/res/values/EngageConfig.xml -->
-    <eat-comment />
-
-    <string name="deepLinkScheme">MakeAndBuild</string>
-    <string name="defaultCurrentCampaignExpiration">1 day</string>
-    <string name="defaultPrimaryUserId">jeremy.dyer@makeandbuild.com</string>
-    <string name="engageListId">23949</string>
-    <string name="lastKnownLocationColumn">Last Location Address</string>
-    <string name="lastKnownLocationDateFormat">MM-dd-yyyy</string>
-    <string name="lastKnownLocationTimestampColumn">Last Location Address Time</string>
-    <!-- From: file:/Users/jeremydyer/Development/Android/EngageSDK-Test/EngageTest/engage/src/main/res/values/Locations.xml -->
-    <eat-comment />
-
     <string name="locality">Atlanta</string>
-    <!-- From: file:/Users/jeremydyer/Development/Android/EngageSDK-Test/EngageTest/engage/src/main/res/values/EngageConfig.xml -->
-    <eat-comment />
-
-    <string name="locationCacheLifespan">1 hr</string>
-    <string name="paramCallToAction">CallToAction</string>
-    <string name="paramCampaignExpiresAt">CampaignExpiresAt</string>
-    <string name="paramCampaignValidFor">CampaignValidFor</string>
-    <string name="paramCurrentCampaign">CurrentCampaign</string>
-    <string name="pluggableLocationManagerClassName">com.silverpop.engage.location.manager.plugin.EngageLocationManagerDefault</string>
-    <!-- From: file:/Users/jeremydyer/Development/Android/EngageSDK-Test/EngageTest/engage/src/main/res/values/Locations.xml -->
-    <eat-comment />
-
     <string name="postalCode">30306</string>
-    <!-- From: file:/Users/jeremydyer/Development/Android/EngageSDK-Test/EngageTest/engage/src/main/res/values/EngageConfig.xml -->
-    <eat-comment />
-
-    <string name="sessionLifecycleExpiration">15 seconds</string>
     <!-- From: file:/Users/jeremydyer/Development/Android/EngageSDK-Test/EngageTest/engage/src/main/res/values/styles.xml -->
     <eat-comment />
 

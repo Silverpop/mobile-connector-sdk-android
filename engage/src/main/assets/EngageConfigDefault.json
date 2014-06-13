@@ -15,7 +15,7 @@
 		"paramCallToAction": "CallToAction"
 	},
 	"Session" : {
-		"sessionLifecycleExpiration": "15 seconds"
+		"sessionLifecycleExpiration": "5 minutes"
 	},
 	"Networking" : {
 		"maxNumRetries": 3,
@@ -48,6 +48,10 @@
 		"pluggableLocationManagerClassName": "com.silverpop.engage.location.manager.plugin.EngageLocationManagerDefault"
 	},
 	"Augmentation" : {
-		"augmentationTimeout": "15 seconds"
+		"augmentationTimeout": "15 seconds",
+		"ubfAugmentorClassNames" : [
+		    "com.silverpop.engage.augmentation.plugin.UBFCoordinatesAugmentationPlugin",
+		    "com.silverpop.engage.augmentation.plugin.UBFAddressAugmentationPlugin"
+		]
 	}
 }
