@@ -98,15 +98,15 @@ public class EngageLocationReceiverGeocode
 
     protected void updateUserLastKnownLocation(Context context) {
         Resources r = context.getResources();
-        String lastKnownLocationColumn = r.getString(R.string.lastKnownLocationTimestampColumn);
-        String lastKnownLocationTimestampColumn = r.getString(R.string.lastKnownLocationColumn);
+        String lastKnownLocationColumn = EngageConfigManager.get(context).lastKnownLocationColumn();
+        String lastKnownLocationTimestampColumn = EngageConfigManager.get(context).lastKnownLocationTimestampColumn();
 
-        String lastKnownLocationTimeFormat = r.getString(R.string.lastKnownLocationDateFormat);
+        String lastKnownLocationTimeFormat = EngageConfigManager.get(context).lastKnownLocationDateFormat();
         SimpleDateFormat sdf = new SimpleDateFormat(lastKnownLocationTimeFormat);
 
         //Make XMLAPI request to update the last known location.
         Map<String, Object> bodyElements = new HashMap<String, Object>();
-        bodyElements.put("LIST_ID", r.getString(R.string.engageListId));
+        bodyElements.put("LIST_ID", EngageConfigManager.get(context).engageListId());
         bodyElements.put("CREATED_FROM", "1");
         XMLAPI updateLastKnownLocation = new XMLAPI("UpdateRecipient", bodyElements);
         Map<String, Object> syncFields = new HashMap<String, Object>();

@@ -1,11 +1,9 @@
-package com.silverpop.engage.augmentation.impl;
+package com.silverpop.engage.augmentation;
 
 import android.content.Context;
 import android.util.Log;
 
-import com.silverpop.engage.augmentation.UBFAugmentationService;
 import com.silverpop.engage.augmentation.plugin.UBFAugmentationPlugin;
-import com.silverpop.engage.augmentation.plugin.impl.UBFLocationAugmentationPlugin;
 import com.silverpop.engage.config.EngageConfigManager;
 import com.silverpop.engage.domain.EngageEvent;
 import com.silverpop.engage.domain.UBF;
@@ -46,7 +44,18 @@ public class UBFAugmentationServiceImpl
         ubfClient = UBFClient.get(context);
 
         //Adds the Augmentation plugins
-        plugins.add(new UBFLocationAugmentationPlugin(context));
+        String[] augmentationPlugins = EngageConfigManager.get(context).augmentationPluginClasses();
+        for (String augmentationClass : augmentationPlugins) {
+            try {
+                Class augClazz = Class.forName(augmentationClass);
+                UBFAugmentationPlugin augmentationPlugin = (UBFAugmentationPlugin) augClazz.newInstance();
+                augmentationPlugin.setContext(context);
+                plugins.add(augmentationPlugin);
+            } catch (Exception ex) {
+                Log.w(TAG, "Unable to initialize Pluggable Augmentation class '"
+                        + augmentationClass + "' : " + ex.getMessage());
+            }
+        }
     }
 
     public static UBFAugmentationServiceImpl get(Context context ){
@@ -81,9 +90,10 @@ public class UBFAugmentationServiceImpl
                             mutEvent = plugin.process(mutEvent);
                             notProcessedPlugins.remove(plugin);
                             //Index does not need to be updated since the list size has decreased by one.
-                        } else {
+                        } else if (!plugin.processSyncronously()) {
                             index++;
                         }
+                        //Else we don't wait to update the index because we must wait until complete or timeout.
                     }
 
                     engageEvent.setEventJson(mutEvent.toJSONString());

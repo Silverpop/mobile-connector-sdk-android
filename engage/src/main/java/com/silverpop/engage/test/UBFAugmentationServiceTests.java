@@ -3,8 +3,7 @@ package com.silverpop.engage.test;
 import android.test.AndroidTestCase;
 
 import com.silverpop.engage.augmentation.UBFAugmentationService;
-import com.silverpop.engage.augmentation.impl.UBFAugmentationServiceImpl;
-import com.silverpop.engage.config.EngageConfig;
+import com.silverpop.engage.augmentation.UBFAugmentationServiceImpl;
 import com.silverpop.engage.domain.UBF;
 
 /**

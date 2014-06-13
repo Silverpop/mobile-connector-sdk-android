@@ -72,7 +72,7 @@ public class EngageApplication
         EngageConfigManager cm = EngageConfigManager.get(getApplicationContext());
 
         if (cm.locationServicesEnabled()) {
-            String pluggableLocationClassname = r.getString(R.string.pluggableLocationManagerClassName);
+            String pluggableLocationClassname = EngageConfigManager.get(getApplicationContext()).pluggableLocationManagerClassName();
             if (pluggableLocationClassname != null) {
                 try {
                     Class<?> clazz = Class.forName(pluggableLocationClassname);
@@ -130,16 +130,16 @@ public class EngageApplication
 
             //Create the Last known user location database columns
             Map<String, Object> bodyElements = new HashMap<String, Object>();
-            bodyElements.put("LIST_ID", r.getString(R.string.engageListId));
-            bodyElements.put("COLUMN_NAME", r.getString(R.string.lastKnownLocationColumn));
+            bodyElements.put("LIST_ID", EngageConfigManager.get(getApplicationContext()).engageListId());
+            bodyElements.put("COLUMN_NAME", EngageConfigManager.get(getApplicationContext()).lastKnownLocationColumn());
             bodyElements.put("COLUMN_TYPE", 0);
             bodyElements.put("DEFAULT", "");
             XMLAPI createLastKnownLocationColumns = new XMLAPI("AddListColumn", bodyElements);
             XMLAPIManager.get().postXMLAPI(createLastKnownLocationColumns, null, null);
 
             bodyElements = new HashMap<String, Object>();
-            bodyElements.put("LIST_ID", r.getString(R.string.engageListId));
-            bodyElements.put("COLUMN_NAME", r.getString(R.string.lastKnownLocationTimestampColumn));
+            bodyElements.put("LIST_ID", EngageConfigManager.get(getApplicationContext()).engageListId());
+            bodyElements.put("COLUMN_NAME", EngageConfigManager.get(getApplicationContext()).lastKnownLocationTimestampColumn());
             bodyElements.put("COLUMN_TYPE", 3);
             bodyElements.put("DEFAULT", "");
             createLastKnownLocationColumns = new XMLAPI("AddListColumn", bodyElements);

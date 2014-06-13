@@ -7,7 +7,7 @@ import android.util.Log;
 
 import com.android.volley.Response;
 import com.silverpop.engage.augmentation.UBFAugmentationService;
-import com.silverpop.engage.augmentation.impl.UBFAugmentationServiceImpl;
+import com.silverpop.engage.augmentation.UBFAugmentationServiceImpl;
 import com.silverpop.engage.config.EngageConfig;
 import com.silverpop.engage.config.EngageConfigManager;
 import com.silverpop.engage.domain.UBF;
