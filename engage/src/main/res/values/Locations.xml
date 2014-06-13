@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="locality">Atlanta</string>
+    <string name="locality">Blairsville</string>
     <string name="adminArea">Georgia</string>
-    <string name="postalCode">30306</string>
+    <string name="postalCode">30512</string>
     <string name="countryName">United States</string>
     <string name="countryCode">US</string>
+    <string name="featureName">Jeremy Place Made Up</string>
 </resources>

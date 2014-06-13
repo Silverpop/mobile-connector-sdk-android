@@ -27,6 +27,13 @@
             </intent-filter>
         </activity>
 
+        <receiver android:name="com.silverpop.engage.location.receiver.plugin.EngageLocationReceiverHardcodeTest"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.silverpop.engage.location.ACTION_LOCATION" />
+            </intent-filter>
+        </receiver>
+
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name" >

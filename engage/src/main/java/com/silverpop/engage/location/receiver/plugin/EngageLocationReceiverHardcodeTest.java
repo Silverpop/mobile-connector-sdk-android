@@ -51,6 +51,7 @@ public class EngageLocationReceiverHardcodeTest
             address.setPostalCode(r.getString(R.string.postalCode));
             address.setCountryName(r.getString(R.string.countryName));
             address.setCountryCode(r.getString(R.string.countryCode));
+            address.setFeatureName(r.getString(R.string.featureName));
 
             EngageConfig.storeCurrentAddressCache(address);
             EngageConfig.storeCurrentAddressCacheExpiration(new Date());
@@ -75,7 +76,7 @@ public class EngageLocationReceiverHardcodeTest
         bodyElements.put("CREATED_FROM", "1");
         XMLAPI updateLastKnownLocation = new XMLAPI("UpdateRecipient", bodyElements);
         Map<String, Object> syncFields = new HashMap<String, Object>();
-        syncFields.put("EMAIL", "jeremy.dyer@makeandbuild.com");
+        syncFields.put("EMAIL", EngageConfig.primaryUserId(context));
         updateLastKnownLocation.addSyncFields(syncFields);
         Map<String, Object> cols = new HashMap<String, Object>();
         cols.put(lastKnownLocationColumn, sdf.format(new Date()));

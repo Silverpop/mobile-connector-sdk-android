@@ -51,7 +51,8 @@
 		"augmentationTimeout": "15 seconds",
 		"ubfAugmentorClassNames" : [
 		    "com.silverpop.engage.augmentation.plugin.UBFCoordinatesAugmentationPlugin",
-		    "com.silverpop.engage.augmentation.plugin.UBFAddressAugmentationPlugin"
+		    "com.silverpop.engage.augmentation.plugin.UBFAddressAugmentationPlugin",
+		    "com.silverpop.engage.augmentation.plugin.UBFLocationNameAugmentationPlugin"
 		]
 	}
 }

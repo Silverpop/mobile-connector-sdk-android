@@ -77,11 +77,7 @@ public class EngageConfigManager {
                             Log.d(TAG, userNames.toString());
 
                             for (String key : userNames) {
-                                if (userDefined.get(key) instanceof JSONObject) {
-
-                                } else {
-                                    merged.put(key, userDefined.get(key));
-                                }
+                                merged.put(key, userDefined.get(key));
                             }
 
                             configs = merged;

@@ -12,13 +12,6 @@
         android:theme="@style/AppTheme"
         android:enabled="true">
 
-        <receiver android:name=".location.receiver.plugin.EngageLocationReceiverHardcodeTest"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="com.silverpop.engage.location.ACTION_LOCATION" />
-            </intent-filter>
-        </receiver>
-
     </application>
 
 </manifest>

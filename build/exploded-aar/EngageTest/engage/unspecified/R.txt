@@ -335,8 +335,9 @@ int string adminArea 0x7f0a000d
 int string app_name 0x7f0a000e
 int string countryCode 0x7f0a000f
 int string countryName 0x7f0a0010
-int string locality 0x7f0a0011
-int string postalCode 0x7f0a0012
+int string featureName 0x7f0a0011
+int string locality 0x7f0a0012
+int string postalCode 0x7f0a0013
 int style AppTheme 0x7f0b0000
 int style TextAppearance_AppCompat_Base_CompactMenu_Dialog 0x7f0b0001
 int style TextAppearance_AppCompat_Base_SearchResult 0x7f0b0002

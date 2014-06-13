@@ -8,12 +8,6 @@
 
     <application android:allowBackup="true" android:enabled="true" android:label="@string/app_name" android:theme="@style/AppTheme">
 
-        <receiver android:exported="true" android:name="com.silverpop.engage.location.receiver.plugin.EngageLocationReceiverHardcodeTest">
-            <intent-filter>
-                <action android:name="com.silverpop.engage.location.ACTION_LOCATION"/>
-            </intent-filter>
-        </receiver>
-
     </application>
 
 </manifest>

@@ -14,8 +14,9 @@
 
     <string name="countryCode">US</string>
     <string name="countryName">United States</string>
-    <string name="locality">Atlanta</string>
-    <string name="postalCode">30306</string>
+    <string name="featureName">Jeremy Place Made Up</string>
+    <string name="locality">Blairsville</string>
+    <string name="postalCode">30512</string>
     <!-- From: file:/Users/jeremydyer/Development/Android/EngageSDK-Test/EngageTest/engage/src/main/res/values/styles.xml -->
     <eat-comment />
 

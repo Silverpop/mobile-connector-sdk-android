@@ -10,10 +10,10 @@ import com.silverpop.engage.domain.UBF;
 /**
  * Created by jeremydyer on 6/12/14.
  */
-public class UBFAddressAugmentationPlugin
-    implements UBFAugmentationPlugin {
+public class UBFLocationNameAugmentationPlugin
+        implements UBFAugmentationPlugin {
 
-    private static final String TAG = UBFAddressAugmentationPlugin.class.getName();
+    private static final String TAG = UBFLocationNameAugmentationPlugin.class.getName();
 
     private Context mContext;
 
@@ -44,8 +44,12 @@ public class UBFAddressAugmentationPlugin
 
         //Sets the location name and address.
         if (EngageConfig.currentAddressCache() != null) {
-            if (!ubfEvent.getParams().containsKey(cm.ubfLocationAddressFieldName())) {
-                ubfEvent.addParam(cm.ubfLocationAddressFieldName(), EngageConfig.buildLocationAddress());
+            if (!ubfEvent.getParams().containsKey(cm.ubfLocationNameFieldName())) {
+                String locationName = "";
+                if (address.getFeatureName() != null) {
+                    locationName = address.getFeatureName();
+                }
+                ubfEvent.addParam(cm.ubfLocationNameFieldName(), locationName);
             }
         }
 
