@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+<<<<<<< HEAD
     package="com.silverpop.engage.demo.engagetest" >
 
     <application
@@ -44,5 +45,109 @@
         </activity>
 
     </application>
+=======
+	package="com.silverpop.engage.demo.engagetest" >
+>>>>>>> a1b55889dc089cd8c10908041afb0d2a686946db
 
+	<!-- REQUIRED PERMISSIONS (for Urban Airship GCM) -->
+	<uses-permission android:name="android.permission.INTERNET"/>
+	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+	<uses-permission android:name="android.permission.VIBRATE"/>
+	<uses-permission android:name="android.permission.GET_ACCOUNTS" /><!-- GCM requires a Google account. -->
+	<uses-permission android:name="android.permission.WAKE_LOCK" />	<!-- Keeps the processor from sleeping when a message is received. -->
+	<uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" /><!-- This app has permission to register with GCM and receive message -->
+	<permission android:name="com.silverpop.engage.demo.engagetest.permission.C2D_MESSAGE" android:protectionLevel="signature" />
+	<uses-permission android:name="com.silverpop.engage.demo.engagetest.permission.C2D_MESSAGE" />
+	<permission android:name="com.silverpop.engage.demo.engagetest.permission.UA_DATA" android:protectionLevel="signature" />
+	<uses-permission android:name="com.silverpop.engage.demo.engagetest.permission.UA_DATA" />
+
+	<application
+		android:name="com.silverpop.engage.demo.engagetest.Application"
+		android:allowBackup="true"
+		android:icon="@drawable/ic_launcher"
+		android:label="@string/app_name"
+		android:theme="@style/AppTheme" >
+
+
+		<meta-data android:name="ENGAGE_CLIENT_ID" android:value="02eb567b-3674-4c48-8418-dbf17e0194fc" />
+		<meta-data android:name="ENGAGE_CLIENT_SECRET_META" android:value="9c650c5b-bcb8-4eb3-bf0a-cc8ad9f41580" />
+		<meta-data android:name="ENGAGE_REFRESH_TOKEN" android:value="676476e8-2d1f-45f9-9460-a2489640f41a" />
+		<meta-data android:name="ENGAGE_HOST" android:value="https://apipilot.silverpop.com/" />
+
+		<activity
+			android:name="com.silverpop.engage.deeplinking.EngageDeepLinkManager"
+			android:theme="@android:style/Theme.NoDisplay"
+			android:noHistory="true">
+			<intent-filter>
+				<data android:scheme="makeandbuild"/>
+				<action android:name="android.intent.action.VIEW" />
+				<category android:name="android.intent.category.VIEW" />
+				<category android:name="android.intent.category.DEFAULT" />
+				<category android:name="android.intent.category.BROWSABLE" />
+			</intent-filter>
+		</activity>
+
+		<activity
+			android:name=".MainActivity"
+			android:label="@string/app_name" >
+			<intent-filter>
+				<action android:name="android.intent.action.MAIN" />
+				<category android:name="android.intent.category.LAUNCHER" />
+			</intent-filter>
+		</activity>
+
+
+		<provider android:name="com.urbanairship.UrbanAirshipProvider"
+			android:authorities="com.silverpop.engage.demo.engagetest.urbanairship.provider"
+			android:permission="com.silverpop.engage.demo.engagetest.permission.UA_DATA"
+			android:exported="true"
+			android:multiprocess="true" />
+
+		<!-- Required for Push -->
+        <receiver android:name=".PushReceiver" />
+        <service android:name="com.urbanairship.push.PushService"/>
+		<receiver android:name="com.urbanairship.CoreReceiver" />
+		<receiver android:name="com.urbanairship.push.GCMPushReceiver" android:permission="com.google.android.c2dm.permission.SEND">
+			<intent-filter>
+				<action android:name="com.google.android.c2dm.intent.RECEIVE" />
+				<action android:name="com.google.android.c2dm.intent.REGISTRATION" />
+				<category android:name="com.silverpop.engage.demo.engagetest" />
+			</intent-filter>
+
+			<!--  Required for detecting when the application is upgraded so it can request a new GCM ID -->
+			<intent-filter>
+				<action android:name="android.intent.action.PACKAGE_REPLACED" />
+				<data android:scheme="package"/>
+			</intent-filter>
+		</receiver>
+
+		<!-- Required for analytics -->
+		<service android:name="com.urbanairship.analytics.EventService"/>
+
+		<!-- Required for Rich Push -->
+		<service android:name="com.urbanairship.richpush.RichPushUpdateService"/>
+
+		<!-- Required for Actions -->
+		<activity android:name="com.urbanairship.actions.ActionActivity"/>
+		<service android:name="com.urbanairship.actions.ActionService"/>
+
+		<!-- Required for Landing Page Action -->
+		<activity
+			android:name="com.urbanairship.actions.LandingPageActivity"
+			android:parentActivityName="com.silverpop.engage.demo.engagetest.MainActivity"
+			android:exported="false">
+
+			<!-- MODIFICATION REQUIRED set or remove the parent activity -->
+			<meta-data
+				android:name="android.support.PARENT_ACTIVITY"
+				android:value="com.silverpop.engage.demo.engagetest.MainActivity" />
+
+			<intent-filter>
+				<action android:name="com.urbanairship.actions.SHOW_LANDING_PAGE_INTENT_ACTION"/>
+				<data android:scheme="http" />
+				<data android:scheme="https" />
+				<category android:name="android.intent.category.DEFAULT"/>
+			</intent-filter>
+		</activity>
+	</application>
 </manifest>
