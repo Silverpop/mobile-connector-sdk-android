@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.silverpop.engage.demo.engagetest.fragment.EngageConfigFragment;
-import com.silverpop.engage.demo.engagetest.fragment.NotificationsFragment;
 import com.silverpop.engage.demo.engagetest.fragment.UBFAPIFragment;
 import com.silverpop.engage.demo.engagetest.fragment.XMLAPIFragment;
 
@@ -30,9 +29,6 @@ public class MainActivity extends FragmentActivity {
         mTabHost.addTab(mTabHost.newTabSpec("UBF Client").setIndicator("UBF Client"),
                 UBFAPIFragment.class, null);
 
-        mTabHost.addTab(mTabHost.newTabSpec("Notifications").setIndicator("Notifications"),
-                NotificationsFragment.class, null);
-
         mTabHost.addTab(mTabHost.newTabSpec("EngageConfig").setIndicator("EngageConfig"),
                 EngageConfigFragment.class, null);
 
@@ -48,10 +44,8 @@ public class MainActivity extends FragmentActivity {
                         mTabHost.setCurrentTab(0);
                     } else if (tabId.equalsIgnoreCase("ubf")) {
                         mTabHost.setCurrentTab(1);
-                    } else if (tabId.equalsIgnoreCase("notifications")) {
-                        mTabHost.setCurrentTab(2);
                     } else if (tabId.equalsIgnoreCase("config")) {
-                        mTabHost.setCurrentTab(3);
+                        mTabHost.setCurrentTab(2);
                     }
                 }
             }

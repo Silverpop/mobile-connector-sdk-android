@@ -22,8 +22,8 @@ import org.json.JSONObject;
 
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
-import java.util.SimpleTimeZone;
 
 /**
  * Created by jeremydyer on 5/19/14.
@@ -131,10 +131,19 @@ public class UBFManager {
         }
     }
 
-    public long handlePushTest(Intent intent) {
+    /**
+     * Invoked when a remote notifcation is received.
+     *
+     * @param intent
+     *      Intent
+     *
+     * @return
+     */
+    public long handleRemoteNotification(Intent intent) {
         UBF pushNotification = null;
         if (intent != null && intent.getExtras() != null) {
-            Map<String, Object> params = monitorForEvents(intent.getExtras());
+            Map<String, Object> params = intentExtraValueToMap(intent);
+            monitorParamsForImportantSystemEvents(params);
             pushNotification = UBF.receivedNotification(context, params);
         } else {
             pushNotification = UBF.receivedNotification(context, null);
@@ -142,32 +151,6 @@ public class UBFManager {
         return postEvent(pushNotification);
     }
 
-    private Map<String, Object> monitorForEvents(Bundle bundle) {
-        Map<String, Object> refactoredParams = new HashMap<String, Object>();
-
-        EngageConfigManager cm = EngageConfigManager.get(context);
-
-        if (bundle.containsKey(cm.paramCurrentCampaign())) {
-            String currentCampaign = bundle.getString(cm.paramCurrentCampaign());
-
-            if (bundle.containsKey(cm.paramCampaignExpiresAt())) {
-                EngageExpirationParser parser = new EngageExpirationParser(bundle.getString(cm.paramCampaignExpiresAt()), null);
-                EngageConfig.storeCurrentCampaignWithExpirationTimestamp(context,
-                        currentCampaign, parser.expirationTimeStamp());
-            } else if (bundle.containsKey(cm.paramCampaignValidFor())) {
-                EngageExpirationParser parser = new EngageExpirationParser(bundle.getString(cm.paramCampaignValidFor()), null);
-                EngageConfig.storeCurrentCampaignWithExpirationTimestamp(context,
-                        currentCampaign, parser.expirationTimeStamp());
-            } else {
-                EngageConfig.storeCurrentCampaignWithExpirationTimestamp(context,
-                        currentCampaign, -1);
-            }
-
-            refactoredParams.put(cm.ubfCurrentCampaignFieldName(), currentCampaign);
-        }
-
-        return refactoredParams;
-    }
 
     public long handleNotificationReceivedEvents(Context context, Notification notification, Map<String, Object> params) {
         return handleNotificationReceivedEvents(context, notification, params, null, null);
@@ -197,10 +180,28 @@ public class UBFManager {
     public long handleExternalURLOpenedEvents(Context context, Map<String, String> params) {
         Map<String, Object> refactoredParams = new HashMap<String, Object>();
         refactoredParams.putAll(params);
-
-        monitorParamsForImportantSystemEvents(refactoredParams);
+        refactoredParams = monitorParamsForImportantSystemEvents(refactoredParams);
         UBF externalURLOpenedEvent = UBF.deepLinkOpened(context, refactoredParams);
         return postEvent(externalURLOpenedEvent);
+    }
+
+    /**
+     * Converts an Intent bundle into a more friend Map datastructure.
+     *
+     * @param intent
+     * @return
+     */
+    private Map<String, Object> intentExtraValueToMap(Intent intent) {
+        Map<String, Object> intentParams = new HashMap<String, Object>();
+        if (intent != null && intent.getExtras() != null) {
+            Bundle bundle = intent.getExtras();
+            Iterator<String> itr = bundle.keySet().iterator();
+            while (itr.hasNext()) {
+                String key = itr.next();
+                intentParams.put(key, bundle.getString(key));
+            }
+        }
+        return intentParams;
     }
 
     /**
@@ -210,7 +211,6 @@ public class UBFManager {
     private Map<String, Object> monitorParamsForImportantSystemEvents(Map<String, Object> params) {
 
         Map<String, Object> refactoredParams = new HashMap<String, Object>();
-        refactoredParams.putAll(params);
 
         EngageConfigManager cm = EngageConfigManager.get(context);
         if (params.containsKey(cm.paramCurrentCampaign())) {
@@ -230,8 +230,12 @@ public class UBFManager {
                         (String)value, -1);
             }
 
-            refactoredParams.remove(value);
             refactoredParams.put(cm.ubfCurrentCampaignFieldName(), value);
+        }
+
+        //Parse the CallToAction Parameter
+        if (params.containsKey(cm.paramCallToAction())) {
+            refactoredParams.put(cm.paramCallToAction(), params.get(cm.paramCallToAction()));
         }
 
         return refactoredParams;
