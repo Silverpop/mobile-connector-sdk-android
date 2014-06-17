@@ -1,7 +1,6 @@
 package com.silverpop.engage.augmentation.plugin;
 
 import android.content.Context;
-
 import com.silverpop.engage.domain.UBF;
 
 /**

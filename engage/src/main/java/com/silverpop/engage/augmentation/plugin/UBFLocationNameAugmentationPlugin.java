@@ -42,7 +42,7 @@ public class UBFLocationNameAugmentationPlugin
 
         EngageConfigManager cm = EngageConfigManager.get(mContext);
 
-        //Sets the location name and address.
+        //Sets the location name.
         if (EngageConfig.currentAddressCache() != null) {
             if (!ubfEvent.getParams().containsKey(cm.ubfLocationNameFieldName())) {
                 String locationName = "";

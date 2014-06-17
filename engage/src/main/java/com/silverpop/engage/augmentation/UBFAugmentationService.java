@@ -8,7 +8,19 @@ import com.silverpop.engage.domain.UBF;
  */
 public interface UBFAugmentationService {
 
-    public int augmentorsCount();
-
+    /**
+     * Augments a UBF object by processing it through all of the "plugins" configured to run
+     * in the SDK environment.
+     *
+     * @param ubfEvent
+     *      UBF event object.
+     *
+     * @param engageEvent
+     *      EngageEvent object
+     *
+     * @param expirationSeconds
+     *      Seconds before the augmentation process times out and the
+     *      event is sent without the Augmented data.
+     */
     public void augmentUBFEvent(UBF ubfEvent, EngageEvent engageEvent, long expirationSeconds);
 }

@@ -29,14 +29,16 @@ public class UBFAugmentationServiceImpl
 
     private final ArrayList<UBFAugmentationPlugin> plugins = new ArrayList<UBFAugmentationPlugin>();
 
-    @Override
-    public int augmentorsCount() {
-        if (plugins == null) {
-            return 0 ;
+    public static UBFAugmentationServiceImpl get(Context context ){
+        if (augmentationService == null) {
+            augmentationService = new UBFAugmentationServiceImpl(context);
         }
-        return plugins.size();
+        return augmentationService;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     private UBFAugmentationServiceImpl(Context context) {
         mAppContext = context;
         engageLocalEventStore = EngageLocalEventStore.get(context);
@@ -58,14 +60,9 @@ public class UBFAugmentationServiceImpl
         }
     }
 
-    public static UBFAugmentationServiceImpl get(Context context ){
-        if (augmentationService == null) {
-            augmentationService = new UBFAugmentationServiceImpl(context);
-        }
-        return augmentationService;
-    }
-
-
+    /**
+     * {@inheritDoc}
+     */
     public void augmentUBFEvent(final UBF ubfEvent, final EngageEvent engageEvent, final long expirationSeconds) {
 
         if (ubfEvent != null && engageEvent != null) {
