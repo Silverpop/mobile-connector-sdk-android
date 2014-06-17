@@ -10,9 +10,10 @@ apply plugin: 'maven'
 apply plugin: 'signing'
 
 repositories {
-    maven {
-        url 'http://localhost:8081/artifactory'
-    }
+    //Place repository you would like to push EngageSDK to here
+//    maven {
+//        url 'http://localhost:8081/artifactory/libs-release-local'
+//    }
 }
 
 android {
@@ -60,7 +61,6 @@ android {
     buildTypes {
         release {
             runProguard false
-            //proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }
     }
 }
