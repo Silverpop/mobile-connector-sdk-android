@@ -3,6 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/EngageTest.iml" filepath="$PROJECT_DIR$/EngageTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/engage/engage.iml" filepath="$PROJECT_DIR$/engage/engage.iml" />
+      <module fileurl="file://$PROJECT_DIR$/engagetest/engagetest.iml" filepath="$PROJECT_DIR$/engagetest/engagetest.iml" />
     </modules>
   </component>
 </project>

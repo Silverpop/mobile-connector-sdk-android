@@ -1,9 +1,8 @@
-package com.silverpop.engage.test;
+package com.silverpop.engage;
 
 import android.os.AsyncTask;
 import android.test.AndroidTestCase;
 
-import com.silverpop.engage.UBFManager;
 import com.silverpop.engage.XMLAPIManager;
 import com.silverpop.engage.domain.XMLAPI;
 import com.silverpop.engage.exception.XMLResponseParseException;

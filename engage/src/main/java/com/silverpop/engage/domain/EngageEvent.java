@@ -1,7 +1,5 @@
 package com.silverpop.engage.domain;
 
-import com.silverpop.engage.domain.UBF;
-
 import java.io.Serializable;
 import java.util.Date;
 

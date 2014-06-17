@@ -9,6 +9,7 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/engage" />
+            <option value="$PROJECT_DIR$/engagetest" />
           </set>
         </option>
       </GradleProjectSettings>

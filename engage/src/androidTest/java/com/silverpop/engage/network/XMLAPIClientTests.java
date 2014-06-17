@@ -1,4 +1,4 @@
-package com.silverpop.engage.test;
+package com.silverpop.engage.network;
 
 import android.test.AndroidTestCase;
 
@@ -7,13 +7,7 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
-import com.silverpop.engage.exception.XMLResponseParseException;
-import com.silverpop.engage.response.EngageResponseXML;
-import com.silverpop.engage.domain.XMLAPI;
 import com.silverpop.engage.network.XMLAPIClient;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Created by jeremydyer on 5/19/14.

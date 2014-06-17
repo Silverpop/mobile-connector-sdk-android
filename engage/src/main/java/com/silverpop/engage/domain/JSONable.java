@@ -15,12 +15,4 @@ public interface JSONable {
      *  Implementations may throw other unchecked exceptions.
      */
     JSONObject toJSONObject();
-
-    /**
-     * Must populate this object from the given JSON source.
-     *
-     * @param src The source JSON data.
-     * may optionally throw if the input object violates the expected structure.
-     */
-    void fromJSONObject( final JSONObject src );
 }

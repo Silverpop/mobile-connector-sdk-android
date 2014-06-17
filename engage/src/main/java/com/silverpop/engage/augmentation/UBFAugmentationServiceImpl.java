@@ -63,6 +63,17 @@ public class UBFAugmentationServiceImpl
     /**
      * {@inheritDoc}
      */
+    public int augmentorsCount() {
+        if (plugins != null) {
+            return plugins.size();
+        } else {
+            return 0;
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public void augmentUBFEvent(final UBF ubfEvent, final EngageEvent engageEvent, final long expirationSeconds) {
 
         if (ubfEvent != null && engageEvent != null) {

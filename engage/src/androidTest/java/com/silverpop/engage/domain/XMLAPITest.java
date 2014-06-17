@@ -1,4 +1,4 @@
-package com.silverpop.engage.test;
+package com.silverpop.engage.domain;
 
 import android.test.AndroidTestCase;
 

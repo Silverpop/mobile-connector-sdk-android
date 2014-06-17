@@ -9,6 +9,12 @@ import com.silverpop.engage.domain.UBF;
 public interface UBFAugmentationService {
 
     /**
+     * Number of Augmentor plugins configured under this service.
+     * @return
+     */
+    public int augmentorsCount();
+
+    /**
      * Augments a UBF object by processing it through all of the "plugins" configured to run
      * in the SDK environment.
      *

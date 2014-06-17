@@ -319,12 +319,6 @@ public class UBF
         }
     }
 
-    @Override
-    public void fromJSONObject(JSONObject src) {
-        //TODO: Not implemented.
-        throw new RuntimeException("NOT IMPLEMENTED!!!");
-    }
-
     public EngageEvent toEngageEvent() {
         return new EngageEvent(this);
     }
