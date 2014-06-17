@@ -1,4 +1,19 @@
+def globalVersion = new Version("1.0.0")
+
+// Define the artifacts coordinates
+group = 'com.silverpop'
+version = globalVersion
+status = version.status
+
 apply plugin: 'android-library'
+apply plugin: 'maven'
+apply plugin: 'signing'
+
+repositories {
+    maven {
+        url 'http://localhost:8081/artifactory'
+    }
+}
 
 android {
     compileSdkVersion 19
@@ -14,18 +29,95 @@ android {
         versionCode 1
         versionName "1.0"
     }
+
+    signingConfigs {
+        debug {
+            storeFile file("debug.keystore")
+        }
+
+        myConfig {
+            storeFile file("other.keystore")
+            storePassword "android"
+            keyAlias "androiddebugkey"
+            keyPassword "android"
+        }
+    }
+
+    buildTypes {
+        foo {
+            debuggable true
+            jniDebugBuild true
+            signingConfig signingConfigs.myConfig
+        }
+    }
+
     buildTypes {
         release {
             runProguard false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+            //proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+        }
+    }
+}
+
+configurations {
+    archives {
+        extendsFrom configurations.default
+    }
+}
+
+//Singing the library for release version.
+signing {
+    required {
+        version.status == 'release' && gradle.taskGraph.hasTask("uploadArchives")
+    }
+    sign configurations.archives
+}
+
+uploadArchives {
+    configuration = configurations.archives
+    repositories.mavenDeployer {
+        beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+        repository(url: artifactoryRepo) {
+            authentication(userName: artifactoryUsername, password: artifactoryPassword)
+        }
+
+        pom.project {
+            name 'EngageSDK'
+            packaging 'aar'
+            description 'Silverpop Android EngageSDK'
+            url 'https://github.com/silverpop'
+
+            developers {
+                developer {
+                    id 'jdye64'
+                    name 'Jeremy Dyer'
+                    email 'jeremy.dyer@makeandbuild.com'
+                }
+            }
         }
     }
 }
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile('com.android.support:appcompat-v7:19.+') {
-        exclude group: 'com.android.support' //exclude android support from EngageSDK Library
+    compile 'com.android.support:appcompat-v7:19.+'
+}
+
+class Version {
+    String buildVersion
+    String status
+
+    Version(String versionValue) {
+        buildVersion = versionValue
+        if (buildVersion.endsWith('-SNAPSHOT')) {
+            status = 'integration'
+        } else {
+            status = 'release'
+        }
     }
-    compile 'com.wu-man:android-oauth-client:0.0.3'
+
+    String toString() {
+        buildVersion
+    }
 }

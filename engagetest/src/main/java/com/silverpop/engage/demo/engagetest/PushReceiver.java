@@ -14,7 +14,7 @@ public class PushReceiver extends BroadcastReceiver {
 
         if (PushManager.ACTION_PUSH_RECEIVED.equals(intent.getAction())) {
             Log.e("engagetest", "recieved notification");
-            //UBFManager.get().handleRemoteNotification(intent);
+            UBFManager.get().handleRemoteNotification(intent);
         } else if (PushManager.ACTION_NOTIFICATION_OPENED.equals(intent.getAction())) {
             Log.e("engagetest", "opened notification");
         }

@@ -143,7 +143,7 @@ public class UBFManager {
         UBF pushNotification = null;
         if (intent != null && intent.getExtras() != null) {
             Map<String, Object> params = intentExtraValueToMap(intent);
-            monitorParamsForImportantSystemEvents(params);
+            params = monitorParamsForImportantSystemEvents(params);
             pushNotification = UBF.receivedNotification(context, params);
         } else {
             pushNotification = UBF.receivedNotification(context, null);
@@ -198,7 +198,9 @@ public class UBFManager {
             Iterator<String> itr = bundle.keySet().iterator();
             while (itr.hasNext()) {
                 String key = itr.next();
-                intentParams.put(key, bundle.getString(key));
+                try {
+                    intentParams.put(key, bundle.getString(key));
+                } catch (Exception ex) {}
             }
         }
         return intentParams;

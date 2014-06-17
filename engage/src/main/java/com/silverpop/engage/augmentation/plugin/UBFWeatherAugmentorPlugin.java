@@ -1,18 +1,19 @@
 package com.silverpop.engage.augmentation.plugin;
 
 import android.content.Context;
-import android.location.Address;
+import android.location.Location;
 
 import com.silverpop.engage.config.EngageConfig;
 import com.silverpop.engage.config.EngageConfigManager;
 import com.silverpop.engage.domain.UBF;
 
 /**
- * Created by jeremydyer on 6/12/14.
+ * Created by jeremydyer on 6/13/14.
  */
-public class temp implements UBFAugmentationPlugin {
+public class UBFWeatherAugmentorPlugin
+        implements UBFAugmentationPlugin {
 
-    private static final String TAG = UBFLocationNameAugmentationPlugin.class.getName();
+    private static final String TAG = UBFCoordinatesAugmentationPlugin.class.getName();
 
     private Context mContext;
 
@@ -36,7 +37,8 @@ public class temp implements UBFAugmentationPlugin {
 
         EngageConfigManager cm = EngageConfigManager.get(mContext);
 
-        ubfEvent.addParam("Temperature", "98.00");
+        ubfEvent.addParam("Temperature", "80");
+        ubfEvent.addParam("wizometer", "5");
 
         return ubfEvent;
     }

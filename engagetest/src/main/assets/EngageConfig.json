@@ -39,7 +39,7 @@
 		"locationDistanceFilter": 10,
 		"locationMilliUpdateInterval": 30000,
 		"locationCacheLifespan": "1 hr",
-		"locationServicesEnabled": false,
+		"locationServicesEnabled": true,
 		"lastKnownLocationDateFormat": "MM-dd-yyyy",
 		"lastKnownLocationTimestampColumn": "Last Location Address Time",
 		"lastKnownLocationColumn": "Last Location Address"
@@ -50,10 +50,10 @@
 	"Augmentation" : {
 		"augmentationTimeout": "15 seconds",
 		"ubfAugmentorClassNames" : [
+		    "com.silverpop.engage.augmentation.plugin.UBFWeatherAugmentorPlugin",
 		    "com.silverpop.engage.augmentation.plugin.UBFCoordinatesAugmentationPlugin",
 		    "com.silverpop.engage.augmentation.plugin.UBFAddressAugmentationPlugin",
-		    "com.silverpop.engage.augmentation.plugin.UBFLocationNameAugmentationPlugin",
-		    "com.silverpop.engage.augmentation.plugin.temp"
+		    "com.silverpop.engage.augmentation.plugin.UBFLocationNameAugmentationPlugin"
 		]
 	}
 }
