@@ -93,24 +93,90 @@ threshold is met.
 
 #### <a name="UBF"/> UBF Class
 
-Details about the UBF class need to go here.
+The UBF class represents a client side Universal Behavior JSON message intended for the Engage API.
+The class also contains several static convenience methods for creating common UBF events. The UBF is 
+broken down into 2 separate "containers" of data. There are the UBF Core Values that are contained
+in every single UBF event and then the UBF Param values that are specific to each UBF of type.
+Most UBF param values are populated automatically by the SDK but the SDK user can pass those values in
+as a parameter and the values they provide will take precedence over the automatic params generated 
+by the SDK. 
 
 ##### UBF Core Values
 
-*Device Version
-*OS Name
-*OS Version
-*App Name
-*App Version
-*Device Id
-*Primary User Id
-*Anonymous Id
+* Device Version
+* OS Name
+* OS Version
+* App Name
+* App Version
+* Device Id
+* Primary User Id
+* Anonymous Id
 
-List EngageSDK user defined capture events.
+##### UBF Events and their Type Codes
+
+* INSTALLED - 12
+* SESSION_STARTED - 13;
+* SESSION_ENDED - 14
+* GOAL_ABANDONED - 15
+* GOAL_COMPLETED - 16
+* NAMED_EVENT - 17
+* RECEIVED_NOTIFICATION - 48
+* OPENED_NOTIFICATION 49
 
 #### <a nam="UBFAugmentation"/>UBF Augmentation
 
-Description/example of the UBF event pluggable augmentation.
+After a UBF event is created and sent the the UBFManager the UBF may also be further augmented with
+data received from Android hardware or user defined external services. This functionality maintains
+maximum SDK flexibility as it allows the user to define their own Augmentation plugins that augment
+the UBF event before it is posted to the Engage API. The SDK by default uses this framework for augmenting
+the UBF events with location coordinates and location name for example. Any plugin can be created by the user
+by extending the ```com.silverpop.engage.augmentation.plugin.UBFAugmentationPlugin``` interface. Here is a 
+simple example of a "weather UBF augmentation plugin"
+
+```java
+public class UBFWeatherAugmentationPlugin
+    implements UBFAugmentationPlugin {
+
+    private Context mContext;
+
+    @Override
+    public void setContext(Context context) {
+        mContext = context;
+    }
+
+    @Override
+    /**
+     * Returns false until the data needed to augment the UBF event is ready. For example this event
+     * might continually return false until a web service call returns.
+     */
+    public boolean isSupplementalDataReady() {
+        return true;
+    }
+
+    @Override
+    /**
+     * If true it means that the following plugins depend on the data that this augmentor injects
+     * into the UBF. We can't continue processing those subsequent plugins until this plugin has
+     * completed.
+     */
+    public boolean processSyncronously() {
+        return true;
+    }
+
+    @Override
+    public UBF process(UBF ubf) {
+        FakeExternalWeatherService weatherService = new FakeExternalWeatherService();
+        ubf.addParam("outside temperature fahrenheit", weatherService.getTemperatureInFahrenheit());
+        ubf.addParam("outside temperature celsius", weatherService.getTemperatureInCelsius());
+        return ubf; //UBF will now have temperature data when posting to Engage API
+    }
+}
+```
+
+To prevent UBF events from becoming stagnant or waiting indefinately for augmentation data a [configurable](#Configuration)
+augmentation timeout is placed for a single UBF augmentation. The same timeout applies if you have 1 plugin
+or 1000 plugins so tuning to match your needs is expected. After the timeout is reached the UBF event
+will be posted to Engage API in the same state as when it was handed off to the augmentation plugin service.
 
 ### <a name="XMLAPI"/>XMLAPI
 
@@ -373,7 +439,7 @@ The EngageSDK is configured via 2 plist files. One plist file (EngageConfigDefau
 
 The EngageSDK configuration values are stored in memory in a NSDictionary after the application starts up. Receiving those individual configuration values is managed via the EngageConfigManager. The manager queries the NSDictionary for the requested field. EngageConfigManager accepts constants defined in EngageConfig which provide more description names that point to the actual configuration values specified in the Configuration Values table below.
 
-### Configuration Values
+### <a name="Configuration"/> Configuration Values
 
 The configuration 
 
