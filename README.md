@@ -55,6 +55,25 @@ com.silverpop.engage.demo.engagetest.Application.
 </application>
 ```
 
+You must also provide your private credentials received from Silverpop inside the application element
+as follows.
+
+```xml
+<meta-data android:name="ENGAGE_CLIENT_ID" android:value=${YOUR_ENGAGE_CLIENT_ID} />
+<meta-data android:name="ENGAGE_CLIENT_SECRET_META" android:value=${YOUR_ENGAGE_CLIENT_SECRET} />
+<meta-data android:name="ENGAGE_REFRESH_TOKEN" android:value=${YOUR_ENGAGE_REFRESH_TOKEN} />
+<meta-data android:name="ENGAGE_HOST" android:value=${ENGAGE API URL} />
+```
+
+### Before You Release Your App
+
+#### Important Note: Increase Token Limits for Production Apps
+
+There are currently limits placed on the number of Access Tokens that can be generated per hour per 
+instance of Engage.  This number is easily increased, however, before deploying your app publicly, 
+you must contact your Relationship Manager or Sales Rep regarding your intention to use this connector 
+and that you will need to have your OAuth Access Token rate limit increased.
+
 ### Universal Behaviors
 
 Universal Events represent application events (ex. installed, session started, etc) or SDK consumer 
@@ -173,7 +192,7 @@ public class UBFWeatherAugmentationPlugin
 }
 ```
 
-To prevent UBF events from becoming stagnant or waiting indefinately for augmentation data a [configurable](#Configuration)
+To prevent UBF events from becoming stagnant or waiting indefinitely for augmentation data a [configurable](#Configuration)
 augmentation timeout is placed for a single UBF augmentation. The same timeout applies if you have 1 plugin
 or 1000 plugins so tuning to match your needs is expected. After the timeout is reached the UBF event
 will be posted to Engage API in the same state as when it was handed off to the augmentation plugin service.
@@ -186,27 +205,35 @@ Brief introduction about XMLAPI.
 
 #### <a name="XMLAPIManager"/>XMLAPIManager
 
-The XMLAPIManager manages posting XMLAPI messages to the Engage web services. A XMLAPIManager singleton instance should be created in your AppDelegate class.
+The XMLAPIManager manages posting XMLAPI messages to the Engage web services. A XMLAPIManager global instance
+is automatically created for you by ```java com.silverpop.engage.EngageApplication ```. XMLAPIManager
+manages network availability and will cache requests when the network is not reachable executing them
+once the network is accessible again. All XMLAPI requests made to Engage should be made through
+this XMLAPIManager.
 
-Create XMLAPIManager instance in your AppDelegate
-```objective-c
-XMLAPIManager *xmlapiManager = [XMLAPIManager createClient:ENGAGE_CLIENT_ID
-                                          secret:ENGAGE_SECRET
-                                           token:ENGAGE_REFRESH_TOKEN
-                                            host:ENGAGE_BASE_URL
-                                  connectSuccess:^(AFOAuthCredential *credential) {
-        NSLog(@"Successfully connected to Engage XMLAPI : Credential %@", credential);
-    } failure:^(NSError *error) {
-        NSLog(@"Failed to connect to Silverpop XMLAPI .... %@", [error description]);
-    }];
+```java
+    /**
+     * Post an XMLAPI request to Engage
+     *
+     * @param api
+     *      XMLAPI operation desired.
+     *
+     * @param successTask
+     *      AsyncTask to execute on successful result.
+     *
+     * @param failureTask
+     *      AsyncTask to execute on failure
+     */
+    public void postXMLAPI(XMLAPI api,
+                           AsyncTask<EngageResponseXML, Void, Object> successTask,
+                           AsyncTask<VolleyError, Void, Object> failureTask) {
+        Response.Listener<String> successListener = successListenerForXMLAPI(api, successTask);
+        Response.ErrorListener errorListener = null;
+        xmlapiClient.postResource(api, successListener, errorListener);
+    }
 ```
 
-After initial XMLAPIManager creation you may reference your singleton anytime with
-```objective-c
-XMLAPIManager *xmlapiManager = [XMLAPIManager sharedInstance];
-```
-
-#### Creating an anonymous user
+##### Creating an anonymous user
 
 ```objective-c
 // Conveniently calls addRecipient and stores anonymousId within EngageConfig
@@ -222,7 +249,7 @@ XMLAPIManager *xmlapiManager = [XMLAPIManager sharedInstance];
 }];
 ```
 
-#### Identifying a registered user
+##### Identifying a registered user
 
 ```objective-c
 
@@ -243,7 +270,7 @@ XMLAPI *selectRecipientData = [XMLAPI selectRecipientData:@"somebody@somedomain.
     }];
 ```
 
-#### Convert anonymous user to registered user
+##### Convert anonymous user to registered user
 
 ```objective-c
 // Conveniently links anonymous user record with the primary user record according to the mergeColumn
@@ -290,17 +317,6 @@ XMLAPI *selectRecipientData = [XMLAPI selectRecipientData:@"somebody@somedomain.
 ```objective-c
 [[UBFManager sharedInstance] trackEvent:[UBF namedEvent:@"PLAYER LOADED" params:@{ @"Event Source View" : @"HomeViewController", @"Event Tags" : @"MVSTERMIND,Underground" }]];
 ```
-
-### UBFManager Operations
-
-The goal of UBFManager is serve the simple purpose of posting UBF Universal Events to Engage while masking the more complicated management tasks such as (network reachability, persistence, and authentication) from the SDK user. 
-
-* tracking UBF events - Posts your individual events to Engage. Local cache is taken into consideration and events are not posted until "ubfEventCacheSize" configuration value is reached. Once that value is reached then the events are batched and sent to Engage to reduce network traffic. You may set the value of "ubfEventCacheSize" if you do not wish for local caching to take palce. 
-* handleLocalNotification - utility method invoked SDK user invokes when their application receives a local notificaiton
-* handlePushNotificationReceived - utility method for received push notification. This method also handles searching the notification for EngageSDK parameter values like Current Campaign (configurable).
-* handleNotificationOpened - utility method for opened notifications. Method handles searching the notifications for EngageSDK parameter values like Current Campaign (configurable)
-* handleExternalURLOpened - utility method for external URL opened (email or website deeplink on the device for example) and handles searching the notifications for EngageSDK parameter values like Current Campaign (configurable)
-
 
 ## Local Event Storage
 
@@ -495,16 +511,6 @@ EnagageSDK interacts with a wide array of dates and expiration times. Those valu
 |3seconds|6/10/2014 00:00:03|
 
 
-## Installing SDK
-
-
-
-## Before You Release Your App
-
-### Important Note: Increase Token Limits for Production Apps
-
-There are currently limits placed on the number of Access Tokens that can be generated per hour per instance of Engage.  This number is easily increased, however, before deploying your app publicly, you must contact your Relationship Manager or Sales Rep regarding your intention to use this connector and that you will need to have your OAuth Access Token rate limit increased.
-
 ## Demo
 
 EngageSDK includes a sample project within the Example subdirectory. In order to build the project, you must install the dependencies via CocoaPods. To do so:
@@ -527,63 +533,10 @@ The first thing you will want to do is contact your Relationship Manager at Silv
 
 Next, you can follow the instructions in this readme file, or as an additional offer, we've put together a short 10 minute tutorial that will walk you through the download, installation, and configuration process to get your app up and running.  [Click here](https://kb.silverpop.com/kb/engage/Silverpop_Mobile_Connector_-_***NEW***/Video_Tutorial%3A_Up_and_Running_in_10_mins!) to watch that video tutorial within our KnowledgeBase.
 
-## Environment Setup
-The best way to begin is by using [CocoaPods](https://github.com/cocoapods/cocoapods). Follow the instructions offered at the CocoaPods website to install CocoaPods using Ruby Gems. 
-
-
-Using an new or existing iPhone project within Xcode, create a new C header file. We will use this file to define important constant configuration data for the EngageSDK library. Copy and paste the following lines between `#define` and `#endif`:
-
-```objective-c
-#define ENGAGE_BASE_URL (@"YOUR ENGAGE POD API URL")
-#define ENGAGE_CLIENT_ID (@"YOUR CLIENT ID GOES HERE")
-#define ENGAGE_SECRET (@"YOUR SECRET GOES HERE")
-#define ENGAGE_REFRESH_TOKEN (@"YOUR REFRESH TOKEN HERE")
-#define ENGAGE_LIST_ID (@"YOUR LIST ID")
-```
-
-Configure the defines with your values and save changes and close your project if it is open. 
-
-Open the terminal and open the project folder. 
-
-```
-touch Podfile
-```
-
-Edit this file to add the EngageSDK dependency
-
-```
-pod 'EngageSDK', '~> 0.2'
-```
-
-Save and close. 
-Install the Pod dependencies.
-
-```
-pod install
-```
 
 CocoaPods clones the EngageSDK files from github and creates an Xcode workspace configured with all dependencies (AFNetworking, AFOAuth2) and linking your existing project to a 'Pods' project that organizes and manages your dependencies and builds them as static libraries linked into your project.
 
 Open the Xcode workspace and import the public headers of the EngageSDK library by adding the following line to your code:
- 
-```
-#import "YOURSUPERSECRETCONFIGFILE.h"
-#import <EngageSDK/EngageSDK.h>
-```
-
-## Tips
-You may want to add the following lines to your .gitignore file
-
-```
-#CocoaPods
-*/Pods/*
-*/Podfile.lock
-*/YOURSUPERSECRETCONFIGFILE.h
-```
-
-Some developers may need to install Xcode Command Line Tools before installing CocoaPods
-
-If you are having trouble with ruby gems, try performing a gem system update: `gem update --system`
 
 ### Sessions
 
