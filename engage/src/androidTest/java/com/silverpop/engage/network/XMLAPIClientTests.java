@@ -15,19 +15,19 @@ import com.silverpop.engage.network.XMLAPIClient;
 public class XMLAPIClientTests
         extends AndroidTestCase {
 
-    private XMLAPIClient xmlapiClient;
-
-    public void setUp() {
-        xmlapiClient = XMLAPIClient.init(getContext(), TestingValues.clientId, TestingValues.clientSecret, TestingValues.refreshToken, TestingValues.host);
-    }
-
-    public void testValidXMLAPIClientCreation() throws InterruptedException {
-        assertTrue(xmlapiClient != null);
-    }
-
-//    public void testXMLAPIClientOAuth2ConnectionCredentials() {
-//        assertFalse(xmlapiClient.isAuthTokenExpired());
+//    private XMLAPIClient xmlapiClient;
+//
+//    public void setUp() {
+//        xmlapiClient = XMLAPIClient.init(getContext(), TestingValues.clientId, TestingValues.clientSecret, TestingValues.refreshToken, TestingValues.host);
 //    }
+//
+//    public void testValidXMLAPIClientCreation() throws InterruptedException {
+//        assertTrue(xmlapiClient != null);
+//    }
+//
+////    public void testXMLAPIClientOAuth2ConnectionCredentials() {
+////        assertFalse(xmlapiClient.isAuthTokenExpired());
+////    }
 
     public void testXMLAPIOAuth2TokenRefresh() {
         assertTrue(false);

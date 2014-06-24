@@ -6,6 +6,7 @@ import com.silverpop.engage.domain.XMLAPI;
 import com.silverpop.engage.domain.XMLAPIEnum;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -13,6 +14,59 @@ import java.util.Map;
  */
 public class XMLAPITest
         extends AndroidTestCase {
+
+    public void testExample1() {
+
+        String expected = "<Envelope><Body><SelectRecipientData><LIST_ID>45654</LIST_ID><EMAIL>someone@adomain.com</EMAIL><COLUMN><NAME>Customer Id</NAME><VALUE>123-45-6789</VALUE></COLUMN></SelectRecipientData></Body></Envelope>";
+
+        XMLAPI selectRecipientData = new XMLAPI("SelectRecipientData", null);
+
+        //Map of XMLAPI top level parameters.
+        Map<String, Object> xmlapiParams = new LinkedHashMap<String, Object>();
+        xmlapiParams.put("LIST_ID", "45654");
+        xmlapiParams.put("EMAIL", "someone@adomain.com");
+
+        selectRecipientData.addParams(xmlapiParams);
+
+        //Map of XMLAPI NAME/VALUE columns.
+        Map<String, Object> columns = new HashMap<String, Object>();
+        columns.put("Customer Id", "123-45-6789");
+
+        selectRecipientData.addColumns(columns);
+
+        assertTrue(expected.equals(selectRecipientData.envelope()));
+    }
+
+    public void testExample2() {
+        String expected = "<Envelope><Body><SelectRecipientData><LIST_ID>45654</LIST_ID><RECIPIENT_ID>702003</RECIPIENT_ID></SelectRecipientData></Body></Envelope>";
+
+        XMLAPI selectRecipientData = new XMLAPI("SelectRecipientData", null);
+
+        //Map of XMLAPI top level parameters.
+        Map<String, Object> xmlapiParams = new LinkedHashMap<String, Object>();
+        xmlapiParams.put("LIST_ID", "45654");
+        xmlapiParams.put("RECIPIENT_ID", "702003");
+
+        selectRecipientData.addParams(xmlapiParams);
+
+        assertTrue(expected.equals(selectRecipientData.envelope()));
+    }
+
+    public void testExample3() {
+        String expected = "<Envelope><Body><SelectRecipientData><LIST_ID>45654</LIST_ID><EMAIL>someone@adomain.com</EMAIL></SelectRecipientData></Body></Envelope>";
+
+        XMLAPI selectRecipientData = new XMLAPI("SelectRecipientData", null);
+
+        //Map of XMLAPI top level parameters.
+        Map<String, Object> xmlapiParams = new LinkedHashMap<String, Object>();
+        xmlapiParams.put("LIST_ID", "45654");
+        xmlapiParams.put("EMAIL", "someone@adomain.com");
+
+        selectRecipientData.addParams(xmlapiParams);
+
+        assertTrue(expected.equals(selectRecipientData.envelope()));
+    }
+
 
     public void testXMLAPICreation() {
         String resourceName = "AddRecipient";

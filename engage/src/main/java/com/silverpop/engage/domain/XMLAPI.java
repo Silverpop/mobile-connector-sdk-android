@@ -1,8 +1,8 @@
 package com.silverpop.engage.domain;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -15,13 +15,13 @@ public class XMLAPI {
 
     public XMLAPI(String resourceName) {
         this.setNamedResource(resourceName);
-        this.setBodyElements(new HashMap<String, Object>());
+        this.setBodyElements(new LinkedHashMap<String, Object>());
     }
 
     public XMLAPI(String resourceName, Map<String, Object> bodyElements) {
         this.setNamedResource(resourceName);
         if (bodyElements == null) {
-            bodyElements = new HashMap<String, Object>();
+            bodyElements = new LinkedHashMap<String, Object>();
         }
         this.setBodyElements(bodyElements);
     }
@@ -85,11 +85,11 @@ public class XMLAPI {
     public static XMLAPI selectRecipientData(String emailAddress, String listId) {
         XMLAPI api = new XMLAPI("SelectRecipientData");
 
-        Map<String, Object> rd = new HashMap<String, Object>();
+        Map<String, Object> rd = new LinkedHashMap<String, Object>();
         rd.put(XMLAPIEnum.LIST_ID.toString(), listId);
         rd.put(XMLAPIEnum.EMAIL.toString(), emailAddress);
 
-        Map<String, Object> in = new HashMap<String, Object>();
+        Map<String, Object> in = new LinkedHashMap<String, Object>();
         in.put(XMLAPIEnum.EMAIL.toString(), emailAddress);
         rd.put(XMLAPIEnum.COLUMNS.toString(), in);
 
@@ -100,10 +100,10 @@ public class XMLAPI {
     public static XMLAPI addRecipient(String emailAddress, String listId) {
         XMLAPI api = new XMLAPI("AddRecipient");
 
-        Map<String, Object> obs = new HashMap<String, Object>();
+        Map<String, Object> obs = new LinkedHashMap<String, Object>();
         obs.put(XMLAPIEnum.LIST_ID.toString(), listId);
 
-        Map<String, Object> emailCol = new HashMap<String, Object>();
+        Map<String, Object> emailCol = new LinkedHashMap<String, Object>();
         emailCol.put(XMLAPIEnum.EMAIL.toString(), emailAddress);
 
         obs.put(XMLAPIEnum.SYNC_FIELDS.toString(), emailCol);
@@ -117,7 +117,7 @@ public class XMLAPI {
     public static XMLAPI updateRecipient(String recipientId, String listId) {
         XMLAPI api = new XMLAPI("UpdateRecipient");
 
-        Map<String, Object> obs = new HashMap<String, Object>();
+        Map<String, Object> obs = new LinkedHashMap<String, Object>();
         obs.put(XMLAPIEnum.LIST_ID.toString(), listId);
         obs.put(XMLAPIEnum.RECIPIENT_ID.toString(), recipientId);
 
@@ -128,7 +128,7 @@ public class XMLAPI {
     public static XMLAPI addRecipientAnonymousToList(String listId) {
         XMLAPI api = new XMLAPI("AddRecipient");
 
-        Map<String, Object> obs = new HashMap<String, Object>();
+        Map<String, Object> obs = new LinkedHashMap<String, Object>();
         obs.put(XMLAPIEnum.LIST_ID.toString(), listId);
 
         api.setBodyElements(obs);

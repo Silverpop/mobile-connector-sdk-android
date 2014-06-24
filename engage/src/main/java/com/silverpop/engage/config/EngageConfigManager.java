@@ -74,7 +74,6 @@ public class EngageConfigManager {
 
                             //Merges in the user values now.
                             String[] userNames = jsonObjectNames(userDefined);
-                            Log.d(TAG, userNames.toString());
 
                             for (String key : userNames) {
                                 merged.put(key, userDefined.get(key));

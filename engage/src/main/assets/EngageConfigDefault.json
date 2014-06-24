@@ -3,10 +3,10 @@
 		"expireLocalEventsAfterNumDays": 30
 	},
 	"General" : {
-		"ubfEventCacheSize": 1,
+		"ubfEventCacheSize": 3,
 		"defaultCurrentCampaignExpiration": "1 day",
-		"deepLinkScheme": "MakeAndBuild",
-		"engageListId": "23949"
+		"deepLinkScheme": "",
+		"engageListId": ""
 	},
 	"ParamFieldNames" : {
 		"paramCampaignValidFor" : "CampaignValidFor",
