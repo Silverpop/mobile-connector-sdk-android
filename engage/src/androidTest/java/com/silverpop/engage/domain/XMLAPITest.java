@@ -2,9 +2,6 @@ package com.silverpop.engage.domain;
 
 import android.test.AndroidTestCase;
 
-import com.silverpop.engage.domain.XMLAPI;
-import com.silverpop.engage.domain.XMLAPIEnum;
-
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;

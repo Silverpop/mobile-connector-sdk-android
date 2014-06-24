@@ -2,8 +2,6 @@ package com.silverpop.engage.config;
 
 import android.test.AndroidTestCase;
 
-import com.silverpop.engage.config.EngageConfigManager;
-
 /**
  * Created by jeremydyer on 6/12/14.
  */

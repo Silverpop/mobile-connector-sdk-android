@@ -2,8 +2,6 @@ package com.silverpop.engage.config;
 
 import android.test.AndroidTestCase;
 
-import com.silverpop.engage.config.EngageConfig;
-
 import java.util.Calendar;
 import java.util.Date;
 
@@ -12,10 +10,6 @@ import java.util.Date;
  */
 public class EngageConfigTest
     extends AndroidTestCase {
-
-    public void testexpireLocalEventsAfterNumDays() {
-
-    }
 
     public void testDeviceName() {
         String deviceName = EngageConfig.deviceName();
@@ -69,24 +63,4 @@ public class EngageConfigTest
         EngageConfig.storeCurrentCampaignWithExpirationTimestamp(getContext(), currentCampaign, currentDate.getTime());
         assertEquals(currentCampaign, EngageConfig.currentCampaign(getContext()));
     }
-
-//    public void testDeviceVersion() {
-//        assertFalse(true);
-//    }
-//
-//    public void testOsName() {
-//        assertFalse(true);
-//    }
-//
-//    public void testOsVersion() {
-//        assertFalse(true);
-//    }
-//
-//    public void testAppName() {
-//        assertFalse(true);
-//    }
-//
-//    public void testAppVersion() {
-//        assertFalse(true);
-//    }
 }

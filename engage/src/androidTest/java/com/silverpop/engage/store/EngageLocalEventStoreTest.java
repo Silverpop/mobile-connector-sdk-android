@@ -3,7 +3,6 @@ package com.silverpop.engage.store;
 import android.test.AndroidTestCase;
 
 import com.silverpop.engage.domain.EngageEvent;
-import com.silverpop.engage.store.EngageLocalEventStore;
 import com.silverpop.engage.domain.UBF;
 
 import java.util.Calendar;

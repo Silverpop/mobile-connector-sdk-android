@@ -37,6 +37,7 @@ android {
         versionName "1.0"
     }
 
+    //Uncomment the following lines if you wish to deploy EngageSDK to custom repository
 //    signingConfigs {
 //        debug {
 //            storeFile file("debug.keystore")
@@ -68,6 +69,7 @@ configurations {
     }
 }
 
+//Uncomment the following lines if you wish to sign, bundle, and deploy EngageSDK to your custom repository
 //Singing the library for release version.
 //signing {
 //    required {

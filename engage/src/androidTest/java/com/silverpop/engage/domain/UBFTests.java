@@ -3,8 +3,6 @@ package com.silverpop.engage.domain;
 import android.app.Notification;
 import android.test.AndroidTestCase;
 
-import com.silverpop.engage.domain.UBF;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;

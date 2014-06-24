@@ -2,8 +2,6 @@ package com.silverpop.engage.util;
 
 import android.test.AndroidTestCase;
 
-import com.silverpop.engage.util.EngageExpirationParser;
-
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;

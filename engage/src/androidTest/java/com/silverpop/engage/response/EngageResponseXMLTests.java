@@ -3,7 +3,6 @@ package com.silverpop.engage.response;
 import android.test.AndroidTestCase;
 
 import com.silverpop.engage.exception.XMLResponseParseException;
-import com.silverpop.engage.response.EngageResponseXML;
 
 /**
  * Created by jeremydyer on 5/19/14.
