@@ -1,6 +1,7 @@
 package com.silverpop.engage.config;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -23,6 +24,8 @@ public class EngageConfig {
     public static final String ANONYMOUS_ID = "ANONYMOUS_ID";
     public static final String CURRENT_CAMPAIGN = "CURRENT_CAMPAIGN";
     public static final String CURRENT_CAMPAIGN_EXPIRATION_TIMESTAMP = "CURRENT_CAMPAIGN_EXPIRATION_TIMESTAMP";
+
+    public static final String PRIMARY_USER_ID_SET_EVENT = "com.silverpop.engage.PRIMARY_USER_ID_SET_EVENT";
 
     private static Location currentLocationCache;
     private static Date currentLocationCacheBirthday;
@@ -98,6 +101,8 @@ public class EngageConfig {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(PRIMARY_USER_ID, primaryUserId);
         editor.commit();
+
+        context.sendBroadcast(new Intent(PRIMARY_USER_ID_SET_EVENT));
     }
 
     public static String anonymousUserId(Context context) {

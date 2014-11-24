@@ -3,7 +3,7 @@ package com.silverpop.engage.demo.engagetest;
 import android.util.Log;
 
 import com.silverpop.engage.EngageApplication;
-import com.urbanairship.AirshipConfigOptions;
+import com.silverpop.engage.config.EngageConfig;
 import com.urbanairship.UAirship;
 import com.urbanairship.push.PushManager;
 
@@ -21,6 +21,7 @@ public class Application extends EngageApplication {
 
         super.onCreate();
 
+        EngageConfig.storePrimaryUserId(getApplicationContext(), "secret@test.com");
     }
 
 }

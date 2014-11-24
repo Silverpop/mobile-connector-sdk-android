@@ -1,8 +1,7 @@
 package com.silverpop.engage;
 
 import android.app.Application;
-import android.content.Context;
-import android.content.SharedPreferences;
+import android.content.*;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
@@ -42,8 +41,8 @@ public class EngageApplication
     private static String refreshToken = null;
     private static String host = null;
 
-    private final String APP_INSTALLED = "APP_INSTALLED";
-    private final String SESSION = "SESSION";
+    private static final String APP_INSTALLED = "APP_INSTALLED";
+    private static final String SESSION = "SESSION";
 
     private Date sessionExpires = null;
     private Date sessionBegan = null;
@@ -107,8 +106,6 @@ public class EngageApplication
         UBFManager.initialize(getApplicationContext(), clientId, clientSecret, refreshToken, host);
 
 
-        final UBFManager ubfManager = UBFManager.get();
-
         //Registers a default deep linking handler for parsing URL parameters
         EngageDeepLinkManager.registerHandler(EngageDeepLinkManager.DEFAULT_HANDLER_NAME, new Handler() {
             @Override
@@ -122,11 +119,12 @@ public class EngageApplication
                 getSharedPreferences(EngageConfig.ENGAGE_CONFIG_PREF_ID, Context.MODE_PRIVATE);
 
         //Check if this is the first time the app has been ran or not
-        if (sharedPreferences.getString(APP_INSTALLED, null) == null) {
+        final boolean firstInstall = sharedPreferences.getString(APP_INSTALLED, null) == null;
+        if (firstInstall) {
             Log.d(TAG, "EngageSDK - Application has been installed/ran for the first time");
             sharedPreferences.edit().putString(APP_INSTALLED, "YES").commit();
-            UBF appInstalled = UBF.installed(getApplicationContext(), null);
-            ubfManager.postEvent(appInstalled);
+
+            waitForPrimaryUserIdThenCreateInstalledEvent();
 
             //Create the Last known user location database columns
             Map<String, Object> bodyElements = new HashMap<String, Object>();
@@ -147,10 +145,10 @@ public class EngageApplication
         }
 
         //Examine the session and determine if events should be posted.
-        handleSessionApplicationLaunch();
+        handleSessionApplicationLaunch(firstInstall);
     }
 
-    private void handleSessionApplicationLaunch() {
+    private void handleSessionApplicationLaunch(final boolean firstInstall) {
         SharedPreferences sharedPreferences = getApplicationContext().
                 getSharedPreferences(EngageConfig.ENGAGE_CONFIG_PREF_ID, Context.MODE_PRIVATE);
         if (sessionBegan == null) {
@@ -159,8 +157,12 @@ public class EngageApplication
             if (sessionStartedTimestamp == -1) {
                 //Start a session.
                 sessionBegan = new Date();
-                UBFManager.get().postEvent(UBF.sessionStarted(getApplicationContext(),
-                        null, EngageConfig.currentCampaign(getApplicationContext())));
+                // app just installed so wait for login
+                if (firstInstall) {
+                    waitForPrimaryUserIdThenCreateSessionStartedEvent();
+                } else {
+                    createAndPostSessionStartedEvent();
+                }
                 sharedPreferences.edit().putLong(SESSION, sessionBegan.getTime()).commit();
             } else {
                 sessionBegan = new Date(sessionStartedTimestamp);
@@ -171,20 +173,76 @@ public class EngageApplication
             sessionExpires = parser.expirationDate();
 
             if (isSessionExpired()) {
-                UBFManager.get().postEvent(UBF.sessionEnded(getApplicationContext(), null));
+                createAndPostSessionEndedEvent();
                 sharedPreferences.edit().putLong(SESSION, -1).commit();
-                UBFManager.get().postEvent(UBF.sessionStarted(getApplicationContext(),
-                        null, EngageConfig.currentCampaign(getApplicationContext())));
+                createAndPostSessionStartedEvent();
             }
 
         } else {
             //Compare the current time to the session began time.
             if (isSessionExpired()) {
-                UBFManager.get().postEvent(UBF.sessionEnded(getApplicationContext(), null));
+                createAndPostSessionEndedEvent();
                 sharedPreferences.edit().putLong(SESSION, -1).commit();
-                UBFManager.get().postEvent(UBF.sessionStarted(getApplicationContext(),
-                        null, EngageConfig.currentCampaign(getApplicationContext())));
+                createAndPostSessionStartedEvent();
             }
+        }
+    }
+
+    private void createAndPostSessionEndedEvent() {
+        UBFManager.get().postEvent(UBF.sessionEnded(getApplicationContext(), null));
+    }
+
+    private void createAndPostSessionStartedEvent() {
+        UBFManager.get().postEvent(UBF.sessionStarted(getApplicationContext(),
+                null, EngageConfig.currentCampaign(getApplicationContext())));
+    }
+
+
+    private void waitForPrimaryUserIdThenCreateInstalledEvent() {
+        Log.i(TAG, "Registering primary user id listener for installed event");
+        final String primaryUserId = EngageConfig.primaryUserId(getApplicationContext());
+        if (primaryUserId != null && !primaryUserId.isEmpty()) {
+            createAndPostInstalledEvent();
+        } else {
+            this.registerReceiver(
+                    new BroadcastReceiver() {
+                        @Override
+                        public void onReceive(Context context, Intent intent) {
+                            createAndPostInstalledEvent();
+
+                            // remove listener
+                            EngageApplication.this.unregisterReceiver(this);
+                            Log.i(TAG, "Removed primary user id listener for installed event");
+                        }
+                    },
+                    new IntentFilter(EngageConfig.PRIMARY_USER_ID_SET_EVENT));
+        }
+    }
+
+    private void createAndPostInstalledEvent() {
+        UBF appInstalled = UBF.installed(getApplicationContext(), null);
+        UBFManager.get().postEvent(appInstalled);
+    }
+
+    private void waitForPrimaryUserIdThenCreateSessionStartedEvent() {
+        Log.i(TAG, "Registering primary user id listener for session started event");
+
+        final String primaryUserId = EngageConfig.primaryUserId(getApplicationContext());
+        if (primaryUserId != null && !primaryUserId.isEmpty()) {
+            createAndPostSessionStartedEvent();
+        } else {
+            this.registerReceiver(
+                    new BroadcastReceiver() {
+                        @Override
+                        public void onReceive(Context context, Intent intent) {
+                            createAndPostSessionStartedEvent();
+
+                            // remove listener
+                            EngageApplication.this.unregisterReceiver(this);
+                            Log.i(TAG, "Removed primary user id listener for session started event");
+                        }
+                    },
+                    new IntentFilter(EngageConfig.PRIMARY_USER_ID_SET_EVENT));
         }
     }
 
@@ -201,7 +259,7 @@ public class EngageApplication
         super.onTerminate();
 
         if (isSessionExpired()) {
-            UBFManager.get().postEvent(UBF.sessionEnded(getApplicationContext(), null));
+            createAndPostSessionEndedEvent();
         }
     }
 }
