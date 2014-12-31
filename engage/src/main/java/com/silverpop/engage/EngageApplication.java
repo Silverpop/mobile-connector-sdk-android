@@ -11,8 +11,7 @@ import android.util.Log;
 import com.silverpop.engage.config.EngageConfig;
 import com.silverpop.engage.config.EngageConfigManager;
 import com.silverpop.engage.deeplinking.EngageDeepLinkManager;
-import com.silverpop.engage.domain.UBF;
-import com.silverpop.engage.domain.XMLAPI;
+import com.silverpop.engage.domain.*;
 import com.silverpop.engage.location.manager.EngageLocationManager;
 import com.silverpop.engage.location.manager.plugin.EngageLocationManagerDefault;
 import com.silverpop.engage.util.EngageExpirationParser;
@@ -56,9 +55,9 @@ public class EngageApplication
         Resources r = getResources();
 
         try {
-            ApplicationInfo ai = getPackageManager().getApplicationInfo(
+            ApplicationInfo appInfo = getPackageManager().getApplicationInfo(
                     getApplicationContext().getPackageName(), PackageManager.GET_META_DATA);
-            Bundle bundle = ai.metaData;
+            Bundle bundle = appInfo.metaData;
             clientId = bundle.getString(CLIENT_ID_META);
             clientSecret = bundle.getString(CLIENT_SECRET_META);
             refreshToken = bundle.getString(REFRESH_TOKEN_META);
@@ -68,9 +67,64 @@ public class EngageApplication
                     "Did you provide your engage credentials in your manifest?");
         }
 
-        EngageConfigManager cm = EngageConfigManager.get(getApplicationContext());
+        configureLocationServicesIfNeeded();
 
-        if (cm.locationServicesEnabled()) {
+        //Initializes the UBFManager and XMLAPIManager instances.
+        XMLAPIManager.initialize(getApplicationContext(), clientId, clientSecret, refreshToken, host);
+        UBFManager.initialize(getApplicationContext(), clientId, clientSecret, refreshToken, host);
+
+
+        //Registers a default deep linking handler for parsing URL parameters
+        EngageDeepLinkManager.registerHandler(EngageDeepLinkManager.DEFAULT_HANDLER_NAME, new Handler() {
+            @Override
+            public Map<String, String> execute(Map<String, String> paramsMap) {
+                UBFManager.get().handleExternalURLOpenedEvents(getApplicationContext(), paramsMap);
+                return paramsMap;
+            }
+        });
+
+        SharedPreferences sharedPreferences = getApplicationContext().
+                getSharedPreferences(EngageConfig.ENGAGE_CONFIG_PREF_ID, Context.MODE_PRIVATE);
+
+        //Check if this is the first time the app has been ran or not
+        final boolean firstInstall = sharedPreferences.getString(APP_INSTALLED, null) == null;
+        if (firstInstall) {
+
+            Log.d(TAG, "EngageSDK - Application has been installed/ran for the first time");
+            sharedPreferences.edit().putString(APP_INSTALLED, "YES").commit();
+
+            waitForPrimaryUserIdThenCreateInstalledEvent();
+
+            configureXmlApiDatabaseTables();
+        }
+
+        //Examine the session and determine if events should be posted.
+        handleSessionApplicationLaunch(firstInstall);
+    }
+
+    private void configureXmlApiDatabaseTables() {
+        //Create the Last known user location database columns
+        Map<String, Object> bodyElements = new HashMap<String, Object>();
+        bodyElements.put(XMLAPIElement.LIST_ID.toString(), EngageConfigManager.get(getApplicationContext()).engageListId());
+        bodyElements.put(XMLAPIElement.COLUMN_NAME.toString(), EngageConfigManager.get(getApplicationContext()).lastKnownLocationColumn());
+        bodyElements.put(XMLAPIElement.COLUMN_TYPE.toString(), XMLAPIColumnType.TEXT_COLUMN.value());
+        bodyElements.put(XMLAPIElement.DEFAULT.toString(), "");
+        XMLAPI createLastKnownLocationColumns = new XMLAPI(XMLAPIOperation.ADD_LIST_COLUMN, bodyElements);
+        XMLAPIManager.get().postXMLAPI(createLastKnownLocationColumns, null, null);
+
+        bodyElements = new HashMap<String, Object>();
+        bodyElements.put(XMLAPIElement.LIST_ID.toString(), EngageConfigManager.get(getApplicationContext()).engageListId());
+        bodyElements.put(XMLAPIElement.COLUMN_NAME.toString(), EngageConfigManager.get(getApplicationContext()).lastKnownLocationTimestampColumn());
+        bodyElements.put(XMLAPIElement.COLUMN_TYPE.toString(), XMLAPIColumnType.DATE_COLUMN.value());
+        bodyElements.put(XMLAPIElement.DEFAULT.toString(), "");
+        createLastKnownLocationColumns = new XMLAPI(XMLAPIOperation.ADD_LIST_COLUMN, bodyElements);
+        XMLAPIManager.get().postXMLAPI(createLastKnownLocationColumns, null, null);
+    }
+
+    private void configureLocationServicesIfNeeded() {
+        EngageConfigManager configManager = EngageConfigManager.get(getApplicationContext());
+
+        if (configManager.locationServicesEnabled()) {
             String pluggableLocationClassname = EngageConfigManager.get(getApplicationContext()).pluggableLocationManagerClassName();
             if (pluggableLocationClassname != null) {
                 try {
@@ -100,52 +154,6 @@ public class EngageApplication
         } else {
             Log.d(TAG, "Location services are disabled");
         }
-
-        //Initializes the UBFManager and XMLAPIManager instances.
-        XMLAPIManager.initialize(getApplicationContext(), clientId, clientSecret, refreshToken, host);
-        UBFManager.initialize(getApplicationContext(), clientId, clientSecret, refreshToken, host);
-
-
-        //Registers a default deep linking handler for parsing URL parameters
-        EngageDeepLinkManager.registerHandler(EngageDeepLinkManager.DEFAULT_HANDLER_NAME, new Handler() {
-            @Override
-            public Map<String, String> execute(Map<String, String> paramsMap) {
-                UBFManager.get().handleExternalURLOpenedEvents(getApplicationContext(), paramsMap);
-                return paramsMap;
-            }
-        });
-
-        SharedPreferences sharedPreferences = getApplicationContext().
-                getSharedPreferences(EngageConfig.ENGAGE_CONFIG_PREF_ID, Context.MODE_PRIVATE);
-
-        //Check if this is the first time the app has been ran or not
-        final boolean firstInstall = sharedPreferences.getString(APP_INSTALLED, null) == null;
-        if (firstInstall) {
-            Log.d(TAG, "EngageSDK - Application has been installed/ran for the first time");
-            sharedPreferences.edit().putString(APP_INSTALLED, "YES").commit();
-
-            waitForPrimaryUserIdThenCreateInstalledEvent();
-
-            //Create the Last known user location database columns
-            Map<String, Object> bodyElements = new HashMap<String, Object>();
-            bodyElements.put("LIST_ID", EngageConfigManager.get(getApplicationContext()).engageListId());
-            bodyElements.put("COLUMN_NAME", EngageConfigManager.get(getApplicationContext()).lastKnownLocationColumn());
-            bodyElements.put("COLUMN_TYPE", 0);
-            bodyElements.put("DEFAULT", "");
-            XMLAPI createLastKnownLocationColumns = new XMLAPI("AddListColumn", bodyElements);
-            XMLAPIManager.get().postXMLAPI(createLastKnownLocationColumns, null, null);
-
-            bodyElements = new HashMap<String, Object>();
-            bodyElements.put("LIST_ID", EngageConfigManager.get(getApplicationContext()).engageListId());
-            bodyElements.put("COLUMN_NAME", EngageConfigManager.get(getApplicationContext()).lastKnownLocationTimestampColumn());
-            bodyElements.put("COLUMN_TYPE", 3);
-            bodyElements.put("DEFAULT", "");
-            createLastKnownLocationColumns = new XMLAPI("AddListColumn", bodyElements);
-            XMLAPIManager.get().postXMLAPI(createLastKnownLocationColumns, null, null);
-        }
-
-        //Examine the session and determine if events should be posted.
-        handleSessionApplicationLaunch(firstInstall);
     }
 
     private void handleSessionApplicationLaunch(final boolean firstInstall) {

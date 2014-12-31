@@ -3,18 +3,21 @@ package com.silverpop.engage.domain;
 /**
  * Created by jeremydyer on 5/19/14.
  */
-public enum XMLAPIEnum {
+public enum XMLAPIElement {
     SYNC_FIELDS ("SYNC_FIELDS"),
     COLUMNS ("COLUMNS"),
     LIST_ID ("LIST_ID"),
     CONTACTS_LIST ("CONTACT_LISTS"),
     EMAIL ("EMAIL"),
     UPDATE_IF_FOUND ("UPDATE_IF_FOUND"),
-    RECIPIENT_ID ("RECIPIENT_ID");
+    RECIPIENT_ID ("RECIPIENT_ID"),
+    COLUMN_NAME("COLUMN_NAME"),
+    COLUMN_TYPE("COLUMN_TYPE"),
+    DEFAULT("DEFAULT");
 
     private final String name;
 
-    private XMLAPIEnum(String n) {
+    private XMLAPIElement(String n) {
         name = n;
     }
 

@@ -67,6 +67,7 @@ public class XMLAPIClient
     private String getXMLAPIURL() {
         try {
             if (EngageConfigManager.get(mAppContext).secureConnection()) {
+                //[Lindsay Thurmond:12/30/14] TODO: externalize XMLAPI resource string
                 return new URI("https", getHost(), "/XMLAPI", null).toString();
             } else {
                 return new URI("http", getHost(), "/XMLAPI", null).toString();
@@ -89,6 +90,8 @@ public class XMLAPIClient
                     return params;
                 }
 
+                //[Lindsay Thurmond:12/30/14] TODO: pull out logic to method in EngageClient
+                //[Lindsay Thurmond:12/30/14] TODO: so we don't have to duplicate here and in UBFClient
                 @Override
                 public Map<String, String> getHeaders() throws AuthFailureError {
                     Map<String,String> params = new HashMap<String, String>();

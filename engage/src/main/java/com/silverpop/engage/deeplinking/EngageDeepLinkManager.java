@@ -283,6 +283,7 @@ public class EngageDeepLinkManager extends Activity
                 ex.printStackTrace();
             }
         }
+        //[Lindsay Thurmond:12/29/14] TODO: clean up logging
         catch (JSONException e)
         {
             e.printStackTrace();

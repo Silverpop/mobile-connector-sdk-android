@@ -82,6 +82,7 @@ public class UBFClient
     private String getUBFURL() {
         try {
             if (EngageConfigManager.get(mAppContext).secureConnection()) {
+                //[Lindsay Thurmond:12/30/14] TODO: clean up hardcoded resource, move to external config
                 return new URI("https", getHost(), "/rest/events/submission", null).toString();
             } else {
                 return new URI("http", getHost(), "/rest/events/submission", null).toString();
@@ -92,6 +93,7 @@ public class UBFClient
         return "";
     }
 
+    //[Lindsay Thurmond:12/30/14] TODO: success and error handlers not hooked up
     public void postUBFEngageEvents(Response.Listener<JSONObject> success,
                                     Response.ErrorListener error) {
 
@@ -154,6 +156,8 @@ public class UBFClient
                                 }
                         )
                         {
+                            //[Lindsay Thurmond:12/30/14] TODO: pull out logic to method in EngageClient
+                            //[Lindsay Thurmond:12/30/14] TODO: so we don't have to duplicate here and in XMLAPIClient
                             @Override
                             public Map<String, String> getHeaders() throws AuthFailureError {
                                 Map<String, String> params = new HashMap<String, String>();

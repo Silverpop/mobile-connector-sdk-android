@@ -40,6 +40,7 @@ public abstract class EngageClient
     private static RequestQueue authenticationQueue;
 
     //Authentication
+    //[Lindsay Thurmond:12/30/14] TODO: move endpoint to external config
     private final String oauthEndpoint = "/oauth/token";
     private Credential credential = null;
 

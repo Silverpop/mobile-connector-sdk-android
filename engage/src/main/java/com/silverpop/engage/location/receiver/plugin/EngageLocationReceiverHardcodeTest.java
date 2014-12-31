@@ -13,6 +13,7 @@ import com.silverpop.engage.XMLAPIManager;
 import com.silverpop.engage.config.EngageConfig;
 import com.silverpop.engage.config.EngageConfigManager;
 import com.silverpop.engage.domain.XMLAPI;
+import com.silverpop.engage.domain.XMLAPIOperation;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -74,7 +75,7 @@ public class EngageLocationReceiverHardcodeTest
         Map<String, Object> bodyElements = new HashMap<String, Object>();
         bodyElements.put("LIST_ID", EngageConfigManager.get(context).engageListId());
         bodyElements.put("CREATED_FROM", "1");
-        XMLAPI updateLastKnownLocation = new XMLAPI("UpdateRecipient", bodyElements);
+        XMLAPI updateLastKnownLocation = new XMLAPI(XMLAPIOperation.UPDATE_RECIPIENT, bodyElements);
         Map<String, Object> syncFields = new HashMap<String, Object>();
         syncFields.put("EMAIL", EngageConfig.primaryUserId(context));
         updateLastKnownLocation.addSyncFields(syncFields);

@@ -57,6 +57,7 @@ public class XMLAPIManager {
      * @param failureTask
      *      AsyncTask to execute on failure
      */
+    //[Lindsay Thurmond:12/29/14] TODO: failure task isn't actually hooked up
     public void postXMLAPI(XMLAPI api,
                            AsyncTask<EngageResponseXML, Void, Object> successTask,
                            AsyncTask<VolleyError, Void, Object> failureTask) {
@@ -85,6 +86,7 @@ public class XMLAPIManager {
     }
 
 
+    //[Lindsay Thurmond:12/29/14] TODO: identical to createAnonymousUserList() - fix or delete me
     public void updateAnonymousUserToKnownUser(String listId, AsyncTask<EngageResponseXML, Void, Object> successTask,
                                                AsyncTask<VolleyError, Void, Object> failureTask) {
         XMLAPI createAnonymous = XMLAPI.addRecipientAnonymousToList(listId);

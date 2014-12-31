@@ -101,6 +101,7 @@ public class UBFManager {
         return postEvent(event, null, null);
     }
 
+    //[Lindsay Thurmond:12/29/14] TODO: success failure listeners not hooked up
     public long postEvent(UBF event, Response.Listener<JSONObject> successListener, Response.ErrorListener errorListener) {
         //Save the UBF event in the SQLite DB.
         EngageEvent engageEvent = localEventStore.saveUBFEvent(event.toEngageEvent());
