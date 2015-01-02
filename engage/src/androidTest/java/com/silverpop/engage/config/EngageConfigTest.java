@@ -25,8 +25,8 @@ public class EngageConfigTest
 
     public void testPrimaryUserId() {
         String primUser = "EngageTestPrimaryUserId@gmail.com";
-        EngageConfig.storePrimaryUserId(getContext(), primUser);
-        assertEquals(primUser, EngageConfig.primaryUserId(getContext()));
+        EngageConfig.storeMobileUserId(getContext(), primUser);
+        assertEquals(primUser, EngageConfig.mobileUserId(getContext()));
     }
 
     public void testAnonymousUserId() {

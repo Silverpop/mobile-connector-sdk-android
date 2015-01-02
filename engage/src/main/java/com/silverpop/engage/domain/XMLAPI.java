@@ -1,7 +1,6 @@
 package com.silverpop.engage.domain;
 
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -71,7 +70,7 @@ public class XMLAPI {
     }
 
     public void addContactLists(String[] contactLists) {
-        String[] existingContacts = (String[]) this.getBodyElements().get(XMLAPIElement.CONTACTS_LIST.toString());
+        String[] existingContacts = (String[]) this.getBodyElements().get(XMLAPIElement.CONTACT_LISTS.toString());
         String[] merged = null;
         if (existingContacts != null) {
             merged = Arrays.copyOf(existingContacts, existingContacts.length + contactLists.length);
@@ -81,7 +80,7 @@ public class XMLAPI {
         }
 
         Map<String, Object> existing = this.getBodyElements();
-        existing.put(XMLAPIElement.CONTACTS_LIST.toString(), merged);
+        existing.put(XMLAPIElement.CONTACT_LISTS.toString(), merged);
         setBodyElements(existing);
     }
 
@@ -104,20 +103,42 @@ public class XMLAPI {
         return api;
     }
 
-    public static XMLAPI addRecipient(String emailAddress, String listId) {
+    public static XMLAPI addRecipientWithEmail(String emailAddress, String listId) {
         XMLAPI api = new XMLAPI(XMLAPIOperation.ADD_RECIPIENT);
 
         Map<String, Object> obs = new LinkedHashMap<String, Object>();
         obs.put(XMLAPIElement.LIST_ID.toString(), listId);
 
-        Map<String, Object> emailCol = new LinkedHashMap<String, Object>();
-        emailCol.put(XMLAPIElement.EMAIL.toString(), emailAddress);
+        Map<String, Object> emailCol = nameValueMap(XMLAPIElement.EMAIL.toString(), emailAddress);
 
         obs.put(XMLAPIElement.SYNC_FIELDS.toString(), emailCol);
         obs.put(XMLAPIElement.COLUMNS.toString(), emailCol);
 
         api.setBodyElements(obs);
         return api;
+    }
+
+
+    public static XMLAPI addRecipient(String mobileUserIdColumnName, String mobileUserId, String listId, boolean updateIfFound) {
+        XMLAPI api = new XMLAPI(XMLAPIOperation.ADD_RECIPIENT);
+
+        Map<String, Object> obs = new LinkedHashMap<String, Object>();
+        obs.put(XMLAPIElement.LIST_ID.toString(), listId);
+        obs.put(XMLAPIElement.UPDATE_IF_FOUND.toString(), updateIfFound);
+
+        Map<String, Object> mobileUserIdDetails = nameValueMap(mobileUserIdColumnName, mobileUserId);
+
+        obs.put(XMLAPIElement.SYNC_FIELDS.toString(), mobileUserIdDetails);
+        obs.put(XMLAPIElement.COLUMNS.toString(), mobileUserIdDetails);
+
+        api.setBodyElements(obs);
+        return api;
+    }
+
+    private static Map<String, Object> nameValueMap(String name, Object value) {
+        Map<String, Object> nameValueMap = new LinkedHashMap<String, Object>();
+        nameValueMap.put(name, value);
+        return nameValueMap;
     }
 
 
@@ -146,19 +167,17 @@ public class XMLAPI {
         StringBuilder contactLists = new StringBuilder();
 
         Map<String, Object> bodyElements = this.getBodyElements();
-        Iterator<String> itr = bodyElements.keySet().iterator();
-        while (itr.hasNext()) {
-            String key = itr.next();
+        for (String key : bodyElements.keySet()) {
             Object element = bodyElements.get(key);
 
             if (key.equals(XMLAPIElement.COLUMNS.toString())) {
                 Map<String, Object> innerDict = (Map<String, Object>) element;
-                body = this.buildInnerElementFromMapWithName(innerDict, body, "COLUMN");
+                body = this.buildInnerElementFromMapWithName(innerDict, body, XMLAPIElement.COLUMN.toString());
             } else if (key.equals(XMLAPIElement.SYNC_FIELDS.toString())) {
                 Map<String, Object> innerDict = (Map<String, Object>) element;
-                syncFields = this.buildInnerElementFromMapWithName(innerDict, syncFields, "SYNC_FIELD");
-            } else if (key.equals(XMLAPIElement.CONTACTS_LIST.toString())) {
-                String[] contacts = (String[])element;
+                syncFields = this.buildInnerElementFromMapWithName(innerDict, syncFields, XMLAPIElement.SYNC_FIELD.toString());
+            } else if (key.equals(XMLAPIElement.CONTACT_LISTS.toString())) {
+                String[] contacts = (String[]) element;
                 contactLists = buildContactsList(contactLists, contacts);
             } else {
                 body.append("<");
@@ -172,15 +191,15 @@ public class XMLAPI {
         }
 
         if (contactLists.length() > 0) {
-            body.append("<CONTACT_LISTS>");
+            body.append("<" + XMLAPIElement.CONTACT_LISTS.toString() + ">");
             body.append(contactLists.toString());
-            body.append("</CONTACT_LISTS>");
+            body.append("</" + XMLAPIElement.CONTACT_LISTS.toString() + ">");
         }
 
         if (syncFields.length() > 0) {
-            body.append("<SYNC_FIELDS>");
+            body.append("<" + XMLAPIElement.SYNC_FIELDS.toString() + ">");
             body.append(syncFields.toString());
-            body.append("</SYNC_FIELDS>");
+            body.append("</" + XMLAPIElement.SYNC_FIELDS.toString() + ">");
         }
 
         envelope.append("<Envelope><Body><");
@@ -213,9 +232,7 @@ public class XMLAPI {
      *      StringBuilder containing nested structure.
      */
     private StringBuilder buildInnerElementFromMapWithName(Map<String, Object> innerMap, StringBuilder body, String elementName) {
-        Iterator<String> innerItr = innerMap.keySet().iterator();
-        while (innerItr.hasNext()) {
-            String innerKey = innerItr.next();
+        for (String innerKey : innerMap.keySet()) {
             body.append("<");
             body.append(elementName);
             body.append(">");

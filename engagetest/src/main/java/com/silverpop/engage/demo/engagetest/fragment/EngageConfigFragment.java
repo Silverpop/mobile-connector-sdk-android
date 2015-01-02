@@ -53,7 +53,7 @@ public class EngageConfigFragment
         m.put("Device Name", EngageConfig.deviceName());
         m.put("Device Version", EngageConfig.deviceVersion());
         m.put("Anonymous User ID", EngageConfig.anonymousUserId(context));
-        m.put("Primary User ID", EngageConfig.primaryUserId(context));
+        m.put("Primary User ID", EngageConfig.mobileUserId(context));
         m.put("OS Name", EngageConfig.osName(context));
         m.put("OS Version", EngageConfig.osVersion(context));
         m.put("App Name", EngageConfig.appName(context));

@@ -107,7 +107,7 @@ public class XMLAPIFragment
         mUpgradeAnonymousUserButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                XMLAPI addRecipient = XMLAPI.addRecipient(EngageConfig.primaryUserId(getActivity()), EngageConfigManager.get(getActivity()).engageListId());
+                XMLAPI addRecipient = XMLAPI.addRecipientWithEmail(EngageConfig.mobileUserId(getActivity()), EngageConfigManager.get(getActivity()).engageListId());
                 xmlapiManager.postXMLAPI(addRecipient, new AsyncTask<EngageResponseXML, Void, Object>() {
 
                     @Override

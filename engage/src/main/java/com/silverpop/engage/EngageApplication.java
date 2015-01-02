@@ -1,21 +1,23 @@
 package com.silverpop.engage;
 
 import android.app.Application;
-import android.content.*;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.util.Log;
-
 import com.silverpop.engage.config.EngageConfig;
 import com.silverpop.engage.config.EngageConfigManager;
 import com.silverpop.engage.deeplinking.EngageDeepLinkManager;
 import com.silverpop.engage.domain.*;
 import com.silverpop.engage.location.manager.EngageLocationManager;
 import com.silverpop.engage.location.manager.plugin.EngageLocationManagerDefault;
+import com.silverpop.engage.user.UserManager;
 import com.silverpop.engage.util.EngageExpirationParser;
-
 import org.mobiledeeplinking.android.Handler;
 
 import java.util.Date;
@@ -39,9 +41,6 @@ public class EngageApplication
     private static String clientSecret = null;
     private static String refreshToken = null;
     private static String host = null;
-
-    private static final String APP_INSTALLED = "APP_INSTALLED";
-    private static final String SESSION = "SESSION";
 
     private Date sessionExpires = null;
     private Date sessionBegan = null;
@@ -69,10 +68,9 @@ public class EngageApplication
 
         configureLocationServicesIfNeeded();
 
-        //Initializes the UBFManager and XMLAPIManager instances.
         XMLAPIManager.initialize(getApplicationContext(), clientId, clientSecret, refreshToken, host);
         UBFManager.initialize(getApplicationContext(), clientId, clientSecret, refreshToken, host);
-
+        UserManager.initialize(getApplicationContext());
 
         //Registers a default deep linking handler for parsing URL parameters
         EngageDeepLinkManager.registerHandler(EngageDeepLinkManager.DEFAULT_HANDLER_NAME, new Handler() {
@@ -83,15 +81,12 @@ public class EngageApplication
             }
         });
 
-        SharedPreferences sharedPreferences = getApplicationContext().
-                getSharedPreferences(EngageConfig.ENGAGE_CONFIG_PREF_ID, Context.MODE_PRIVATE);
-
         //Check if this is the first time the app has been ran or not
-        final boolean firstInstall = sharedPreferences.getString(APP_INSTALLED, null) == null;
+        final boolean firstInstall = !EngageConfig.appInstalled(getApplicationContext());
         if (firstInstall) {
 
             Log.d(TAG, "EngageSDK - Application has been installed/ran for the first time");
-            sharedPreferences.edit().putString(APP_INSTALLED, "YES").commit();
+            EngageConfig.storeAppInstalled(getApplicationContext(), "YES");
 
             waitForPrimaryUserIdThenCreateInstalledEvent();
 
@@ -157,11 +152,10 @@ public class EngageApplication
     }
 
     private void handleSessionApplicationLaunch(final boolean firstInstall) {
-        SharedPreferences sharedPreferences = getApplicationContext().
-                getSharedPreferences(EngageConfig.ENGAGE_CONFIG_PREF_ID, Context.MODE_PRIVATE);
+
         if (sessionBegan == null) {
             //Checks to see if a previous session has been persisted.
-            long sessionStartedTimestamp = sharedPreferences.getLong(SESSION, -1);
+            long sessionStartedTimestamp = EngageConfig.session(getApplicationContext());
             if (sessionStartedTimestamp == -1) {
                 //Start a session.
                 sessionBegan = new Date();
@@ -171,18 +165,19 @@ public class EngageApplication
                 } else {
                     createAndPostSessionStartedEvent();
                 }
-                sharedPreferences.edit().putLong(SESSION, sessionBegan.getTime()).commit();
+                EngageConfig.storeSession(getApplicationContext(), sessionBegan.getTime());
+
             } else {
                 sessionBegan = new Date(sessionStartedTimestamp);
             }
 
-            EngageConfigManager cm = EngageConfigManager.get(getApplicationContext());
-            EngageExpirationParser parser = new EngageExpirationParser(cm.sessionLifecycleExpiration(), sessionBegan);
+            EngageConfigManager configManager = EngageConfigManager.get(getApplicationContext());
+            EngageExpirationParser parser = new EngageExpirationParser(configManager.sessionLifecycleExpiration(), sessionBegan);
             sessionExpires = parser.expirationDate();
 
             if (isSessionExpired()) {
                 createAndPostSessionEndedEvent();
-                sharedPreferences.edit().putLong(SESSION, -1).commit();
+                EngageConfig.clearSession(getApplicationContext());
                 createAndPostSessionStartedEvent();
             }
 
@@ -190,7 +185,7 @@ public class EngageApplication
             //Compare the current time to the session began time.
             if (isSessionExpired()) {
                 createAndPostSessionEndedEvent();
-                sharedPreferences.edit().putLong(SESSION, -1).commit();
+                EngageConfig.clearSession(getApplicationContext());
                 createAndPostSessionStartedEvent();
             }
         }
@@ -208,7 +203,7 @@ public class EngageApplication
 
     private void waitForPrimaryUserIdThenCreateInstalledEvent() {
         Log.i(TAG, "Registering primary user id listener for installed event");
-        final String primaryUserId = EngageConfig.primaryUserId(getApplicationContext());
+        final String primaryUserId = EngageConfig.mobileUserId(getApplicationContext());
         if (primaryUserId != null && !primaryUserId.isEmpty()) {
             createAndPostInstalledEvent();
         } else {
@@ -235,7 +230,7 @@ public class EngageApplication
     private void waitForPrimaryUserIdThenCreateSessionStartedEvent() {
         Log.i(TAG, "Registering primary user id listener for session started event");
 
-        final String primaryUserId = EngageConfig.primaryUserId(getApplicationContext());
+        final String primaryUserId = EngageConfig.mobileUserId(getApplicationContext());
         if (primaryUserId != null && !primaryUserId.isEmpty()) {
             createAndPostSessionStartedEvent();
         } else {
@@ -255,11 +250,8 @@ public class EngageApplication
     }
 
     private boolean isSessionExpired() {
-        if (sessionExpires.compareTo(new Date()) < 0) {
-            return true;
-        } else {
-            return false;
-        }
+        boolean sessionExpired = sessionExpires.compareTo(new Date()) < 0;
+        return sessionExpired;
     }
 
     @Override

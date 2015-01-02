@@ -5,9 +5,11 @@ package com.silverpop.engage.domain;
  */
 public enum XMLAPIElement {
     SYNC_FIELDS ("SYNC_FIELDS"),
+    SYNC_FIELD("SYNC_FIELD"),
     COLUMNS ("COLUMNS"),
+    COLUMN("COLUMN"),
     LIST_ID ("LIST_ID"),
-    CONTACTS_LIST ("CONTACT_LISTS"),
+    CONTACT_LISTS("CONTACT_LISTS"),
     EMAIL ("EMAIL"),
     UPDATE_IF_FOUND ("UPDATE_IF_FOUND"),
     RECIPIENT_ID ("RECIPIENT_ID"),

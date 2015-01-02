@@ -21,7 +21,7 @@ public class Application extends EngageApplication {
 
         super.onCreate();
 
-        EngageConfig.storePrimaryUserId(getApplicationContext(), "secret@test.com");
+        EngageConfig.storeMobileUserId(getApplicationContext(), "secret@test.com");
     }
 
 }

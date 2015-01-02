@@ -57,12 +57,11 @@ public class XMLAPIManager {
      * @param failureTask
      *      AsyncTask to execute on failure
      */
-    //[Lindsay Thurmond:12/29/14] TODO: failure task isn't actually hooked up
     public void postXMLAPI(XMLAPI api,
                            AsyncTask<EngageResponseXML, Void, Object> successTask,
                            AsyncTask<VolleyError, Void, Object> failureTask) {
         Response.Listener<String> successListener = successListenerForXMLAPI(api, successTask);
-        Response.ErrorListener errorListener = null;
+        Response.ErrorListener errorListener = errorListenerForXMLAPI(api, failureTask);
         xmlapiClient.postResource(api, successListener, errorListener);
     }
 

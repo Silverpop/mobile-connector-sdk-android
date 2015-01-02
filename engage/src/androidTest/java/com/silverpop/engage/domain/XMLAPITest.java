@@ -250,7 +250,7 @@ public class XMLAPITest
         String email = "somebody@domain.com";
         String listId = "85628";
 
-        XMLAPI api = XMLAPI.addRecipient(email, listId);
+        XMLAPI api = XMLAPI.addRecipientWithEmail(email, listId);
 
         //Adds the extra Params
         Map<String, Object> extraParams = new HashMap<String, Object>();

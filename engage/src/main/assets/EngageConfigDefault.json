@@ -54,5 +54,10 @@
 		    "com.silverpop.engage.augmentation.plugin.UBFAddressAugmentationPlugin",
 		    "com.silverpop.engage.augmentation.plugin.UBFLocationNameAugmentationPlugin"
 		]
-	}
+    },
+    "User": {
+        "enableAutoAnonymousTracking": true,
+        "mobileUserIdGeneratorClassName": "com.silverpop.engage.util.uuid.plugin.DefaultUUIDGenerator",
+        "mobileUserIdColumn" : "mobile_user_id"
+    }
 }

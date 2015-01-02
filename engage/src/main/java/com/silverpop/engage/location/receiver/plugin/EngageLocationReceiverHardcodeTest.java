@@ -77,7 +77,7 @@ public class EngageLocationReceiverHardcodeTest
         bodyElements.put("CREATED_FROM", "1");
         XMLAPI updateLastKnownLocation = new XMLAPI(XMLAPIOperation.UPDATE_RECIPIENT, bodyElements);
         Map<String, Object> syncFields = new HashMap<String, Object>();
-        syncFields.put("EMAIL", EngageConfig.primaryUserId(context));
+        syncFields.put("EMAIL", EngageConfig.mobileUserId(context));
         updateLastKnownLocation.addSyncFields(syncFields);
         Map<String, Object> cols = new HashMap<String, Object>();
         cols.put(lastKnownLocationColumn, sdf.format(new Date()));
