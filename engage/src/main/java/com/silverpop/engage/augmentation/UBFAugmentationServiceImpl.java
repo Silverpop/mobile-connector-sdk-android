@@ -43,7 +43,7 @@ public class UBFAugmentationServiceImpl
         mAppContext = context;
         engageLocalEventStore = EngageLocalEventStore.get(context);
         maxCacheSize = EngageConfigManager.get(context).ubfEventCacheSize();
-        ubfClient = UBFClient.get(context);
+        ubfClient = UBFClient.get();
 
         //Adds the Augmentation plugins
         String[] augmentationPlugins = EngageConfigManager.get(context).augmentationPluginClasses();
@@ -64,11 +64,8 @@ public class UBFAugmentationServiceImpl
      * {@inheritDoc}
      */
     public int augmentorsCount() {
-        if (plugins != null) {
-            return plugins.size();
-        } else {
-            return 0;
-        }
+        int size = plugins != null ? plugins.size() : 0;
+        return size;
     }
 
     /**

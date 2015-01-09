@@ -16,7 +16,10 @@ import com.silverpop.engage.deeplinking.EngageDeepLinkManager;
 import com.silverpop.engage.domain.*;
 import com.silverpop.engage.location.manager.EngageLocationManager;
 import com.silverpop.engage.location.manager.plugin.EngageLocationManagerDefault;
-import com.silverpop.engage.user.UserManager;
+import com.silverpop.engage.network.AuthenticationHandler;
+import com.silverpop.engage.network.EngageConnectionManager;
+import com.silverpop.engage.network.UBFClient;
+import com.silverpop.engage.network.XMLAPIClient;
 import com.silverpop.engage.util.EngageExpirationParser;
 import org.mobiledeeplinking.android.Handler;
 
@@ -68,9 +71,25 @@ public class EngageApplication
 
         configureLocationServicesIfNeeded();
 
-        XMLAPIManager.initialize(getApplicationContext(), clientId, clientSecret, refreshToken, host);
-        UBFManager.initialize(getApplicationContext(), clientId, clientSecret, refreshToken, host);
-        UserManager.initialize(getApplicationContext());
+        //[Lindsay Thurmond:1/7/15] TODO: think through start up ordering
+        EngageConnectionManager.init(getApplicationContext(), clientId, clientSecret, refreshToken, host,
+                new AuthenticationHandler() {
+                    @Override
+                    public void onSuccess(String response) {
+                        // post any existing events
+                        XMLAPIClient.get().postCachedEvents(); //[Lindsay Thurmond:1/6/15] TODO: add event listener instead?
+                        UBFClient.get().postUBFEngageEvents(); //[Lindsay Thurmond:1/6/15] TODO: add event listener instead?
+                    }
+
+                    @Override
+                    public void onFailure(Exception exception) {
+                    }
+                });
+
+        // init singletons
+        XMLAPIManager.init(getApplicationContext());
+        UBFManager.init(getApplicationContext());
+        MobileConnectorManager.init(getApplicationContext());
 
         //Registers a default deep linking handler for parsing URL parameters
         EngageDeepLinkManager.registerHandler(EngageDeepLinkManager.DEFAULT_HANDLER_NAME, new Handler() {
@@ -99,20 +118,33 @@ public class EngageApplication
 
     private void configureXmlApiDatabaseTables() {
         //Create the Last known user location database columns
-        Map<String, Object> bodyElements = new HashMap<String, Object>();
-        bodyElements.put(XMLAPIElement.LIST_ID.toString(), EngageConfigManager.get(getApplicationContext()).engageListId());
-        bodyElements.put(XMLAPIElement.COLUMN_NAME.toString(), EngageConfigManager.get(getApplicationContext()).lastKnownLocationColumn());
-        bodyElements.put(XMLAPIElement.COLUMN_TYPE.toString(), XMLAPIColumnType.TEXT_COLUMN.value());
-        bodyElements.put(XMLAPIElement.DEFAULT.toString(), "");
-        XMLAPI createLastKnownLocationColumns = new XMLAPI(XMLAPIOperation.ADD_LIST_COLUMN, bodyElements);
-        XMLAPIManager.get().postXMLAPI(createLastKnownLocationColumns, null, null);
+        createDatabaseColumn(EngageConfigManager.get(getApplicationContext()).lastKnownLocationColumn(),
+                XMLAPIColumnType.TEXT_COLUMN, "");
 
-        bodyElements = new HashMap<String, Object>();
-        bodyElements.put(XMLAPIElement.LIST_ID.toString(), EngageConfigManager.get(getApplicationContext()).engageListId());
-        bodyElements.put(XMLAPIElement.COLUMN_NAME.toString(), EngageConfigManager.get(getApplicationContext()).lastKnownLocationTimestampColumn());
-        bodyElements.put(XMLAPIElement.COLUMN_TYPE.toString(), XMLAPIColumnType.DATE_COLUMN.value());
-        bodyElements.put(XMLAPIElement.DEFAULT.toString(), "");
-        createLastKnownLocationColumns = new XMLAPI(XMLAPIOperation.ADD_LIST_COLUMN, bodyElements);
+        createDatabaseColumn(EngageConfigManager.get(getApplicationContext()).lastKnownLocationTimestampColumn(),
+                XMLAPIColumnType.DATE_COLUMN, "");
+
+        configureAdditionalXmlApiDatabaseTables();
+    }
+
+    /**
+     * Optionally override this to do additional database configuration
+     */
+    protected void configureAdditionalXmlApiDatabaseTables() {
+    }
+
+    protected void createDatabaseColumn(String columnName, XMLAPIColumnType columnType, Object defaultValue) {
+        createDatabaseColumn(EngageConfigManager.get(getApplicationContext()).engageListId(), columnName, columnType, defaultValue);
+    }
+
+    protected void createDatabaseColumn(String listId, String columnName, XMLAPIColumnType columnType, Object defaultValue) {
+        Map<String, Object> bodyElements = new HashMap<String, Object>();
+        bodyElements.put(XMLAPIElement.LIST_ID.toString(), listId);
+        bodyElements.put(XMLAPIElement.COLUMN_NAME.toString(), columnName);
+        bodyElements.put(XMLAPIElement.COLUMN_TYPE.toString(), columnType.value());
+        bodyElements.put(XMLAPIElement.DEFAULT.toString(), defaultValue);
+
+        XMLAPI createLastKnownLocationColumns = new XMLAPI(XMLAPIOperation.ADD_LIST_COLUMN, bodyElements);
         XMLAPIManager.get().postXMLAPI(createLastKnownLocationColumns, null, null);
     }
 

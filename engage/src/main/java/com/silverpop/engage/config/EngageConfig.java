@@ -22,12 +22,17 @@ public class EngageConfig {
     public enum SharedProperties {
         ENGAGE_CONFIG_PREF_ID("com.silverpop.engage.EngageSDKPrefs"),
         PRIMARY_USER_ID("PRIMARY_USER_ID"),
+        /**
+         * Only still supported for legacy for users who still manually configure their recipients.
+         * The new recipient setup now uses {@link #RECIPIENT_ID}
+         */
         ANONYMOUS_ID("ANONYMOUS_ID"),
-        // RECIPIENT_ID("RECIPIENT_ID"),
+        RECIPIENT_ID("RECIPIENT_ID"),
         CURRENT_CAMPAIGN("CURRENT_CAMPAIGN"),
         CURRENT_CAMPAIGN_EXPIRATION_TIMESTAMP("CURRENT_CAMPAIGN_EXPIRATION_TIMESTAMP"),
         APP_INSTALLED("APP_INSTALLED"),
-        SESSION("SESSION");
+        SESSION("SESSION"),
+        AUDIT_RECORD_TABLE_ID("AUDIT_RECORD_TABLE_ID");
 
         private final String key;
 
@@ -76,10 +81,10 @@ public class EngageConfig {
         return getConfigSharedPrefs(context).getString(SharedProperties.PRIMARY_USER_ID.toString(), "");
     }
 
-//    public static String recipientId(Context context) {
-//        String recipientId = getConfigSharedPrefs(context).getString(SharedProperties.RECIPIENT_ID.toString(), "");
-//        return recipientId;
-//    }
+    public static String recipientId(Context context) {
+        String recipientId = getConfigSharedPrefs(context).getString(SharedProperties.RECIPIENT_ID.toString(), "");
+        return recipientId;
+    }
 
     public static String osName(Context context) {
         return Build.VERSION.CODENAME;
@@ -116,29 +121,32 @@ public class EngageConfig {
     }
 
     public static void storeMobileUserId(Context context, String primaryUserId) {
-        SharedPreferences sharedPreferences = getConfigSharedPrefs(context);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString(SharedProperties.PRIMARY_USER_ID.toString(), primaryUserId);
-        editor.commit();
+        getConfigSharedPrefs(context).edit().putString(SharedProperties.PRIMARY_USER_ID.toString(), primaryUserId).commit();
 
         context.sendBroadcast(new Intent(PRIMARY_USER_ID_SET_EVENT));
     }
 
-//    public static void storeRecipientId(Context context, String recipientId) {
-//        SharedPreferences sharedPreferences = getConfigSharedPrefs(context);
-//        SharedPreferences.Editor editor = sharedPreferences.edit();
-//        editor.putString(SharedProperties.RECIPIENT_ID.toString(), recipientId).commit();
-//
-//        context.sendBroadcast(new Intent(PRIMARY_USER_ID_SET_EVENT));
-//    }
+    public static void storeRecipientId(Context context, String recipientId) {
+        SharedPreferences sharedPreferences = getConfigSharedPrefs(context);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(SharedProperties.RECIPIENT_ID.toString(), recipientId).commit();
+    }
+
+    public static void storeAuditRecordTableId(Context context, String tableId) {
+        getConfigSharedPrefs(context).edit().putString(SharedProperties.AUDIT_RECORD_TABLE_ID.toString(), tableId).commit();
+    }
+
+    public static String auditRecordTableId(Context context) {
+        String auditRecordTableId = getConfigSharedPrefs(context).getString(SharedProperties.AUDIT_RECORD_TABLE_ID.toString(), "");
+        return auditRecordTableId;
+    }
 
     public static String anonymousUserId(Context context) {
         return getConfigSharedPrefs(context).getString(SharedProperties.ANONYMOUS_ID.toString(), "");
     }
 
     public static void storeAnonymousUserId(Context context, String anonymousUserId) {
-        SharedPreferences sharedPreferences = getConfigSharedPrefs(context);
-        sharedPreferences.edit().putString(SharedProperties.ANONYMOUS_ID.toString(), anonymousUserId).commit();
+        getConfigSharedPrefs(context).edit().putString(SharedProperties.ANONYMOUS_ID.toString(), anonymousUserId).commit();
     }
 
     public static String currentCampaign(Context context) {

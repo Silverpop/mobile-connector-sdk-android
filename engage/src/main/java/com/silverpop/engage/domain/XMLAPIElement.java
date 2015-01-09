@@ -15,7 +15,10 @@ public enum XMLAPIElement {
     RECIPIENT_ID ("RECIPIENT_ID"),
     COLUMN_NAME("COLUMN_NAME"),
     COLUMN_TYPE("COLUMN_TYPE"),
-    DEFAULT("DEFAULT");
+    DEFAULT("DEFAULT"),
+    ROWS("ROWS"),
+    ROW("ROW"),
+    TABLE_ID("TABLE_ID");
 
     private final String name;
 

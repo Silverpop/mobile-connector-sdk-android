@@ -28,7 +28,8 @@ public class EngageConfigManager {
         GENERAL("General"),
         NETWORKING("Networking"),
         PLUGGABLE_SERVICES("PluggableServices"),
-        USER("User");
+        RECIPIENT("Recipient"),
+        AUDIT_RECORD("AuditRecord");
 
         final String value;
 
@@ -452,7 +453,7 @@ public class EngageConfigManager {
         String propName = "enableAutoAnonymousTracking";
         boolean enableAutoAnonymousTracking = false;
         try {
-            enableAutoAnonymousTracking = getUserConfigJson().getBoolean(propName);
+            enableAutoAnonymousTracking = getRecipientConfigJson().getBoolean(propName);
         } catch (JSONException ex) {
             Log.w(TAG, "Unable to find " + propName + " configuration.  Defaulting to false.");
         }
@@ -463,7 +464,7 @@ public class EngageConfigManager {
         String propName = "mobileUserIdGeneratorClassName";
         String mobileUserIdGeneratorClassName = null;
         try {
-            mobileUserIdGeneratorClassName = getUserConfigJson().getString(propName);
+            mobileUserIdGeneratorClassName = getRecipientConfigJson().getString(propName);
         } catch (JSONException ex) {
             Log.w(TAG, "Unable to find " + propName + " configuration.  ");
         }
@@ -474,11 +475,64 @@ public class EngageConfigManager {
         String propName = "mobileUserIdColumn";
         String mobileUserIdColumnName = null;
         try {
-            mobileUserIdColumnName = getUserConfigJson().getString(propName);
+            mobileUserIdColumnName = getRecipientConfigJson().getString(propName);
         } catch (JSONException ex) {
             Log.w(TAG, "Unable to find " + propName + " configuration.  ");
         }
         return mobileUserIdColumnName;
+    }
+
+    public String mergedRecipientIdColumnName() {
+        String propName = "mergedRecipientIdColumn";
+        String mergedRecipientIdColumnName = null;
+        try {
+            mergedRecipientIdColumnName = getRecipientConfigJson().getString(propName);
+        } catch (JSONException ex) {
+            Log.w(TAG, "Unable to find " + propName + " configuration.  ");
+        }
+        return mergedRecipientIdColumnName;
+    }
+
+    public String mergedDateColumnName() {
+        String propName = "mergedDateColumn";
+        String mergedDateColumnName = null;
+        try {
+            mergedDateColumnName = getRecipientConfigJson().getString(propName);
+        } catch (JSONException ex) {
+            Log.w(TAG, "Unable to find " + propName + " configuration.  ");
+        }
+        return mergedDateColumnName;
+    }
+
+    public String auditRecordOldRecipientIdColumnName() {
+        String propName = "oldRecipientIdColumnName";
+        String oldRecipientIdColumnName = null;
+        try {
+            oldRecipientIdColumnName = getAuditRecordConfigJson().getString(propName);
+        } catch (JSONException ex) {
+            Log.w(TAG, "Unable to find " + propName + " configuration.  ");
+        }
+        return oldRecipientIdColumnName;
+    }
+    public String auditRecordNewRecipientIdColumnName() {
+        String propName = "newRecipientIdColumnName";
+        String newRecipientIdColumnName = null;
+        try {
+            newRecipientIdColumnName = getAuditRecordConfigJson().getString(propName);
+        } catch (JSONException ex) {
+            Log.w(TAG, "Unable to find " + propName + " configuration.  ");
+        }
+        return newRecipientIdColumnName;
+    }
+    public String auditRecordCreateDateColumnName() {
+        String propName = "createDateColumnName";
+        String createDateColumnName = null;
+        try {
+            createDateColumnName = getAuditRecordConfigJson().getString(propName);
+        } catch (JSONException ex) {
+            Log.w(TAG, "Unable to find " + propName + " configuration.  ");
+        }
+        return createDateColumnName;
     }
 
     private JSONObject getGeneralConfigJson() throws JSONException {
@@ -509,8 +563,11 @@ public class EngageConfigManager {
         return getConfigJson(Config.PLUGGABLE_SERVICES);
     }
 
-    private JSONObject getUserConfigJson() throws JSONException {
-        return getConfigJson(Config.USER);
+    private JSONObject getRecipientConfigJson() throws JSONException {
+        return getConfigJson(Config.RECIPIENT);
+    }
+    private JSONObject getAuditRecordConfigJson() throws JSONException {
+        return getConfigJson(Config.AUDIT_RECORD);
     }
 
     private JSONObject getConfigJson(Config config) throws JSONException {

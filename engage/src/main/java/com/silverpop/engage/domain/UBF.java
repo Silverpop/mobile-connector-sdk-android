@@ -66,6 +66,7 @@ public class UBF
         core.put("Device Id", EngageConfig.deviceId(context));
         core.put("Primary User Id", EngageConfig.mobileUserId(context));
         core.put("Anonymous Id", EngageConfig.anonymousUserId(context));
+        core.put("Recipient Id", EngageConfig.recipientId(context));
 
         return core;
     }

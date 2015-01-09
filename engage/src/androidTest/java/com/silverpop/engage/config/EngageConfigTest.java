@@ -13,13 +13,13 @@ public class EngageConfigTest
 
     public void testDeviceName() {
         String deviceName = EngageConfig.deviceName();
-        assertTrue(deviceName != null);
+        assertNotNull(deviceName);
         assertTrue(deviceName.length() > 0);
     }
 
     public void testDeviceId() {
         String deviceId = EngageConfig.deviceId(getContext());
-        assertTrue(deviceId != null);
+        assertNotNull(deviceId);
         assertTrue(deviceId.length() > 0);
     }
 
