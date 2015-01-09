@@ -163,12 +163,12 @@ public class MobileConnectorManager extends BaseManager {
         }
     }
 
-    public void checkIdentity(final String idFieldName, final String idValue, final IdentityHandler identityHandler) {
+    public void checkIdentity(final Map<String, String> idFieldNamesToValues, final IdentityHandler identityHandler) {
 
         setupRecipient(new SetupRecipientHandler() {
             @Override
             public void onSuccess(String currentRecipientId) {
-                checkForExistingRecipientAndUpdateIfNeeded(idFieldName, idValue, currentRecipientId, identityHandler);
+                checkForExistingRecipientAndUpdateIfNeeded(idFieldNamesToValues, currentRecipientId, identityHandler);
             }
 
             @Override
@@ -181,14 +181,17 @@ public class MobileConnectorManager extends BaseManager {
         });
     }
 
-    //[Lindsay Thurmond:1/9/15] TODO: change to support multiple id columns
-    public void checkForExistingRecipientAndUpdateIfNeeded(final String idFieldName, final String idValue, final String currentRecipientId, final IdentityHandler identityHandler) {
+    public void checkForExistingRecipientAndUpdateIfNeeded(final Map<String, String> idFieldNamesToValues, final String currentRecipientId, final IdentityHandler identityHandler) {
 
         // look up recipient from silverpop
         final String listId = getEngageConfigManager().engageListId();
         final XMLAPI selectRecipientData = XMLAPI.selectRecipientData();
         selectRecipientData.addListIdParam(listId);
-        selectRecipientData.addColumn(idFieldName, idValue);
+        for (Map.Entry<String, String> fieldValueEntry : idFieldNamesToValues.entrySet()) {
+            String idFieldName = fieldValueEntry.getKey();
+            String idValue = fieldValueEntry.getValue();
+            selectRecipientData.addColumn(idFieldName, idValue);
+        }
 
         getXMLAPIManager().postXMLAPI(selectRecipientData, new XMLAPIResponseHandler() {
             @Override
@@ -203,7 +206,7 @@ public class MobileConnectorManager extends BaseManager {
                     // user not found or error with actual request?
                     if (existingRecipientResponse.getErrorCode() == ErrorCode.RECIPIENT_NOT_LIST_MEMBER) {
                         // recipient doesn't exist
-                        updateRecipientWithCustomId(currentRecipientId, listId, idFieldName, idValue, identityHandler);
+                        updateRecipientWithCustomId(currentRecipientId, listId, idFieldNamesToValues, identityHandler);
                     } else {
                         // an error happened with the request/response
                         //[Lindsay Thurmond:1/7/15] TODO: handle error
@@ -385,14 +388,16 @@ public class MobileConnectorManager extends BaseManager {
     /**
      * Scenario 1 - no existing recipient
      */
-    protected void updateRecipientWithCustomId(String recipientId, String listId, String idFieldName, String idValue, final IdentityHandler identityHandler) {
-        XMLAPI xmlapi = XMLAPI.updateRecipient(recipientId, listId);
-        xmlapi.addColumn(idFieldName, idValue);
-        //[Lindsay Thurmond:1/9/15] TODO: support multiple ids
-
+    protected void updateRecipientWithCustomId(String recipientId, String listId, Map<String, String> idFieldNamesToValues, final IdentityHandler identityHandler) {
+        XMLAPI updateCurrentRecipientXml = XMLAPI.updateRecipient(recipientId, listId);
+        for (Map.Entry<String, String> fieldValueEntry : idFieldNamesToValues.entrySet()) {
+            String idFieldName = fieldValueEntry.getKey();
+            String idValue = fieldValueEntry.getValue();
+            updateCurrentRecipientXml.addColumn(idFieldName, idValue);
+        }
         //[Lindsay Thurmond:1/7/15] TODO: are sync fields needed?
 
-        getXMLAPIManager().postXMLAPI(xmlapi, new UpdateRecipientResponseHandler() {
+        getXMLAPIManager().postXMLAPI(updateCurrentRecipientXml, new UpdateRecipientResponseHandler() {
             @Override
             public void onUpdateRecipientSuccess(UpdateRecipientResponse updateRecipientResponse) {
                 if (identityHandler != null) {
