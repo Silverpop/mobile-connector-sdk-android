@@ -167,8 +167,8 @@ public class MobileConnectorManager extends BaseManager {
 
         setupRecipient(new SetupRecipientHandler() {
             @Override
-            public void onSuccess(String recipientId) {
-                checkForExistingRecipientAndUpdateIfNeeded(idFieldName, idValue, recipientId, identityHandler);
+            public void onSuccess(String currentRecipientId) {
+                checkForExistingRecipientAndUpdateIfNeeded(idFieldName, idValue, currentRecipientId, identityHandler);
             }
 
             @Override
@@ -182,7 +182,7 @@ public class MobileConnectorManager extends BaseManager {
     }
 
     //[Lindsay Thurmond:1/9/15] TODO: change to support multiple id columns
-    public void checkForExistingRecipientAndUpdateIfNeeded(final String idFieldName, final String idValue, final String recipientId, final IdentityHandler identityHandler) {
+    public void checkForExistingRecipientAndUpdateIfNeeded(final String idFieldName, final String idValue, final String currentRecipientId, final IdentityHandler identityHandler) {
 
         // look up recipient from silverpop
         final String listId = getEngageConfigManager().engageListId();
@@ -203,7 +203,7 @@ public class MobileConnectorManager extends BaseManager {
                     // user not found or error with actual request?
                     if (existingRecipientResponse.getErrorCode() == ErrorCode.RECIPIENT_NOT_LIST_MEMBER) {
                         // recipient doesn't exist
-                        updateRecipientWithCustomId(recipientId, listId, idFieldName, idValue, identityHandler);
+                        updateRecipientWithCustomId(currentRecipientId, listId, idFieldName, idValue, identityHandler);
                     } else {
                         // an error happened with the request/response
                         //[Lindsay Thurmond:1/7/15] TODO: handle error
@@ -218,127 +218,44 @@ public class MobileConnectorManager extends BaseManager {
 
                     Map<String, String> existingRecipientDataColumns = existingRecipientResponse.getColumns();
                     final String mobileUserIdColumnName = getEngageConfigManager().mobileUserIdColumnName();
-                    String mobileUserId = existingRecipientDataColumns.get(mobileUserIdColumnName);
+                    final String existingMobileUserId = existingRecipientDataColumns.get(mobileUserIdColumnName);
 
                     // scenario 2 - existing recipient doesn't have a mobileUserId
-                    if (TextUtils.isEmpty(mobileUserId)) {
-                        //[Lindsay Thurmond:1/7/15] TODO: updateRecipient(mobileUserId = nil, recipientId = currentRecipientId, mergedRecipientId=existingRecipient.recipientId, mergeDate=now())
-
-                        // keep all data from existing recipient, just add the mobile user id to it
-                        final String mobileUserIdFromApp = EngageConfig.mobileUserId(getContext());
-                        if (TextUtils.isEmpty(mobileUserIdFromApp)) {
-                            final String error = "Cannot find mobileUserId to update the existing applicant with for recipientId = " + existingRecipientResponse.getRecipientId();
-                            Log.e(TAG, error);
-                            // time to bail, can't go any further
-                            if (identityHandler != null) {
-                                identityHandler.onFailure(new EngageConfigException(error));
-                            }
-                        } else {
-                            //[Lindsay Thurmond:1/8/15] TODO: do i need to send all the data columns or just the ones I want to update?
-                            existingRecipientDataColumns.put(mobileUserIdColumnName, mobileUserIdFromApp);
-
-                            // update existing recipient on server with new mobile user id
-                            final XMLAPI updateExistingRecipient = XMLAPI.updateRecipient(existingRecipientResponse.getRecipientId(), listId);
-                            updateExistingRecipient.addColumns((Map<String, Object>) (Object) existingRecipientDataColumns);
-                            getXMLAPIManager().postXMLAPI(updateExistingRecipient, new UpdateRecipientResponseHandler() {
-                                @Override
-                                public void onUpdateRecipientSuccess(UpdateRecipientResponse updateRecipientResponse) {
-
-                                    // clear mobile user id from recipient in app config, and set its merged_recipient_id_ and merged date
-
-                                    // for recipient currently in the app config
-                                    XMLAPI updateCurrentRecipient = XMLAPI.updateRecipient(
-                                            EngageConfig.recipientId(getContext()), getEngageConfigManager().engageListId());
-                                    updateCurrentRecipient.addParam(mobileUserIdColumnName, null);
-                                    //[Lindsay Thurmond:1/8/15] TODO: what should date format be?
-                                    updateCurrentRecipient.addParam(getEngageConfigManager().mergedDateColumnName(), new Date());
-                                    updateCurrentRecipient.addParam(getEngageConfigManager().mergedRecipientIdColumnName(), existingRecipientResponse.getRecipientId());
-
-                                    getXMLAPIManager().postXMLAPI(updateCurrentRecipient, new UpdateRecipientResponseHandler() {
-                                        @Override
-                                        public void onUpdateRecipientSuccess(UpdateRecipientResponse updateCurrentRecipientResponse) {
-                                            // start using existing recipient id instead
-                                            final String oldRecipientId = EngageConfig.recipientId(getContext());
-                                            final String newRecipientId = updateCurrentRecipientResponse.getRecipientId();
-                                            EngageConfig.storeRecipientId(getContext(), newRecipientId);
-                                            // both recipients have been updated, time to update audit table
-                                            final String auditRecordTableId = EngageConfig.auditRecordTableId(getContext());
-                                            if (TextUtils.isEmpty(auditRecordTableId)) {
-                                                if (identityHandler != null) {
-                                                    //[Lindsay Thurmond:1/9/15] TODO: should I do this check earlier?
-                                                    identityHandler.onFailure(new EngageConfigException("Cannot update audit record without audit table id"));
-                                                }
-                                            } else {
-                                                XMLAPI updateAuditRecordApi = XMLAPI.insertUpdateRelationalTable(auditRecordTableId);
-                                                RelationalTableRow newAuditRecordRow = new RelationalTableRow();
-                                                newAuditRecordRow.addColumn(getEngageConfigManager().auditRecordOldRecipientIdColumnName(), oldRecipientId);
-                                                newAuditRecordRow.addColumn(getEngageConfigManager().auditRecordNewRecipientIdColumnName(), newRecipientId);
-                                                //[Lindsay Thurmond:1/9/15] TODO: date format
-                                                newAuditRecordRow.addColumn(getEngageConfigManager().auditRecordCreateDateColumnName(), new Date());
-                                                updateAuditRecordApi.addRow(newAuditRecordRow);
-
-                                                getXMLAPIManager().postXMLAPI(updateAuditRecordApi, new XMLAPIResponseHandler() {
-                                                    @Override
-                                                    public void onSuccess(EngageResponseXML response) {
-
-                                                        if (response.isSuccess()) {
-                                                            // congratz, we're done!
-                                                            if (identityHandler != null) {
-                                                                identityHandler.onSuccess(EngageConfig.recipientId(getContext()), EngageConfig.mobileUserId(getContext()));
-                                                            }
-                                                        } else {
-                                                            if (identityHandler != null) {
-                                                                identityHandler.onFailure(new XMLAPIResponseException(response));
-                                                            }
-                                                        }
-                                                    }
-
-                                                    @Override
-                                                    public void onFailure(Exception exception) {
-                                                        if (identityHandler != null) {
-                                                            identityHandler.onFailure(exception);
-                                                        }
-                                                    }
-                                                });
-
-                                            }
-
-
-                                        }
-
-                                        @Override
-                                        public void onFailure(Exception exception) {
-                                            // failed to update current recipient, can't continue
-                                            if (identityHandler != null) {
-                                                identityHandler.onFailure(exception);
-                                            }
-                                        }
-                                    });
-
-                                }
-
-                                @Override
-                                public void onFailure(Exception exception) {
-                                    // first recipient update failed, can't go any further
-                                    if (identityHandler != null) {
-                                        identityHandler.onFailure(exception);
-                                    }
-                                }
-                            });
-
-                        }
+                    if (TextUtils.isEmpty(existingMobileUserId)) {
+                        handleExistingRecipientWithoutRecipientId(existingRecipientResponse, existingRecipientDataColumns, identityHandler, listId);
 
                     }
                     // scenario 3 - existing recipient has a mobileUserId
                     else {
-                        //[Lindsay Thurmond:1/9/15] TODO: implement me!
-                    }
+                        // mark current recipient as merged
+                        XMLAPI updateCurrentRecipientXml = XMLAPI.updateRecipient(currentRecipientId, listId);
+                        updateCurrentRecipientXml.addColumn(getEngageConfigManager().mergedRecipientIdColumnName(), existingRecipientResponse.getRecipientId());
+                        updateCurrentRecipientXml.addColumn(getEngageConfigManager().mergedDateColumnName(), new Date());
 
+                        getXMLAPIManager().postXMLAPI(updateCurrentRecipientXml, new UpdateRecipientResponseHandler() {
+                            @Override
+                            public void onUpdateRecipientSuccess(UpdateRecipientResponse updateCurrentRecipientResponse) {
+                                // start using existing recipient id instead
+                                final String oldRecipientId = EngageConfig.recipientId(getContext());
+                                final String newRecipientId = existingRecipientResponse.getRecipientId();
+                                EngageConfig.storeRecipientId(getContext(), newRecipientId);
+                                EngageConfig.storeMobileUserId(getContext(), existingMobileUserId);
+
+                                // current recipient has been updated and we are now using the existing recipient instead, time to update audit table
+                                updateAuditRecordWithMergeChanges(oldRecipientId, newRecipientId, identityHandler);
+                            }
+
+                            @Override
+                            public void onFailure(Exception exception) {
+                                if (identityHandler != null) {
+                                    identityHandler.onFailure(exception);
+                                }
+                            }
+                        });
+                    }
                 }
 
-
                 Log.d(TAG, response.getXml());
-
             }
 
             @Override
@@ -346,6 +263,123 @@ public class MobileConnectorManager extends BaseManager {
                 Log.d(TAG, exception.getMessage(), exception);
             }
         });
+    }
+
+    /**
+     * Scenario 2 - existing recipient doesn't have a mobileUserId
+     *
+     * @param existingRecipientResponse
+     * @param existingRecipientDataColumns
+     * @param identityHandler
+     * @param listId
+     */
+    protected void handleExistingRecipientWithoutRecipientId(final SelectRecipientResponse existingRecipientResponse,
+                                                             Map<String, String> existingRecipientDataColumns, final IdentityHandler identityHandler, String listId) {
+        //[Lindsay Thurmond:1/7/15] TODO: updateRecipient(mobileUserId = nil, recipientId = currentRecipientId, mergedRecipientId=existingRecipient.recipientId, mergeDate=now())
+
+        // keep all data from existing recipient, just add the mobile user id to it
+        final String mobileUserIdFromApp = EngageConfig.mobileUserId(getContext());
+        if (TextUtils.isEmpty(mobileUserIdFromApp)) {
+            final String error = "Cannot find mobileUserId to update the existing applicant with for recipientId = " + existingRecipientResponse.getRecipientId();
+            Log.e(TAG, error);
+            // time to bail, can't go any further
+            if (identityHandler != null) {
+                identityHandler.onFailure(new EngageConfigException(error));
+            }
+        } else {
+            //[Lindsay Thurmond:1/8/15] TODO: do i need to send all the data columns or just the ones I want to update?
+            existingRecipientDataColumns.put(getEngageConfigManager().mobileUserIdColumnName(), mobileUserIdFromApp);
+
+            // update existing recipient on server with new mobile user id
+            final XMLAPI updateExistingRecipient = XMLAPI.updateRecipient(existingRecipientResponse.getRecipientId(), listId);
+            updateExistingRecipient.addColumns((Map<String, Object>) (Object) existingRecipientDataColumns);
+            getXMLAPIManager().postXMLAPI(updateExistingRecipient, new UpdateRecipientResponseHandler() {
+                @Override
+                public void onUpdateRecipientSuccess(UpdateRecipientResponse updateRecipientResponse) {
+
+                    // clear mobile user id from recipient in app config, and set its merged_recipient_id_ and merged date
+
+                    // for recipient currently in the app config
+                    XMLAPI updateCurrentRecipient = XMLAPI.updateRecipient(
+                            EngageConfig.recipientId(getContext()), getEngageConfigManager().engageListId());
+                    updateCurrentRecipient.addParam(getEngageConfigManager().mobileUserIdColumnName(), null);
+                    //[Lindsay Thurmond:1/8/15] TODO: what should date format be?
+                    updateCurrentRecipient.addParam(getEngageConfigManager().mergedDateColumnName(), new Date());
+                    updateCurrentRecipient.addParam(getEngageConfigManager().mergedRecipientIdColumnName(), existingRecipientResponse.getRecipientId());
+
+                    getXMLAPIManager().postXMLAPI(updateCurrentRecipient, new UpdateRecipientResponseHandler() {
+                        @Override
+                        public void onUpdateRecipientSuccess(UpdateRecipientResponse updateCurrentRecipientResponse) {
+                            // start using existing recipient id instead
+                            final String oldRecipientId = EngageConfig.recipientId(getContext());
+                            final String newRecipientId = updateCurrentRecipientResponse.getRecipientId();
+                            EngageConfig.storeRecipientId(getContext(), newRecipientId);
+                            // both recipients have been updated, time to update audit table
+                            updateAuditRecordWithMergeChanges(oldRecipientId, newRecipientId, identityHandler);
+                        }
+
+                        @Override
+                        public void onFailure(Exception exception) {
+                            // failed to update current recipient, can't continue
+                            if (identityHandler != null) {
+                                identityHandler.onFailure(exception);
+                            }
+                        }
+                    });
+                }
+
+                @Override
+                public void onFailure(Exception exception) {
+                    // first recipient update failed, can't go any further
+                    if (identityHandler != null) {
+                        identityHandler.onFailure(exception);
+                    }
+                }
+            });
+
+        }
+    }
+
+    protected void updateAuditRecordWithMergeChanges(String oldRecipientId, String newRecipientId, final IdentityHandler identityHandler) {
+        final String auditRecordTableId = EngageConfig.auditRecordTableId(getContext());
+        if (TextUtils.isEmpty(auditRecordTableId)) {
+            if (identityHandler != null) {
+                //[Lindsay Thurmond:1/9/15] TODO: should I do this check earlier?
+                identityHandler.onFailure(new EngageConfigException("Cannot update audit record without audit table id"));
+            }
+        } else {
+            XMLAPI updateAuditRecordApi = XMLAPI.insertUpdateRelationalTable(auditRecordTableId);
+            RelationalTableRow newAuditRecordRow = new RelationalTableRow();
+            newAuditRecordRow.addColumn(getEngageConfigManager().auditRecordOldRecipientIdColumnName(), oldRecipientId);
+            newAuditRecordRow.addColumn(getEngageConfigManager().auditRecordNewRecipientIdColumnName(), newRecipientId);
+            //[Lindsay Thurmond:1/9/15] TODO: date format
+            newAuditRecordRow.addColumn(getEngageConfigManager().auditRecordCreateDateColumnName(), new Date());
+            updateAuditRecordApi.addRow(newAuditRecordRow);
+
+            getXMLAPIManager().postXMLAPI(updateAuditRecordApi, new XMLAPIResponseHandler() {
+                @Override
+                public void onSuccess(EngageResponseXML response) {
+
+                    if (response.isSuccess()) {
+                        // congratz, we're done!
+                        if (identityHandler != null) {
+                            identityHandler.onSuccess(EngageConfig.recipientId(getContext()), EngageConfig.mobileUserId(getContext()));
+                        }
+                    } else {
+                        if (identityHandler != null) {
+                            identityHandler.onFailure(new XMLAPIResponseException(response));
+                        }
+                    }
+                }
+
+                @Override
+                public void onFailure(Exception exception) {
+                    if (identityHandler != null) {
+                        identityHandler.onFailure(exception);
+                    }
+                }
+            });
+        }
     }
 
     /**
