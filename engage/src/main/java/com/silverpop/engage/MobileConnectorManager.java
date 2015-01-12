@@ -92,48 +92,11 @@ public class MobileConnectorManager extends BaseManager {
 
             // create a brand new recipient
             if (!TextUtils.isEmpty(existingRecipientId)) {
-                String newMobileUserId = existingMobileUserId;
-                // generate mobile user id if needed
-                if (TextUtils.isEmpty(newMobileUserId)) {
-                    newMobileUserId = AutoMobileConnectorManager.get().generateMobileUserId();
-                    EngageConfig.storeMobileUserId(getContext(), newMobileUserId);
-                    Log.d(TAG, "MobileUserId was auto generated");
-                }
-
-
-                XMLAPI addRecipient = XMLAPI.addRecipient(mobileUserIdColumn, newMobileUserId, listId, true);
-                getXMLAPIManager().postXMLAPI(addRecipient, new AddRecipientResponseHandler() {
-                    @Override
-                    public void onAddRecipientSuccess(AddRecipientResponse addRecipientResponse) {
-                        String recipientId = addRecipientResponse.getRecipientId();
-
-                        if (TextUtils.isEmpty(recipientId)) {
-                            if (setupRecipientHandler != null) {
-                                setupRecipientHandler.onFailure(
-                                        new XMLAPIResponseException("Empty recipientId returned from Silverpop", addRecipientResponse.getResponseXml()));
-                            }
-                        } else {
-                            EngageConfig.storeRecipientId(getContext(), recipientId);
-                            // EngageConfig.storeAnonymousUserId(context, recipientId);
-
-                            if (setupRecipientHandler != null) {
-                                setupRecipientHandler.onSuccess(recipientId);
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(Exception exception) {
-                        if (setupRecipientHandler != null) {
-                            setupRecipientHandler.onFailure(new XMLAPIResponseException(exception));
-                        }
-                    }
-                });
+                createNewRecipient(setupRecipientHandler, existingMobileUserId, listId, mobileUserIdColumn);
 
             }
             // we have existing existingRecipientId but not mobileUserId - this really shouldn't happen, but just in case
             else if (TextUtils.isEmpty(existingMobileUserId)) {
-                //[Lindsay Thurmond:1/8/15] TODO: verify we should actually do this instead of just throwing an exception!
                 // update the existing recipient with a mobile user id
                 XMLAPI updateRecipientXml = XMLAPI.updateRecipient(existingRecipientId, listId);
                 updateRecipientXml.addColumn(mobileUserIdColumn, existingMobileUserId);
@@ -163,6 +126,47 @@ public class MobileConnectorManager extends BaseManager {
         }
     }
 
+    protected void createNewRecipient(final SetupRecipientHandler setupRecipientHandler, String existingMobileUserId, String listId, String mobileUserIdColumn) {
+        String newMobileUserId = existingMobileUserId;
+        // generate mobile user id if needed
+        if (TextUtils.isEmpty(newMobileUserId)) {
+            newMobileUserId = AutoMobileConnectorManager.get().generateMobileUserId();
+            EngageConfig.storeMobileUserId(getContext(), newMobileUserId);
+            Log.d(TAG, "MobileUserId was auto generated");
+        }
+
+
+        XMLAPI addRecipient = XMLAPI.addRecipient(mobileUserIdColumn, newMobileUserId, listId, true);
+        getXMLAPIManager().postXMLAPI(addRecipient, new AddRecipientResponseHandler() {
+            @Override
+            public void onAddRecipientSuccess(AddRecipientResponse addRecipientResponse) {
+                String recipientId = addRecipientResponse.getRecipientId();
+
+                if (TextUtils.isEmpty(recipientId)) {
+                    if (setupRecipientHandler != null) {
+                        setupRecipientHandler.onFailure(
+                                new XMLAPIResponseException("Empty recipientId returned from Silverpop", addRecipientResponse.getResponseXml()));
+                    }
+                } else {
+                    EngageConfig.storeRecipientId(getContext(), recipientId);
+                    // EngageConfig.storeAnonymousUserId(context, recipientId);
+
+                    if (setupRecipientHandler != null) {
+                        setupRecipientHandler.onSuccess(recipientId);
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Exception exception) {
+                if (setupRecipientHandler != null) {
+                    setupRecipientHandler.onFailure(new XMLAPIResponseException(exception));
+                }
+            }
+        });
+    }
+
+    //[Lindsay Thurmond:1/12/15] TODO: test me
     public void checkIdentity(final Map<String, String> idFieldNamesToValues, final IdentityHandler identityHandler) {
 
         setupRecipient(new SetupRecipientHandler() {
@@ -230,31 +234,7 @@ public class MobileConnectorManager extends BaseManager {
                     }
                     // scenario 3 - existing recipient has a mobileUserId
                     else {
-                        // mark current recipient as merged
-                        XMLAPI updateCurrentRecipientXml = XMLAPI.updateRecipient(currentRecipientId, listId);
-                        updateCurrentRecipientXml.addColumn(getEngageConfigManager().mergedRecipientIdColumnName(), existingRecipientResponse.getRecipientId());
-                        updateCurrentRecipientXml.addColumn(getEngageConfigManager().mergedDateColumnName(), new Date());
-
-                        getXMLAPIManager().postXMLAPI(updateCurrentRecipientXml, new UpdateRecipientResponseHandler() {
-                            @Override
-                            public void onUpdateRecipientSuccess(UpdateRecipientResponse updateCurrentRecipientResponse) {
-                                // start using existing recipient id instead
-                                final String oldRecipientId = EngageConfig.recipientId(getContext());
-                                final String newRecipientId = existingRecipientResponse.getRecipientId();
-                                EngageConfig.storeRecipientId(getContext(), newRecipientId);
-                                EngageConfig.storeMobileUserId(getContext(), existingMobileUserId);
-
-                                // current recipient has been updated and we are now using the existing recipient instead, time to update audit table
-                                updateAuditRecordWithMergeChanges(oldRecipientId, newRecipientId, identityHandler);
-                            }
-
-                            @Override
-                            public void onFailure(Exception exception) {
-                                if (identityHandler != null) {
-                                    identityHandler.onFailure(exception);
-                                }
-                            }
-                        });
+                        handleExistingRecipeintWithRecipientId(existingRecipientResponse, existingMobileUserId, currentRecipientId, listId, identityHandler);
                     }
                 }
 
@@ -264,6 +244,43 @@ public class MobileConnectorManager extends BaseManager {
             @Override
             public void onFailure(Exception exception) {
                 Log.d(TAG, exception.getMessage(), exception);
+            }
+        });
+    }
+
+    /**
+     * Scenario 3 - existing recipient has a mobileUserId
+     *
+     * @param existingRecipientResponse
+     * @param existingMobileUserId
+     * @param currentRecipientId
+     * @param listId
+     * @param identityHandler
+     */
+    protected void handleExistingRecipeintWithRecipientId(final SelectRecipientResponse existingRecipientResponse, final String existingMobileUserId, String currentRecipientId, String listId, final IdentityHandler identityHandler) {
+        // mark current recipient as merged
+        XMLAPI updateCurrentRecipientXml = XMLAPI.updateRecipient(currentRecipientId, listId);
+        updateCurrentRecipientXml.addColumn(getEngageConfigManager().mergedRecipientIdColumnName(), existingRecipientResponse.getRecipientId());
+        updateCurrentRecipientXml.addColumn(getEngageConfigManager().mergedDateColumnName(), new Date());
+
+        getXMLAPIManager().postXMLAPI(updateCurrentRecipientXml, new UpdateRecipientResponseHandler() {
+            @Override
+            public void onUpdateRecipientSuccess(UpdateRecipientResponse updateCurrentRecipientResponse) {
+                // start using existing recipient id instead
+                final String oldRecipientId = EngageConfig.recipientId(getContext());
+                final String newRecipientId = existingRecipientResponse.getRecipientId();
+                EngageConfig.storeRecipientId(getContext(), newRecipientId);
+                EngageConfig.storeMobileUserId(getContext(), existingMobileUserId);
+
+                // current recipient has been updated and we are now using the existing recipient instead, time to update audit table
+                updateAuditRecordWithMergeChanges(oldRecipientId, newRecipientId, identityHandler);
+            }
+
+            @Override
+            public void onFailure(Exception exception) {
+                if (identityHandler != null) {
+                    identityHandler.onFailure(exception);
+                }
             }
         });
     }
@@ -339,10 +356,12 @@ public class MobileConnectorManager extends BaseManager {
                     }
                 }
             });
-
         }
     }
 
+    /**
+     * Used with Scenario 2 & 3
+     */
     protected void updateAuditRecordWithMergeChanges(String oldRecipientId, String newRecipientId, final IdentityHandler identityHandler) {
         final String auditRecordTableId = EngageConfig.auditRecordTableId(getContext());
         if (TextUtils.isEmpty(auditRecordTableId)) {
