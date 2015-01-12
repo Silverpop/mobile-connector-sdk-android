@@ -60,11 +60,13 @@
         "mobileUserIdGeneratorClassName": "com.silverpop.engage.util.uuid.plugin.DefaultUUIDGenerator",
         "mobileUserIdColumn" : "Mobile User Id",
         "mergedRecipientIdColumn" : "Merged Recipient Id",
-        "mergedDateColumn" : "Merged Date"
+        "mergedDateColumn" : "Merged Date",
+        "mergeHistoryInMergedMarketingDatabase" : true
     },
     "AuditRecord": {
         "oldRecipientIdColumnName" : "Old Recipient Id",
         "newRecipientIdColumnName" : "New Recipient Id",
-        "createDateColumnName" : "Create Date"
+        "createDateColumnName" : "Create Date",
+        "mergeHistoryInAuditRecordTable" : false
     }
 }

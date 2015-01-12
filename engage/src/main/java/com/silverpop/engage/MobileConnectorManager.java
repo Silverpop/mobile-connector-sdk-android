@@ -126,7 +126,7 @@ public class MobileConnectorManager extends BaseManager {
         }
     }
 
-    protected void createNewRecipient(final SetupRecipientHandler setupRecipientHandler, String existingMobileUserId, String listId, String mobileUserIdColumn) {
+    private void createNewRecipient(final SetupRecipientHandler setupRecipientHandler, String existingMobileUserId, String listId, String mobileUserIdColumn) {
         String newMobileUserId = existingMobileUserId;
         // generate mobile user id if needed
         if (TextUtils.isEmpty(newMobileUserId)) {
@@ -185,7 +185,7 @@ public class MobileConnectorManager extends BaseManager {
         });
     }
 
-    public void checkForExistingRecipientAndUpdateIfNeeded(final Map<String, String> idFieldNamesToValues, final String currentRecipientId, final IdentityHandler identityHandler) {
+    private void checkForExistingRecipientAndUpdateIfNeeded(final Map<String, String> idFieldNamesToValues, final String currentRecipientId, final IdentityHandler identityHandler) {
 
         // look up recipient from silverpop
         final String listId = getEngageConfigManager().engageListId();
@@ -234,7 +234,7 @@ public class MobileConnectorManager extends BaseManager {
                     }
                     // scenario 3 - existing recipient has a mobileUserId
                     else {
-                        handleExistingRecipeintWithRecipientId(existingRecipientResponse, existingMobileUserId, currentRecipientId, listId, identityHandler);
+                        handleExistingRecipientWithRecipientId(existingRecipientResponse, existingMobileUserId, currentRecipientId, listId, identityHandler);
                     }
                 }
 
@@ -257,11 +257,13 @@ public class MobileConnectorManager extends BaseManager {
      * @param listId
      * @param identityHandler
      */
-    protected void handleExistingRecipeintWithRecipientId(final SelectRecipientResponse existingRecipientResponse, final String existingMobileUserId, String currentRecipientId, String listId, final IdentityHandler identityHandler) {
+    private void handleExistingRecipientWithRecipientId(final SelectRecipientResponse existingRecipientResponse, final String existingMobileUserId, String currentRecipientId, String listId, final IdentityHandler identityHandler) {
         // mark current recipient as merged
         XMLAPI updateCurrentRecipientXml = XMLAPI.updateRecipient(currentRecipientId, listId);
-        updateCurrentRecipientXml.addColumn(getEngageConfigManager().mergedRecipientIdColumnName(), existingRecipientResponse.getRecipientId());
-        updateCurrentRecipientXml.addColumn(getEngageConfigManager().mergedDateColumnName(), new Date());
+        if (getEngageConfigManager().mergeHistoryInMergedMarketingDatabase()) {
+            updateCurrentRecipientXml.addColumn(getEngageConfigManager().mergedRecipientIdColumnName(), existingRecipientResponse.getRecipientId());
+            updateCurrentRecipientXml.addColumn(getEngageConfigManager().mergedDateColumnName(), new Date());
+        }
 
         getXMLAPIManager().postXMLAPI(updateCurrentRecipientXml, new UpdateRecipientResponseHandler() {
             @Override
@@ -273,7 +275,11 @@ public class MobileConnectorManager extends BaseManager {
                 EngageConfig.storeMobileUserId(getContext(), existingMobileUserId);
 
                 // current recipient has been updated and we are now using the existing recipient instead, time to update audit table
-                updateAuditRecordWithMergeChanges(oldRecipientId, newRecipientId, identityHandler);
+                if (!getEngageConfigManager().mergeHistoryInAuditRecordTableDatabase()) {
+                    updateAuditRecordWithMergeChanges(oldRecipientId, newRecipientId, identityHandler);
+                } else {
+                    identityHandler.onSuccess(EngageConfig.recipientId(getContext()), EngageConfig.mobileUserId(getContext()));
+                }
             }
 
             @Override
@@ -293,8 +299,8 @@ public class MobileConnectorManager extends BaseManager {
      * @param identityHandler
      * @param listId
      */
-    protected void handleExistingRecipientWithoutRecipientId(final SelectRecipientResponse existingRecipientResponse,
-                                                             Map<String, String> existingRecipientDataColumns, final IdentityHandler identityHandler, String listId) {
+    private void handleExistingRecipientWithoutRecipientId(final SelectRecipientResponse existingRecipientResponse,
+                                                           Map<String, String> existingRecipientDataColumns, final IdentityHandler identityHandler, String listId) {
         //[Lindsay Thurmond:1/7/15] TODO: updateRecipient(mobileUserId = nil, recipientId = currentRecipientId, mergedRecipientId=existingRecipient.recipientId, mergeDate=now())
 
         // keep all data from existing recipient, just add the mobile user id to it
@@ -324,8 +330,10 @@ public class MobileConnectorManager extends BaseManager {
                             EngageConfig.recipientId(getContext()), getEngageConfigManager().engageListId());
                     updateCurrentRecipient.addParam(getEngageConfigManager().mobileUserIdColumnName(), null);
                     //[Lindsay Thurmond:1/8/15] TODO: what should date format be?
-                    updateCurrentRecipient.addParam(getEngageConfigManager().mergedDateColumnName(), new Date());
-                    updateCurrentRecipient.addParam(getEngageConfigManager().mergedRecipientIdColumnName(), existingRecipientResponse.getRecipientId());
+                    if (getEngageConfigManager().mergeHistoryInMergedMarketingDatabase()) {
+                        updateCurrentRecipient.addParam(getEngageConfigManager().mergedDateColumnName(), new Date());
+                        updateCurrentRecipient.addParam(getEngageConfigManager().mergedRecipientIdColumnName(), existingRecipientResponse.getRecipientId());
+                    }
 
                     getXMLAPIManager().postXMLAPI(updateCurrentRecipient, new UpdateRecipientResponseHandler() {
                         @Override
@@ -334,8 +342,13 @@ public class MobileConnectorManager extends BaseManager {
                             final String oldRecipientId = EngageConfig.recipientId(getContext());
                             final String newRecipientId = updateCurrentRecipientResponse.getRecipientId();
                             EngageConfig.storeRecipientId(getContext(), newRecipientId);
+
                             // both recipients have been updated, time to update audit table
-                            updateAuditRecordWithMergeChanges(oldRecipientId, newRecipientId, identityHandler);
+                            if (!getEngageConfigManager().mergeHistoryInAuditRecordTableDatabase()) {
+                                updateAuditRecordWithMergeChanges(oldRecipientId, newRecipientId, identityHandler);
+                            } else {
+                                identityHandler.onSuccess(EngageConfig.recipientId(getContext()), EngageConfig.mobileUserId(getContext()));
+                            }
                         }
 
                         @Override
@@ -362,7 +375,7 @@ public class MobileConnectorManager extends BaseManager {
     /**
      * Used with Scenario 2 & 3
      */
-    protected void updateAuditRecordWithMergeChanges(String oldRecipientId, String newRecipientId, final IdentityHandler identityHandler) {
+    private void updateAuditRecordWithMergeChanges(String oldRecipientId, String newRecipientId, final IdentityHandler identityHandler) {
         final String auditRecordTableId = EngageConfig.auditRecordTableId(getContext());
         if (TextUtils.isEmpty(auditRecordTableId)) {
             if (identityHandler != null) {
@@ -402,12 +415,13 @@ public class MobileConnectorManager extends BaseManager {
                 }
             });
         }
+
     }
 
     /**
      * Scenario 1 - no existing recipient
      */
-    protected void updateRecipientWithCustomId(String recipientId, String listId, Map<String, String> idFieldNamesToValues, final IdentityHandler identityHandler) {
+    private void updateRecipientWithCustomId(String recipientId, String listId, Map<String, String> idFieldNamesToValues, final IdentityHandler identityHandler) {
         XMLAPI updateCurrentRecipientXml = XMLAPI.updateRecipient(recipientId, listId);
         for (Map.Entry<String, String> fieldValueEntry : idFieldNamesToValues.entrySet()) {
             String idFieldName = fieldValueEntry.getKey();

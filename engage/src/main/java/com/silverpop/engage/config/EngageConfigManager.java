@@ -504,6 +504,17 @@ public class EngageConfigManager {
         return mergedDateColumnName;
     }
 
+    public boolean mergeHistoryInMergedMarketingDatabase() {
+        String propName = "mergeHistoryInMergedMarketingDatabase";
+        boolean mergeHistoryInMergedMarketingDatabase = false;
+        try {
+            mergeHistoryInMergedMarketingDatabase = getRecipientConfigJson().getBoolean(propName);
+        } catch (JSONException ex) {
+            Log.w(TAG, "Unable to find " + propName + " configuration.  Defaulting to false.");
+        }
+        return mergeHistoryInMergedMarketingDatabase;
+    }
+
     public String auditRecordOldRecipientIdColumnName() {
         String propName = "oldRecipientIdColumnName";
         String oldRecipientIdColumnName = null;
@@ -514,6 +525,7 @@ public class EngageConfigManager {
         }
         return oldRecipientIdColumnName;
     }
+
     public String auditRecordNewRecipientIdColumnName() {
         String propName = "newRecipientIdColumnName";
         String newRecipientIdColumnName = null;
@@ -524,6 +536,7 @@ public class EngageConfigManager {
         }
         return newRecipientIdColumnName;
     }
+
     public String auditRecordCreateDateColumnName() {
         String propName = "createDateColumnName";
         String createDateColumnName = null;
@@ -533,6 +546,17 @@ public class EngageConfigManager {
             Log.w(TAG, "Unable to find " + propName + " configuration.  ");
         }
         return createDateColumnName;
+    }
+
+    public boolean mergeHistoryInAuditRecordTableDatabase() {
+        String propName = "mergeHistoryInAuditRecordTable";
+        boolean mergeHistoryInAuditRecordTable = false;
+        try {
+            mergeHistoryInAuditRecordTable = getAuditRecordConfigJson().getBoolean(propName);
+        } catch (JSONException ex) {
+            Log.w(TAG, "Unable to find " + propName + " configuration.  Defaulting to false.");
+        }
+        return mergeHistoryInAuditRecordTable;
     }
 
     private JSONObject getGeneralConfigJson() throws JSONException {
@@ -566,6 +590,7 @@ public class EngageConfigManager {
     private JSONObject getRecipientConfigJson() throws JSONException {
         return getConfigJson(Config.RECIPIENT);
     }
+
     private JSONObject getAuditRecordConfigJson() throws JSONException {
         return getConfigJson(Config.AUDIT_RECORD);
     }
