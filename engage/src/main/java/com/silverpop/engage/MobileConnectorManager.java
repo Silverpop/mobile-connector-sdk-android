@@ -13,6 +13,7 @@ import com.silverpop.engage.response.*;
 import com.silverpop.engage.response.handler.AddRecipientResponseHandler;
 import com.silverpop.engage.response.handler.UpdateRecipientResponseHandler;
 import com.silverpop.engage.response.handler.XMLAPIResponseHandler;
+import com.silverpop.engage.util.DateUtil;
 
 import java.util.Date;
 import java.util.Map;
@@ -213,7 +214,6 @@ public class MobileConnectorManager extends BaseManager {
                         updateRecipientWithCustomId(currentRecipientId, listId, idFieldNamesToValues, identityHandler);
                     } else {
                         // an error happened with the request/response
-                        //[Lindsay Thurmond:1/7/15] TODO: handle error
                         if (identityHandler != null) {
                             // request failed for unknown reason, time to bail
                             identityHandler.onFailure(new XMLAPIResponseException(response));
@@ -230,7 +230,6 @@ public class MobileConnectorManager extends BaseManager {
                     // scenario 2 - existing recipient doesn't have a mobileUserId
                     if (TextUtils.isEmpty(existingMobileUserId)) {
                         handleExistingRecipientWithoutRecipientId(existingRecipientResponse, existingRecipientDataColumns, identityHandler, listId);
-
                     }
                     // scenario 3 - existing recipient has a mobileUserId
                     else {
@@ -262,7 +261,7 @@ public class MobileConnectorManager extends BaseManager {
         XMLAPI updateCurrentRecipientXml = XMLAPI.updateRecipient(currentRecipientId, listId);
         if (getEngageConfigManager().mergeHistoryInMergedMarketingDatabase()) {
             updateCurrentRecipientXml.addColumn(getEngageConfigManager().mergedRecipientIdColumnName(), existingRecipientResponse.getRecipientId());
-            updateCurrentRecipientXml.addColumn(getEngageConfigManager().mergedDateColumnName(), new Date());
+            updateCurrentRecipientXml.addColumn(getEngageConfigManager().mergedDateColumnName(), DateUtil.toGmtString(new Date()));
         }
 
         getXMLAPIManager().postXMLAPI(updateCurrentRecipientXml, new UpdateRecipientResponseHandler() {
@@ -301,7 +300,6 @@ public class MobileConnectorManager extends BaseManager {
      */
     private void handleExistingRecipientWithoutRecipientId(final SelectRecipientResponse existingRecipientResponse,
                                                            Map<String, String> existingRecipientDataColumns, final IdentityHandler identityHandler, String listId) {
-        //[Lindsay Thurmond:1/7/15] TODO: updateRecipient(mobileUserId = nil, recipientId = currentRecipientId, mergedRecipientId=existingRecipient.recipientId, mergeDate=now())
 
         // keep all data from existing recipient, just add the mobile user id to it
         final String mobileUserIdFromApp = EngageConfig.mobileUserId(getContext());
@@ -329,9 +327,8 @@ public class MobileConnectorManager extends BaseManager {
                     XMLAPI updateCurrentRecipient = XMLAPI.updateRecipient(
                             EngageConfig.recipientId(getContext()), getEngageConfigManager().engageListId());
                     updateCurrentRecipient.addParam(getEngageConfigManager().mobileUserIdColumnName(), null);
-                    //[Lindsay Thurmond:1/8/15] TODO: what should date format be?
                     if (getEngageConfigManager().mergeHistoryInMergedMarketingDatabase()) {
-                        updateCurrentRecipient.addParam(getEngageConfigManager().mergedDateColumnName(), new Date());
+                        updateCurrentRecipient.addParam(getEngageConfigManager().mergedDateColumnName(), DateUtil.toGmtString(new Date()));
                         updateCurrentRecipient.addParam(getEngageConfigManager().mergedRecipientIdColumnName(), existingRecipientResponse.getRecipientId());
                     }
 
@@ -374,12 +371,13 @@ public class MobileConnectorManager extends BaseManager {
 
     /**
      * Used with Scenario 2 & 3
+     * <p/>
+     * Should only be called if the 'mergeHistoryInAuditRecordTable' config property is {@code true}
      */
     private void updateAuditRecordWithMergeChanges(String oldRecipientId, String newRecipientId, final IdentityHandler identityHandler) {
         final String auditRecordTableId = EngageConfig.auditRecordTableId(getContext());
         if (TextUtils.isEmpty(auditRecordTableId)) {
             if (identityHandler != null) {
-                //[Lindsay Thurmond:1/9/15] TODO: should I do this check earlier?
                 identityHandler.onFailure(new EngageConfigException("Cannot update audit record without audit table id"));
             }
         } else {
@@ -387,8 +385,7 @@ public class MobileConnectorManager extends BaseManager {
             RelationalTableRow newAuditRecordRow = new RelationalTableRow();
             newAuditRecordRow.addColumn(getEngageConfigManager().auditRecordOldRecipientIdColumnName(), oldRecipientId);
             newAuditRecordRow.addColumn(getEngageConfigManager().auditRecordNewRecipientIdColumnName(), newRecipientId);
-            //[Lindsay Thurmond:1/9/15] TODO: date format
-            newAuditRecordRow.addColumn(getEngageConfigManager().auditRecordCreateDateColumnName(), new Date());
+            newAuditRecordRow.addColumn(getEngageConfigManager().auditRecordCreateDateColumnName(), DateUtil.toGmtString(new Date()));
             updateAuditRecordApi.addRow(newAuditRecordRow);
 
             getXMLAPIManager().postXMLAPI(updateAuditRecordApi, new XMLAPIResponseHandler() {
@@ -415,7 +412,6 @@ public class MobileConnectorManager extends BaseManager {
                 }
             });
         }
-
     }
 
     /**
