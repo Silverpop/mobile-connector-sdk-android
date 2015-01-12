@@ -1,6 +1,7 @@
 package com.silverpop.engage.domain;
 
 import android.test.AndroidTestCase;
+import com.silverpop.engage.AnonymousMobileConnectorManager;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -344,7 +345,8 @@ public class XMLAPITest
 
     public void testAddRecipientAnonymousToList() {
         String listId = "85628";
-        XMLAPI api = XMLAPI.addRecipientAnonymousToList(listId);
+//        XMLAPI api = XMLAPI.addRecipientAnonymousToList(listId);
+        XMLAPI api = AnonymousMobileConnectorManager.addRecipientAnonymousToList(listId);
 
         String expected = "<Envelope><Body><AddRecipient>" +
                 "<LIST_ID>85628</LIST_ID>" +
@@ -363,5 +365,30 @@ public class XMLAPITest
 
         String env = createLastKnownLocationColumns.envelope();
         System.out.println(env);
+    }
+
+    public void testInsertUpdateRelationalTable() throws Exception {
+        XMLAPI insertUpdateRelationalTable = XMLAPI.insertUpdateRelationalTable("86767");
+
+        RelationalTableRow row1 = new RelationalTableRow();
+        row1.addColumn("Record Id", "11111");
+        row1.addColumn("Purchase Date", "01/01/2015");
+        insertUpdateRelationalTable.addRow(row1);
+
+        RelationalTableRow row2 = new RelationalTableRow();
+        row2.addColumn("Record Id", "22222");
+        row2.addColumn("Purchase Date", "01/02/2015");
+        insertUpdateRelationalTable.addRow(row2);
+
+        String envelope = insertUpdateRelationalTable.envelope();
+
+        final String expected = "<Envelope><Body><InsertUpdateRelationalTable>" +
+                "<TABLE_ID>86767</TABLE_ID>" +
+                "<ROWS>" +
+                "<ROW><COLUMN name=\"Record Id\"><![CDATA[11111]]></COLUMN><COLUMN name=\"Purchase Date\"><![CDATA[01/01/2015]]></COLUMN></ROW>" +
+                "<ROW><COLUMN name=\"Record Id\"><![CDATA[22222]]></COLUMN><COLUMN name=\"Purchase Date\"><![CDATA[01/02/2015]]></COLUMN></ROW>" +
+                "</ROWS>" +
+                "</InsertUpdateRelationalTable></Body></Envelope>";
+        assertEquals(expected, envelope);
     }
 }

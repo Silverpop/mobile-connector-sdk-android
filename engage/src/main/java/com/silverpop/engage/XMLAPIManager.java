@@ -7,8 +7,8 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.silverpop.engage.domain.XMLAPI;
 import com.silverpop.engage.network.XMLAPIClient;
-import com.silverpop.engage.response.handler.XMLAPIResponseHandler;
 import com.silverpop.engage.response.EngageResponseXML;
+import com.silverpop.engage.response.handler.XMLAPIResponseHandler;
 
 /**
  * Created by jeremydyer on 5/21/14.
@@ -59,7 +59,7 @@ public class XMLAPIManager extends BaseManager {
     /**
      * Post an XMLAPI request to Engage using a generic handler (as opposed to AsyncTasks) for the response.
      *
-     * @param api         XMLAPI operation desired.
+     * @param api             XMLAPI operation desired.
      * @param responseHandler functionality to run on success or failure of the request.
      */
     public void postXMLAPI(XMLAPI api,
@@ -81,32 +81,47 @@ public class XMLAPIManager extends BaseManager {
         });
     }
 
-
-    //[Lindsay Thurmond:1/6/15] TODO: enable, but throw exception?
     /**
-     * Create an anonymous user for the specified listId(database identifier)
+     * Create an anonymous user for the specified listId(database identifier).
+     * <p/>
+     * Method left here for backwards compatibility, but functionality has been moved to
+     * {@link com.silverpop.engage.AnonymousMobileConnectorManager#createAnonymousUserList(String, android.os.AsyncTask, android.os.AsyncTask)}
+     * which you are encouraged to use instead.
      *
      * @param listId      Database identifier.
      * @param successTask AsyncTask to execute on successful result.
      * @param failureTask AsyncTask to execute on failure
      */
-//    public void createAnonymousUserList(String listId,
-//                                        AsyncTask<EngageResponseXML, Void, Object> successTask,
-//                                        AsyncTask<VolleyError, Void, Object> failureTask) {
+    public void createAnonymousUserList(String listId,
+                                        AsyncTask<EngageResponseXML, Void, Object> successTask,
+                                        AsyncTask<VolleyError, Void, Object> failureTask) {
 //        XMLAPI createAnonymous = XMLAPI.addRecipientAnonymousToList(listId);
 //        postXMLAPI(createAnonymous, successTask, failureTask);
-//    }
 
-    //[Lindsay Thurmond:1/6/15] TODO: enable, but throw exception?
+        AnonymousMobileConnectorManager.get().createAnonymousUserList(listId, successTask, failureTask);
+    }
+
+
     //[Lindsay Thurmond:12/29/14] TODO: identical to createAnonymousUserList() - fix or delete me
-//    public void updateAnonymousUserToKnownUser(String listId, AsyncTask<EngageResponseXML, Void, Object> successTask,
-//                                               AsyncTask<VolleyError, Void, Object> failureTask) {
+    /**
+     * Method left here for backwards compatibility, but functionality has been moved to
+     * {@link com.silverpop.engage.AnonymousMobileConnectorManager#updateAnonymousUserToKnownUser(String, android.os.AsyncTask, android.os.AsyncTask)}
+     * which you are encouraged to use instead.
+     *
+     * @param listId
+     * @param successTask
+     * @param failureTask
+     */
+    public void updateAnonymousUserToKnownUser(String listId, AsyncTask<EngageResponseXML, Void, Object> successTask,
+                                               AsyncTask<VolleyError, Void, Object> failureTask) {
 //        XMLAPI createAnonymous = XMLAPI.addRecipientAnonymousToList(listId);
 //        postXMLAPI(createAnonymous, successTask, failureTask);
-//    }
+
+        AnonymousMobileConnectorManager.get().updateAnonymousUserToKnownUser(listId, successTask, failureTask);
+    }
 
     /**
-     * Handles the successful completion of the UBF post
+     * Handles the successful completion of the XMLAPI post
      *
      * @return
      */
@@ -127,7 +142,7 @@ public class XMLAPIManager extends BaseManager {
 
 
     /**
-     * Handles the failure of a UBF event post.
+     * Handles the failure of a XMLAPI event post.
      *
      * @return
      */

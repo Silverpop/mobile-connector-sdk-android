@@ -21,14 +21,14 @@ import java.util.Map;
 /**
  * Created by Lindsay Thurmond on 1/6/15.
  */
-public class MobileConnectorManager extends BaseManager {
+public class MobileConnectorManager extends BaseManager implements MobileConnector {
 
     private static final String TAG = MobileConnectorManager.class.getName();
     private static MobileConnectorManager instance = null;
 
     protected MobileConnectorManager(Context context) {
         super(context);
-        AutoMobileConnectorManager.init(context);
+        MobileConnectorManagerImpl.init(context);
         AnonymousMobileConnectorManager.init(context);
     }
 
@@ -48,6 +48,7 @@ public class MobileConnectorManager extends BaseManager {
         return instance;
     }
 
+    @Override
     public void setupRecipient(final SetupRecipientHandler setupRecipientHandler) {
 
         try {
@@ -92,31 +93,12 @@ public class MobileConnectorManager extends BaseManager {
             }
 
             // create a brand new recipient
-            if (!TextUtils.isEmpty(existingRecipientId)) {
+            if (TextUtils.isEmpty(existingRecipientId)) {
                 createNewRecipient(setupRecipientHandler, existingMobileUserId, listId, mobileUserIdColumn);
-
             }
             // we have existing existingRecipientId but not mobileUserId - this really shouldn't happen, but just in case
             else if (TextUtils.isEmpty(existingMobileUserId)) {
-                // update the existing recipient with a mobile user id
-                XMLAPI updateRecipientXml = XMLAPI.updateRecipient(existingRecipientId, listId);
-                updateRecipientXml.addColumn(mobileUserIdColumn, existingMobileUserId);
-                //[Lindsay Thurmond:1/8/15] TODO: do I need sync fields?
-                getXMLAPIManager().postXMLAPI(updateRecipientXml, new UpdateRecipientResponseHandler() {
-                    @Override
-                    public void onUpdateRecipientSuccess(UpdateRecipientResponse updateRecipientResponse) {
-                        if (setupRecipientHandler != null) {
-                            setupRecipientHandler.onSuccess(updateRecipientResponse.getRecipientId());
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(Exception exception) {
-                        if (setupRecipientHandler != null) {
-                            setupRecipientHandler.onFailure(exception);
-                        }
-                    }
-                });
+                updateExistingRecipientWithMobileUserId(setupRecipientHandler, existingRecipientId, listId, mobileUserIdColumn);
             }
         } catch (Exception e) {
             // just in case something unexpected happens
@@ -127,17 +109,44 @@ public class MobileConnectorManager extends BaseManager {
         }
     }
 
+    protected void updateExistingRecipientWithMobileUserId(final SetupRecipientHandler setupRecipientHandler, String existingRecipientId, String listId, String mobileUserIdColumn) {
+        // update the existing recipient with a mobile user id
+        XMLAPI updateRecipientXml = XMLAPI.updateRecipient(existingRecipientId, listId);
+
+        // generate new mobile user id
+        String newMobileUserId = MobileConnectorManagerImpl.get().generateMobileUserId();
+        EngageConfig.storeMobileUserId(getContext(), newMobileUserId);
+        Log.d(TAG, "MobileUserId was auto generated");
+        updateRecipientXml.addColumn(mobileUserIdColumn, newMobileUserId);
+
+        getXMLAPIManager().postXMLAPI(updateRecipientXml, new UpdateRecipientResponseHandler() {
+            @Override
+            public void onUpdateRecipientSuccess(UpdateRecipientResponse updateRecipientResponse) {
+                if (setupRecipientHandler != null) {
+                    setupRecipientHandler.onSuccess(updateRecipientResponse.getRecipientId());
+                }
+            }
+
+            @Override
+            public void onFailure(Exception exception) {
+                if (setupRecipientHandler != null) {
+                    setupRecipientHandler.onFailure(exception);
+                }
+            }
+        });
+    }
+
     private void createNewRecipient(final SetupRecipientHandler setupRecipientHandler, String existingMobileUserId, String listId, String mobileUserIdColumn) {
         String newMobileUserId = existingMobileUserId;
         // generate mobile user id if needed
         if (TextUtils.isEmpty(newMobileUserId)) {
-            newMobileUserId = AutoMobileConnectorManager.get().generateMobileUserId();
+            newMobileUserId = MobileConnectorManagerImpl.get().generateMobileUserId();
             EngageConfig.storeMobileUserId(getContext(), newMobileUserId);
             Log.d(TAG, "MobileUserId was auto generated");
         }
 
 
-        XMLAPI addRecipient = XMLAPI.addRecipient(mobileUserIdColumn, newMobileUserId, listId, true);
+        XMLAPI addRecipient = XMLAPI.addRecipient(mobileUserIdColumn, newMobileUserId, listId, false);
         getXMLAPIManager().postXMLAPI(addRecipient, new AddRecipientResponseHandler() {
             @Override
             public void onAddRecipientSuccess(AddRecipientResponse addRecipientResponse) {
@@ -168,6 +177,7 @@ public class MobileConnectorManager extends BaseManager {
     }
 
     //[Lindsay Thurmond:1/12/15] TODO: test me
+    @Override
     public void checkIdentity(final Map<String, String> idFieldNamesToValues, final IdentityHandler identityHandler) {
 
         setupRecipient(new SetupRecipientHandler() {

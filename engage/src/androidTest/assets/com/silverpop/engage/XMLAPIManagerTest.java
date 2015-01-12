@@ -15,12 +15,7 @@ public class XMLAPIManagerTest extends BaseAndroidTest {
 //        userManager = XMLAPIManager.initialize(testContext());
     }
 
-    private void clearSharedPreferences() throws Exception {
-        SharedPreferences settings = testContext().getSharedPreferences("PreferencesName", Context.MODE_PRIVATE);
-        settings.edit().clear().commit();
-//        EngageConfig.storeMobileUserId(getContext(), null);
-//        EngageConfig.storeAnonymousUserId(getContext(), null);
-    }
+
 
 //    public void testSetupRecipient() throws Exception {
 //        clearSharedPreferences();

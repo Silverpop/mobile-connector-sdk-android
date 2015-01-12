@@ -62,6 +62,10 @@ public class XMLAPI {
         existing.put(XMLAPIElement.LIST_ID.toString(), listId);
     }
 
+    public void addParam(XMLAPIElement keyElement, Object value) {
+        addParam(keyElement.toString(), value);
+    }
+
     public void addParam(String key, Object value) {
         Map<String, Object> existing = getBodyElements();
         existing.put(key, value);
@@ -94,6 +98,7 @@ public class XMLAPI {
 
     /**
      * Replaces the current columns list with the provided values.
+     *
      * @param cols
      */
     public void addColumns(Map<String, Object> cols) {
@@ -102,6 +107,7 @@ public class XMLAPI {
 
     /**
      * Adds an additional column to the current list of columns.
+     *
      * @param key
      * @param value
      */
@@ -111,7 +117,7 @@ public class XMLAPI {
         if (existingColumns == null) {
             existingColumns = new LinkedHashMap<String, Object>();
         }
-        Map<String, Object> existingColumnsMap =  (Map<String, Object>) existingColumns;
+        Map<String, Object> existingColumnsMap = (Map<String, Object>) existingColumns;
         // update current list with new column
         existingColumnsMap.put(key, value);
         // replace column list in case we created it as new
@@ -120,6 +126,7 @@ public class XMLAPI {
 
     /**
      * Replaces the current rows with the ones provided.
+     *
      * @param tableRows
      */
     public void setRows(List<RelationalTableRow> tableRows) {
@@ -131,6 +138,7 @@ public class XMLAPI {
 
     /**
      * Adds an additional row to the list of existing rows.
+     *
      * @param tableRow
      */
     public void addRow(RelationalTableRow tableRow) {
@@ -185,11 +193,16 @@ public class XMLAPI {
 
         Map<String, Object> obs = new LinkedHashMap<String, Object>();
         obs.put(XMLAPIElement.LIST_ID.toString(), listId);
-        obs.put(XMLAPIElement.UPDATE_IF_FOUND.toString(), updateIfFound);
+        if (updateIfFound) {
+            obs.put(XMLAPIElement.UPDATE_IF_FOUND.toString(), updateIfFound);
+        }
 
         Map<String, Object> mobileUserIdDetails = nameValueMap(mobileUserIdColumnName, mobileUserId);
 
-        obs.put(XMLAPIElement.SYNC_FIELDS.toString(), mobileUserIdDetails);
+        // SYNC_FIELDS required if list has no unique identifier and UPDATE_IF_FOUND set to true
+        if (updateIfFound) {
+            obs.put(XMLAPIElement.SYNC_FIELDS.toString(), mobileUserIdDetails);
+        }
         obs.put(XMLAPIElement.COLUMNS.toString(), mobileUserIdDetails);
 
         api.setBodyElements(obs);
@@ -240,18 +253,16 @@ public class XMLAPI {
             if (XMLAPIElement.COLUMNS.toString().equals(key)) {
                 Map<String, Object> innerDict = (Map<String, Object>) element;
                 body = this.buildInnerElementFromMapWithName(innerDict, body, XMLAPIElement.COLUMN.toString());
-            }
-            else if (XMLAPIElement.ROWS.toString().equals(key)) {
+            } else if (XMLAPIElement.ROWS.toString().equals(key)) {
                 List<RelationalTableRow> rows = (List<RelationalTableRow>) element;
                 this.appendRows(rows, body);
-            }
-            else if (XMLAPIElement.SYNC_FIELDS.toString().equals(key)) {
+            } else if (XMLAPIElement.SYNC_FIELDS.toString().equals(key)) {
                 Map<String, Object> innerDict = (Map<String, Object>) element;
                 syncFields = this.buildInnerElementFromMapWithName(innerDict, syncFields, XMLAPIElement.SYNC_FIELD.toString());
             } else if (XMLAPIElement.CONTACT_LISTS.toString().equals(key)) {
                 String[] contacts = (String[]) element;
                 contactLists = buildContactsList(contactLists, contacts);
-            }  else {
+            } else {
                 body.append("<");
                 body.append(key);
                 body.append(">");
@@ -299,9 +310,7 @@ public class XMLAPI {
      *
      * @param innerMap
      * @param body
-     *
-     * @return
-     *      StringBuilder containing nested structure.
+     * @return StringBuilder containing nested structure.
      */
     private StringBuilder buildInnerElementFromMapWithName(Map<String, Object> innerMap, StringBuilder body, String elementName) {
         for (String innerKey : innerMap.keySet()) {
