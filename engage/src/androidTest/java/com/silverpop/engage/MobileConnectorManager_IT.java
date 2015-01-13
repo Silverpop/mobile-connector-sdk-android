@@ -4,17 +4,16 @@ import android.util.Log;
 import com.silverpop.BaseAndroidTest;
 import com.silverpop.engage.config.EngageConfig;
 import com.silverpop.engage.domain.XMLAPI;
-import com.silverpop.engage.domain.XMLAPIElement;
 import com.silverpop.engage.domain.XMLAPIOperation;
 import com.silverpop.engage.recipient.SetupRecipientHandler;
 import com.silverpop.engage.response.AddRecipientResponse;
 import com.silverpop.engage.response.EngageResponseXML;
+import com.silverpop.engage.response.SelectRecipientResponse;
 import com.silverpop.engage.response.handler.AddRecipientResponseHandler;
+import com.silverpop.engage.response.handler.SelectRecipientResponseHandler;
 import com.silverpop.engage.response.handler.XMLAPIResponseHandler;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -81,11 +80,11 @@ public class MobileConnectorManager_IT extends BaseAndroidTest {
             }
 
             protected void scheduleCleanup(String recipientId) {
-                XMLAPI removeRecipientXml = new XMLAPI(XMLAPIOperation.REMOVE_RECIPIENT);
-                removeRecipientXml.addListIdParam(getEngageConfigManager().engageListId());
-                removeRecipientXml.addParam(XMLAPIElement.RECIPIENT_ID, recipientId);
-                removeRecipientXml.addColumn(getEngageConfigManager().mobileUserIdColumnName(), EngageConfig.mobileUserId(getContext()));
-                tearDownAPICalls.add(removeRecipientXml);
+                tearDownAPICalls.add(XMLAPI.builder()
+                        .listId(getEngageConfigManager().engageListId())
+                        .recipientId(recipientId)
+                        .column(getEngageConfigManager().mobileUserIdColumnName(), EngageConfig.mobileUserId(getContext()))
+                        .build());
             }
         });
 
@@ -173,11 +172,12 @@ public class MobileConnectorManager_IT extends BaseAndroidTest {
             }
 
             protected void scheduleCleanup(String recipientId) {
-                XMLAPI removeRecipientXml = new XMLAPI(XMLAPIOperation.REMOVE_RECIPIENT);
-                removeRecipientXml.addListIdParam(listId);
-                removeRecipientXml.addParam(XMLAPIElement.EMAIL, email);
-                removeRecipientXml.addParam(XMLAPIElement.RECIPIENT_ID, recipientId);
-                tearDownAPICalls.add(removeRecipientXml);
+                tearDownAPICalls.add(XMLAPI.builder()
+                        .operation(XMLAPIOperation.REMOVE_RECIPIENT)
+                        .listId(listId)
+                        .recipientId(recipientId)
+                        .email(email)
+                        .build());
             }
 
             @Override
@@ -186,12 +186,96 @@ public class MobileConnectorManager_IT extends BaseAndroidTest {
             }
         });
 
-
         signal.await(30, TimeUnit.SECONDS);
     }
 
-    public void testCheckIdentity() throws Exception {
-        //[Lindsay Thurmond:1/12/15] TODO: implement me!
+    public void testCheckIdentity_s1_recipientNotFound() throws Exception {
+        final CountDownLatch signal = new CountDownLatch(1);
+
+        // setup recipient on server with recipientId and mobileUserId set
+        MobileConnectorManager.get().setupRecipient(new SetupRecipientHandler() {
+            @Override
+            public void onSuccess(final String createdRecipientId) {
+
+                // recipient is setup, we should have recipientId and mobileUserId now
+                assertThat(createdRecipientId).isNotEmpty();
+                assertThat(EngageConfig.mobileUserId(getContext())).isNotEmpty();
+
+                // look for an existing recipient with the following
+                final String customIdColumn = "Custom Integration Test Id";
+                final String nonExistingCustomIdValue = UUID.randomUUID().toString();
+
+                Map<String, String> idFieldNamesToValues = new HashMap<String, String>();
+                idFieldNamesToValues.put(customIdColumn, nonExistingCustomIdValue);
+
+
+                MobileConnectorManager.get().checkIdentity(idFieldNamesToValues, new IdentityHandler() {
+                    @Override
+                    public void onSuccess(String recipientId, final String mobileUserId) {
+                        // check that existing recipient was updated with a generated mobile user id
+                        assertThat(recipientId).isNotEmpty();
+                        assertThat(mobileUserId).isNotEmpty();
+
+                        // double check that the server is updated correctly
+                        XMLAPI selectRecipientXml = XMLAPI.builder()
+                                .operation(XMLAPIOperation.SELECT_RECIPIENT_DATA)
+                                .recipientId(recipientId)
+                                .listId(getEngageConfigManager().engageListId())
+                                .build();
+                        getXMLAPIManager().postXMLAPI(selectRecipientXml, new SelectRecipientResponseHandler() {
+                            @Override
+                            public void onSelectRecipientSuccess(SelectRecipientResponse selectRecipientResponse) {
+                                String foundMobileUserId = selectRecipientResponse.getColumnValue(getEngageConfigManager().mobileUserIdColumnName());
+                                String foundCustomId = selectRecipientResponse.getColumnValue(customIdColumn);
+
+                                scheduleCleanup(createdRecipientId);
+
+                                // verify that mobileUserId and custom Id were actually saved to the server
+                                assertThat(foundCustomId).isNotEmpty().isEqualTo(nonExistingCustomIdValue);
+                                assertThat(foundMobileUserId).isNotEmpty().isEqualTo(mobileUserId);
+
+                                signal.countDown();
+                            }
+
+                            @Override
+                            public void onFailure(Exception exception) {
+                                scheduleCleanup(createdRecipientId);
+                                fail(exception.getMessage());
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onFailure(Exception e) {
+                        scheduleCleanup(createdRecipientId);
+                        fail(e.getMessage());
+                    }
+
+                    protected void scheduleCleanup(String recipientId) {
+                        tearDownAPICalls.add(XMLAPI.builder()
+                                .operation(XMLAPIOperation.REMOVE_RECIPIENT)
+                                .listId(getEngageConfigManager().engageListId())
+                                .recipientId(recipientId)
+                                .build());
+                    }
+                });
+
+            }
+
+            @Override
+            public void onFailure(Exception error) {
+                fail(error.getMessage());
+            }
+        });
+
+        signal.await(20, TimeUnit.SECONDS);
+    }
+
+    public void testCheckIdentity_s2_existingRecipientWithoutMobileUserId() throws Exception {
+        fail();
+    }
+
+    public void testCheckIdentity_s3_existingRecipientWithMobileUserId() throws Exception {
         fail();
     }
 }

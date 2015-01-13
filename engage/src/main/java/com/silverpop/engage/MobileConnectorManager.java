@@ -176,7 +176,6 @@ public class MobileConnectorManager extends BaseManager implements MobileConnect
         });
     }
 
-    //[Lindsay Thurmond:1/12/15] TODO: test me
     @Override
     public void checkIdentity(final Map<String, String> idFieldNamesToValues, final IdentityHandler identityHandler) {
 
@@ -212,6 +211,7 @@ public class MobileConnectorManager extends BaseManager implements MobileConnect
             @Override
             public void onSuccess(EngageResponseXML response) {
                 final SelectRecipientResponse existingRecipientResponse = new SelectRecipientResponse(response);
+                Log.d(TAG, response.getXml());
 
                 //[Lindsay Thurmond:1/8/15] TODO: what if selected recipient has same recipient id? merge? ignore?
 
@@ -246,8 +246,6 @@ public class MobileConnectorManager extends BaseManager implements MobileConnect
                         handleExistingRecipientWithRecipientId(existingRecipientResponse, existingMobileUserId, currentRecipientId, listId, identityHandler);
                     }
                 }
-
-                Log.d(TAG, response.getXml());
             }
 
             @Override

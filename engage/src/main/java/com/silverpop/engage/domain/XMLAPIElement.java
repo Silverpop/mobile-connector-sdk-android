@@ -18,7 +18,9 @@ public enum XMLAPIElement {
     DEFAULT("DEFAULT"),
     ROWS("ROWS"),
     ROW("ROW"),
-    TABLE_ID("TABLE_ID");
+    TABLE_ID("TABLE_ID"),
+    VISIBILITY("VISIBILITY"),
+    LIST_TYPE("LIST_TYPE");
 
     private final String name;
 

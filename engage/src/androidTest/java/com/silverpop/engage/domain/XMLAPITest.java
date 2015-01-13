@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 /**
  * Created by jeremydyer on 5/19/14.
  */
@@ -227,6 +229,7 @@ public class XMLAPITest
         assertTrue(api.envelope().endsWith("</UnitTest></Body></Envelope>"));
     }
 
+    //[Lindsay Thurmond:1/12/15] TODO: fix failing test
     public void testSelectRecipientData() {
         String email = "test@silverpop.com";
         String listId = "12345";
@@ -247,7 +250,7 @@ public class XMLAPITest
         assertEquals(request1, api.envelope());
     }
 
-    public void testAddRecipient() {
+    public void testAddRecipientWithEmail() {
         String email = "somebody@domain.com";
         String listId = "85628";
 
@@ -282,6 +285,7 @@ public class XMLAPITest
         assertEquals(request1, api.envelope());
     }
 
+    //[Lindsay Thurmond:1/12/15] TODO: fix failing test
     public void testUpdateRecipient() {
 
         String email = "somebody@domain.com";
@@ -341,6 +345,24 @@ public class XMLAPITest
 
         assertEquals(request2, api.envelope());
 
+    }
+
+    public void testAddRecipient() {
+        XMLAPI xml = XMLAPI.addRecipient("mobile_user_id", "11111", "22222", false);
+        final String expected1 = "<Envelope><Body><AddRecipient>" +
+                "<LIST_ID>22222</LIST_ID>" +
+                "<COLUMN><NAME>mobile_user_id</NAME><VALUE>11111</VALUE></COLUMN>" +
+                "</AddRecipient></Body></Envelope>";
+        assertThat(xml.envelope()).isEqualTo(expected1);
+
+        xml = XMLAPI.addRecipient("mobile_user_id", "11111", "22222", true);
+        final String expected2 = "<Envelope><Body><AddRecipient>" +
+                "<LIST_ID>22222</LIST_ID>" +
+                "<COLUMN><NAME>mobile_user_id</NAME><VALUE>11111</VALUE></COLUMN>" +
+                "<UPDATE_IF_FOUND>true</UPDATE_IF_FOUND>" +
+                "<SYNC_FIELDS><SYNC_FIELD><NAME>mobile_user_id</NAME><VALUE>11111</VALUE></SYNC_FIELD></SYNC_FIELDS>" +
+                "</AddRecipient></Body></Envelope>";
+        assertThat(xml.envelope()).isEqualTo(expected2);
     }
 
     public void testAddRecipientAnonymousToList() {

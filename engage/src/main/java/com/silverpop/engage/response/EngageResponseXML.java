@@ -156,6 +156,12 @@ public class EngageResponseXML {
         return columns;
     }
 
+    public String getColumnValue(String columnName) {
+        Map<String, String> columns = getColumns();
+        String columnValue = columns.get(columnName);
+        return columnValue;
+    }
+
     public boolean isSuccess() {
         boolean success = false;
         try {

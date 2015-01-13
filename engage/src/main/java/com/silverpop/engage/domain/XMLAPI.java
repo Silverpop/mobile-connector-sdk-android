@@ -1,5 +1,8 @@
 package com.silverpop.engage.domain;
 
+import android.text.TextUtils;
+import com.silverpop.engage.AnonymousMobileConnectorManager;
+
 import java.util.*;
 
 /**
@@ -60,6 +63,16 @@ public class XMLAPI {
     public void addListIdParam(String listId) {
         Map<String, Object> existing = getBodyElements();
         existing.put(XMLAPIElement.LIST_ID.toString(), listId);
+    }
+
+    public void addEmail(String email) {
+        Map<String, Object> existing = getBodyElements();
+        existing.put(XMLAPIElement.EMAIL.toString(), email);
+    }
+
+    public void addRecipientId(String recipientId) {
+        Map<String, Object> existing = getBodyElements();
+        existing.put(XMLAPIElement.RECIPIENT_ID.toString(), recipientId);
     }
 
     public void addParam(XMLAPIElement keyElement, Object value) {
@@ -123,6 +136,33 @@ public class XMLAPI {
         // replace column list in case we created it as new
         addColumns(existingColumnsMap);
     }
+
+    /**
+     * Replaces the current sync fields with the ones provided.
+     * @param syncFields
+     */
+    public void setSyncFields(Map<String, Object> syncFields) {
+        Map<String, Object> existing = this.getBodyElements();
+        existing.put(XMLAPIElement.SYNC_FIELDS.toString(), syncFields);
+        this.setBodyElements(existing);
+    }
+
+    /**
+     * Adds an additional sync field to the list of existing sync fields
+     * @param key
+     * @param value
+     */
+    public void addSyncField(String key, Object value) {
+        Map<String, Object> existing = this.getBodyElements();
+        Object existingSyncFieldsObject = existing.get(XMLAPIElement.SYNC_FIELDS.toString());
+        if (existingSyncFieldsObject == null) {
+            existingSyncFieldsObject = new LinkedHashMap<String, Object>();
+        }
+        Map<String, Object> syncFields = (Map<String, Object>) existingSyncFieldsObject;
+        syncFields.put(key, value);
+        setSyncFields(syncFields);
+    }
+
 
     /**
      * Replaces the current rows with the ones provided.
@@ -189,24 +229,20 @@ public class XMLAPI {
 
 
     public static XMLAPI addRecipient(String mobileUserIdColumnName, String mobileUserId, String listId, boolean updateIfFound) {
-        XMLAPI api = new XMLAPI(XMLAPIOperation.ADD_RECIPIENT);
 
-        Map<String, Object> obs = new LinkedHashMap<String, Object>();
-        obs.put(XMLAPIElement.LIST_ID.toString(), listId);
+        XMLAPI addRecipientXml = builder()
+                .operation(XMLAPIOperation.ADD_RECIPIENT)
+                .listId(listId)
+                .column(mobileUserIdColumnName, mobileUserId)
+                .build();
+
         if (updateIfFound) {
-            obs.put(XMLAPIElement.UPDATE_IF_FOUND.toString(), updateIfFound);
+            addRecipientXml.addParam(XMLAPIElement.UPDATE_IF_FOUND, updateIfFound);
+            // SYNC_FIELDS required if list has no unique identifier and UPDATE_IF_FOUND set to true
+            addRecipientXml.addSyncField(mobileUserIdColumnName, mobileUserId);
         }
 
-        Map<String, Object> mobileUserIdDetails = nameValueMap(mobileUserIdColumnName, mobileUserId);
-
-        // SYNC_FIELDS required if list has no unique identifier and UPDATE_IF_FOUND set to true
-        if (updateIfFound) {
-            obs.put(XMLAPIElement.SYNC_FIELDS.toString(), mobileUserIdDetails);
-        }
-        obs.put(XMLAPIElement.COLUMNS.toString(), mobileUserIdDetails);
-
-        api.setBodyElements(obs);
-        return api;
+        return addRecipientXml;
     }
 
     private static Map<String, Object> nameValueMap(String name, Object value) {
@@ -231,14 +267,16 @@ public class XMLAPI {
         return xmlapi;
     }
 
-    //[Lindsay Thurmond:1/6/15] TODO: enable, but throw exception?
-//    public static XMLAPI addRecipientAnonymousToList(String listId) {
-//        Map<String, Object> bodyElements = new LinkedHashMap<String, Object>();
-//        bodyElements.put(XMLAPIElement.LIST_ID.toString(), listId);
-//
-//        XMLAPI api = new XMLAPI(XMLAPIOperation.ADD_RECIPIENT, bodyElements);
-//        return api;
-//    }
+    /**
+     * Method left here for backwards compatibility, but functionality has been moved to
+     * {@link com.silverpop.engage.AnonymousMobileConnectorManager#addRecipientAnonymousToList(String)}
+     * which you are encouraged to use instead.
+     * @param listId
+     * @return
+     */
+    public static XMLAPI addRecipientAnonymousToList(String listId) {
+       return AnonymousMobileConnectorManager.addRecipientAnonymousToList(listId);
+    }
 
     public String envelope() {
         StringBuilder envelope = new StringBuilder();
@@ -353,4 +391,102 @@ public class XMLAPI {
     public void setBodyElements(Map<String, Object> bodyElements) {
         this.bodyElements = bodyElements;
     }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    //[Lindsay Thurmond:1/12/15] TODO: finish building this out to replace all the static methods with various params
+    public static class Builder {
+
+        private String listId;
+        private String email;
+        private String recipientId;
+        private XMLAPIOperation operation;
+        private Map<String, Object> params;
+        private Map<String, Object> columns;
+        private List<RelationalTableRow> rows;
+        private Map<String, Object> syncFields;
+
+        public Builder() {
+        }
+
+        public Builder listId(String listId) {
+            this.listId = listId;
+            return this;
+        }
+
+        public Builder email(String email) {
+            this.email = email;
+            return this;
+        }
+
+        public Builder recipientId(String recipientId) {
+            this.recipientId = recipientId;
+            return this;
+        }
+
+        public Builder operation(XMLAPIOperation operation) {
+            this.operation = operation;
+            return this;
+        }
+
+        public Builder param(XMLAPIElement element, Object value) {
+            if (params == null) {
+                this.params = new LinkedHashMap<String, Object>();
+            }
+            this.params.put(element.toString(), value);
+            return this;
+        }
+
+        public Builder column(String key, Object value) {
+            if (this.columns == null) {
+                this.columns = new LinkedHashMap<String, Object>();
+            }
+            this.columns.put(key, value);
+            return this;
+        }
+
+        public Builder row(RelationalTableRow relationalTableRow) {
+            if (this.rows == null) {
+                this.rows = new ArrayList<RelationalTableRow>();
+            }
+            this.rows.add(relationalTableRow);
+            return this;
+        }
+
+        public Builder syncField(String key, Object value) {
+            if (this.syncFields == null) {
+                this.syncFields = new LinkedHashMap<String, Object>();
+            }
+            this.syncFields.put(key, value);
+            return this;
+        }
+
+        public XMLAPI build() {
+            XMLAPI xml = new XMLAPI(operation);
+            if (!TextUtils.isEmpty(listId)) {
+                xml.addListIdParam(listId);
+            }
+            if (!TextUtils.isEmpty(email)) {
+                xml.addEmail(email);
+            }
+            if (!TextUtils.isEmpty(recipientId)) {
+                xml.addRecipientId(recipientId);
+            }
+            if (params != null) {
+                xml.addParams(params);
+            }
+            if (columns != null) {
+                xml.addColumns(columns);
+            }
+            if (rows != null) {
+                xml.setRows(rows);
+            }
+
+            return xml;
+        }
+
+    }
+
 }

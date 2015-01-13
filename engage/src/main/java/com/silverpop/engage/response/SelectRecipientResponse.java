@@ -73,6 +73,11 @@ public class SelectRecipientResponse {
         return columns;
     }
 
+    public String getColumnValue(String columnName) {
+        String columnValue = responseXml.getColumnValue(columnName);
+        return columnValue;
+    }
+
     public String getFaultString() {
         String faultString = responseXml.getFaultString();
         return faultString;

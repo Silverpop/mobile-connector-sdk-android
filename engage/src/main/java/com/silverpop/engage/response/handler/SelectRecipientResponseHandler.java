@@ -10,10 +10,10 @@ public abstract class SelectRecipientResponseHandler extends DefaultXMLAPIRespon
 
     @Override
     public void onSuccessfulResponse(EngageResponseXML response) {
-        SelectRecipientResponse updateRecipientResponse = new SelectRecipientResponse(response);
-        onSelectRecipientSuccess(updateRecipientResponse);
+        SelectRecipientResponse selectRecipientResponse = new SelectRecipientResponse(response);
+        onSelectRecipientSuccess(selectRecipientResponse);
     }
 
-    public abstract void onSelectRecipientSuccess(SelectRecipientResponse updateRecipientResponse);
+    public abstract void onSelectRecipientSuccess(SelectRecipientResponse selectRecipientResponse);
 
 }
