@@ -428,12 +428,16 @@ public class XMLAPI {
             return this;
         }
 
-        public Builder param(XMLAPIElement element, Object value) {
+        public Builder param(String element, Object value) {
             if (params == null) {
                 this.params = new LinkedHashMap<String, Object>();
             }
-            this.params.put(element.toString(), value);
+            this.params.put(element, value);
             return this;
+        }
+
+        public Builder param(XMLAPIElement element, Object value) {
+           return param(element.toString(), value);
         }
 
         public Builder column(String key, Object value) {

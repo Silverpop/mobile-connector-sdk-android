@@ -19,6 +19,9 @@ import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+ * Integration tests that actually hit the Silverpop Xml Api web service.
+ */
 public class MobileConnectorManager_IT extends BaseAndroidTest {
 
     private List<XMLAPI> tearDownAPICalls = new ArrayList<XMLAPI>();
@@ -383,6 +386,103 @@ public class MobileConnectorManager_IT extends BaseAndroidTest {
     }
 
     public void testCheckIdentity_s3_existingRecipientWithMobileUserId() throws Exception {
-        fail();
+        final CountDownLatch signal = new CountDownLatch(1);
+
+        final String RECIPIENT_LIST_ID = getEngageConfigManager().engageListId();
+
+        // setup recipient on server with recipientId and mobileUserId set
+        MobileConnectorManager.get().setupRecipient(new SetupRecipientHandler() {
+            @Override
+            public void onSuccess(final String createdWithMobileUserId_RecipientId) {
+                scheduleCleanup(createdWithMobileUserId_RecipientId);
+                final String originalCurrentMobileUserId = EngageConfig.mobileUserId(getContext());
+
+                final String customId = UUID.randomUUID().toString();
+                final String originalExistingMobileUserId = UUID.randomUUID().toString();
+
+                // setup existing recipient on server with custom id and a different mobileUserId
+                XMLAPI addRecipientWithCustomIdXml = XMLAPI.builder()
+                        .operation(XMLAPIOperation.ADD_RECIPIENT)
+                        .listId(RECIPIENT_LIST_ID)
+                        .column(CUSTOM_ID_COLUMN, customId)
+                        .column(getEngageConfigManager().mobileUserIdColumnName(), originalExistingMobileUserId)
+                        .build();
+                getXMLAPIManager().postXMLAPI(addRecipientWithCustomIdXml, new AddRecipientResponseHandler() {
+                    @Override
+                    public void onAddRecipientSuccess(AddRecipientResponse addRecipientResponse) {
+                        final String createdWithCustomId_RecipientId = addRecipientResponse.getRecipientId();
+                        scheduleCleanup(createdWithCustomId_RecipientId);
+
+                        // we now have 2 recipients configured as:
+                        // recipientId | mobileUserId | customId
+                        //    value    |     value    |
+                        //    value    |     value    |  value
+
+                        // look for an existing recipient with customId
+
+                        Map<String, String> idFieldNamesToValues = new HashMap<String, String>();
+                        idFieldNamesToValues.put(CUSTOM_ID_COLUMN, customId);
+                        MobileConnectorManager.get().checkIdentity(idFieldNamesToValues, new IdentityHandler() {
+                            @Override
+                            public void onSuccess(String recipientId, String mobileUserId) {
+
+                                // verify the app is now using the existing recipient
+                                assertThat(EngageConfig.mobileUserId(getContext())).isEqualTo(originalExistingMobileUserId);
+                                assertThat(EngageConfig.recipientId(getContext())).isEqualTo(createdWithCustomId_RecipientId);
+
+                                // verify old recipient is marked as merged on the server
+                                getXMLAPIManager().postXMLAPI(XMLAPI.builder().operation(XMLAPIOperation.SELECT_RECIPIENT_DATA)
+                                                .listId(RECIPIENT_LIST_ID).recipientId(createdWithMobileUserId_RecipientId).build(),
+                                        new SelectRecipientResponseHandler() {
+                                            @Override
+                                            public void onSelectRecipientSuccess(SelectRecipientResponse selectRecipientResponse) {
+
+                                                // check that properties didn't change
+                                                assertThat(selectRecipientResponse.getColumnValue(getEngageConfigManager().mobileUserIdColumnName())).isEqualTo(originalCurrentMobileUserId);
+                                                assertThat(selectRecipientResponse.getColumnValue(CUSTOM_ID_COLUMN)).isNullOrEmpty();
+
+                                                // check marked as merged
+                                                assertThat(selectRecipientResponse.getColumnValue(getEngageConfigManager().mergedRecipientIdColumnName())).isEqualTo(createdWithCustomId_RecipientId);
+                                                assertThat(selectRecipientResponse.getColumnValue(getEngageConfigManager().mergedDateColumnName())).isNotEmpty();
+
+                                                signal.countDown();
+                                            }
+
+                                            @Override
+                                            public void onFailure(Exception exception) {
+                                                fail(exception.getMessage());
+                                            }
+                                        });
+                            }
+
+                            @Override
+                            public void onFailure(Exception e) {
+                                fail(e.getMessage());
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onFailure(Exception exception) {
+                        fail(exception.getMessage());
+                    }
+                });
+            }
+
+            @Override
+            public void onFailure(Exception error) {
+                fail(error.getMessage());
+            }
+
+            protected void scheduleCleanup(String recipientId) {
+                tearDownAPICalls.add(XMLAPI.builder()
+                        .operation(XMLAPIOperation.REMOVE_RECIPIENT)
+                        .listId(getEngageConfigManager().engageListId())
+                        .recipientId(recipientId)
+                        .build());
+            }
+        });
+
+        signal.await(20, TimeUnit.SECONDS);
     }
 }
