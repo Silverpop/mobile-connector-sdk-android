@@ -91,16 +91,20 @@ public class ManualConfigUtil_IT extends BaseAndroidTest {
     public void testCreateDatabaseColumn() throws Exception {
         final CountDownLatch signal = new CountDownLatch(1);
 
-//        String columnName = "Custom Integration Test Id";
-        String columnName = "Mobile User Id";
-        int columnType = XMLAPIColumnType.TEXT_COLUMN.value();
+        // String columnName = "Custom Integration Test Id";
+        // String columnName = "Mobile User Id";
+        // String columnName = getEngageConfigManager().mergedRecipientIdColumnName();
+        String columnName = getEngageConfigManager().mergedDateColumnName();
+
+        // int columnType = XMLAPIColumnType.TEXT_COLUMN.value();
+        int columnType = XMLAPIColumnType.TIMESTAMP.value();
 
         XMLAPI addListColumnXml = XMLAPI.builder()
                 .operation(XMLAPIOperation.ADD_LIST_COLUMN)
                 .listId(getEngageConfigManager().engageListId())
                 .param(XMLAPIElement.COLUMN_NAME, columnName)
                 .param(XMLAPIElement.COLUMN_TYPE, columnType)
-                .param(XMLAPIElement.DEFAULT, "")
+                 //  .param(XMLAPIElement.DEFAULT, "")
                 .build();
 
         getXMLAPIManager().postXMLAPI(addListColumnXml, new XMLAPIResponseHandler() {

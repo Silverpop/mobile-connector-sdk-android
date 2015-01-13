@@ -253,12 +253,9 @@ public class XMLAPI {
 
 
     public static XMLAPI updateRecipient(String recipientId, String listId) {
-        Map<String, Object> bodyElements = new LinkedHashMap<String, Object>();
-        bodyElements.put(XMLAPIElement.LIST_ID.toString(), listId);
-        bodyElements.put(XMLAPIElement.RECIPIENT_ID.toString(), recipientId);
-
-        XMLAPI api = new XMLAPI(XMLAPIOperation.UPDATE_RECIPIENT, bodyElements);
-        return api;
+        XMLAPI updateRecipientXml = builder().operation(XMLAPIOperation.UPDATE_RECIPIENT)
+                .recipientId(recipientId).listId(listId).build();
+        return updateRecipientXml;
     }
 
     public static XMLAPI insertUpdateRelationalTable(String tableId) {

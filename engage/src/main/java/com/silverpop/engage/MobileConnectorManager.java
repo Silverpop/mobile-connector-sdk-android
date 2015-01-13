@@ -6,6 +6,7 @@ import android.util.Log;
 import com.silverpop.engage.config.EngageConfig;
 import com.silverpop.engage.domain.RelationalTableRow;
 import com.silverpop.engage.domain.XMLAPI;
+import com.silverpop.engage.domain.XMLAPIOperation;
 import com.silverpop.engage.exception.EngageConfigException;
 import com.silverpop.engage.exception.XMLAPIResponseException;
 import com.silverpop.engage.recipient.SetupRecipientHandler;
@@ -232,14 +233,11 @@ public class MobileConnectorManager extends BaseManager implements MobileConnect
                 }
                 // we found an existing recipient - does it have a mobileUserId?
                 else {
-
-                    Map<String, String> existingRecipientDataColumns = existingRecipientResponse.getColumns();
-                    final String mobileUserIdColumnName = getEngageConfigManager().mobileUserIdColumnName();
-                    final String existingMobileUserId = existingRecipientDataColumns.get(mobileUserIdColumnName);
+                    final String existingMobileUserId = existingRecipientResponse.getColumnValue(getEngageConfigManager().mobileUserIdColumnName());
 
                     // scenario 2 - existing recipient doesn't have a mobileUserId
                     if (TextUtils.isEmpty(existingMobileUserId)) {
-                        handleExistingRecipientWithoutRecipientId(existingRecipientResponse, existingRecipientDataColumns, identityHandler, listId);
+                        handleExistingRecipientWithoutRecipientId(existingRecipientResponse, identityHandler, listId);
                     }
                     // scenario 3 - existing recipient has a mobileUserId
                     else {
@@ -282,7 +280,7 @@ public class MobileConnectorManager extends BaseManager implements MobileConnect
                 EngageConfig.storeMobileUserId(getContext(), existingMobileUserId);
 
                 // current recipient has been updated and we are now using the existing recipient instead, time to update audit table
-                if (!getEngageConfigManager().mergeHistoryInAuditRecordTableDatabase()) {
+                if (getEngageConfigManager().mergeHistoryInAuditRecordTableDatabase()) {
                     updateAuditRecordWithMergeChanges(oldRecipientId, newRecipientId, identityHandler);
                 } else {
                     identityHandler.onSuccess(EngageConfig.recipientId(getContext()), EngageConfig.mobileUserId(getContext()));
@@ -302,14 +300,12 @@ public class MobileConnectorManager extends BaseManager implements MobileConnect
      * Scenario 2 - existing recipient doesn't have a mobileUserId
      *
      * @param existingRecipientResponse
-     * @param existingRecipientDataColumns
      * @param identityHandler
      * @param listId
      */
     private void handleExistingRecipientWithoutRecipientId(final SelectRecipientResponse existingRecipientResponse,
-                                                           Map<String, String> existingRecipientDataColumns, final IdentityHandler identityHandler, String listId) {
+                                                           final IdentityHandler identityHandler, final String listId) {
 
-        // keep all data from existing recipient, just add the mobile user id to it
         final String mobileUserIdFromApp = EngageConfig.mobileUserId(getContext());
         if (TextUtils.isEmpty(mobileUserIdFromApp)) {
             final String error = "Cannot find mobileUserId to update the existing applicant with for recipientId = " + existingRecipientResponse.getRecipientId();
@@ -319,13 +315,17 @@ public class MobileConnectorManager extends BaseManager implements MobileConnect
                 identityHandler.onFailure(new EngageConfigException(error));
             }
         } else {
-            //[Lindsay Thurmond:1/8/15] TODO: do i need to send all the data columns or just the ones I want to update?
-            existingRecipientDataColumns.put(getEngageConfigManager().mobileUserIdColumnName(), mobileUserIdFromApp);
+
+            final XMLAPI updateExistingRecipientXml = XMLAPI.builder()
+                    .operation(XMLAPIOperation.UPDATE_RECIPIENT)
+                    .listId(listId)
+                    .recipientId(existingRecipientResponse.getRecipientId())
+                    .column(getEngageConfigManager().mobileUserIdColumnName(), mobileUserIdFromApp)
+                    .build();
 
             // update existing recipient on server with new mobile user id
-            final XMLAPI updateExistingRecipient = XMLAPI.updateRecipient(existingRecipientResponse.getRecipientId(), listId);
-            updateExistingRecipient.addColumns((Map<String, Object>) (Object) existingRecipientDataColumns);
-            getXMLAPIManager().postXMLAPI(updateExistingRecipient, new UpdateRecipientResponseHandler() {
+
+            getXMLAPIManager().postXMLAPI(updateExistingRecipientXml, new UpdateRecipientResponseHandler() {
                 @Override
                 public void onUpdateRecipientSuccess(UpdateRecipientResponse updateRecipientResponse) {
 
@@ -333,11 +333,11 @@ public class MobileConnectorManager extends BaseManager implements MobileConnect
 
                     // for recipient currently in the app config
                     XMLAPI updateCurrentRecipient = XMLAPI.updateRecipient(
-                            EngageConfig.recipientId(getContext()), getEngageConfigManager().engageListId());
-                    updateCurrentRecipient.addParam(getEngageConfigManager().mobileUserIdColumnName(), null);
+                            EngageConfig.recipientId(getContext()), listId);
+                    updateCurrentRecipient.addColumn(getEngageConfigManager().mobileUserIdColumnName(), "");
                     if (getEngageConfigManager().mergeHistoryInMergedMarketingDatabase()) {
-                        updateCurrentRecipient.addParam(getEngageConfigManager().mergedDateColumnName(), DateUtil.toGmtString(new Date()));
-                        updateCurrentRecipient.addParam(getEngageConfigManager().mergedRecipientIdColumnName(), existingRecipientResponse.getRecipientId());
+                        updateCurrentRecipient.addColumn(getEngageConfigManager().mergedDateColumnName(), DateUtil.toGmtString(new Date()));
+                        updateCurrentRecipient.addColumn(getEngageConfigManager().mergedRecipientIdColumnName(), existingRecipientResponse.getRecipientId());
                     }
 
                     getXMLAPIManager().postXMLAPI(updateCurrentRecipient, new UpdateRecipientResponseHandler() {
@@ -349,7 +349,7 @@ public class MobileConnectorManager extends BaseManager implements MobileConnect
                             EngageConfig.storeRecipientId(getContext(), newRecipientId);
 
                             // both recipients have been updated, time to update audit table
-                            if (!getEngageConfigManager().mergeHistoryInAuditRecordTableDatabase()) {
+                            if (getEngageConfigManager().mergeHistoryInAuditRecordTableDatabase()) {
                                 updateAuditRecordWithMergeChanges(oldRecipientId, newRecipientId, identityHandler);
                             } else {
                                 identityHandler.onSuccess(EngageConfig.recipientId(getContext()), EngageConfig.mobileUserId(getContext()));
