@@ -3,6 +3,7 @@ package com.silverpop.engage.domain;
 import android.app.Notification;
 import android.test.AndroidTestCase;
 
+import android.text.TextUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -29,14 +30,12 @@ public class UBFTests
         REQ_FIELDS.put("Device Id", Boolean.TRUE);
         REQ_FIELDS.put("Primary User Id", Boolean.FALSE);
         REQ_FIELDS.put("Anonymous Id", Boolean.FALSE);
+        REQ_FIELDS.put("Recipient Id", Boolean.FALSE);
     }
 
     public void testUBFCreation() {
 
-        final Map<String, Object> eventParams = null;
-
-        UBF ubf = new UBF(getContext(), UBF.INSTALLED, eventParams);
-        assertTrue(ubf != null);
+        UBF ubf = new UBF(getContext(), UBF.INSTALLED, null);
         assertTrue(ubf.getCode() == UBF.INSTALLED);
         assertTrue(ubf.getParams() == null);
         assertTrue(ubf.getCoreTemplate() != null && ubf.getCoreTemplate().size() > 0);
@@ -51,7 +50,7 @@ public class UBFTests
 
     
     public void testCreateEventWithCode() {
-        assertTrue(false);
+        fail("Not implemented yet");
     }
 
     public void testUBFJSONSerialization() throws JSONException {
@@ -72,7 +71,7 @@ public class UBFTests
 
     
     public void testUBFJSONDeSerialization() {
-        assertTrue(false);
+        fail("Not implemented yet");
     }
 
     
@@ -237,7 +236,7 @@ public class UBFTests
 
     
     public void testUBFLocation() throws JSONException {
-        assertTrue(false);
+        fail("Not implemented yet");
     }
 
 
@@ -274,7 +273,7 @@ public class UBFTests
                 String entryString = (String) entry.getValue();
                 Boolean required = REQ_FIELDS.get(entry.getKey());
 
-                if (entryString != null && entryString.length() > 0 && required) {
+                if (required && TextUtils.isEmpty(entryString)) {
                     valid = false;
                     break;
                 }

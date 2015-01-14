@@ -11,6 +11,8 @@ import com.silverpop.engage.response.EngageResponseXML;
 import com.silverpop.engage.response.handler.XMLAPIResponseHandler;
 
 /**
+ * Methods for interacting with the Silverpop Engage XML API.
+ *
  * Created by jeremydyer on 5/21/14.
  */
 public class XMLAPIManager extends BaseManager {
@@ -49,10 +51,31 @@ public class XMLAPIManager extends BaseManager {
      * @param failureTask AsyncTask to execute on failure
      */
     public void postXMLAPI(XMLAPI api,
-                           AsyncTask<EngageResponseXML, Void, Object> successTask,
-                           AsyncTask<VolleyError, Void, Object> failureTask) {
-        Response.Listener<String> successListener = successListenerForXMLAPI(successTask);
-        Response.ErrorListener errorListener = errorListenerForXMLAPI(failureTask);
+                           final AsyncTask<EngageResponseXML, Void, Object> successTask,
+                           final AsyncTask<VolleyError, Void, Object> failureTask) {
+
+        Response.Listener<String> successListener = new Response.Listener<String>() {
+            public void onResponse(String response) {
+                //If null the user doesn't want anything special to happen.
+                if (successTask != null) {
+
+                    //Perform the EngageSDK internal logic before passing processing off to user defined AsyncTask.
+                    EngageResponseXML responseXML = new EngageResponseXML(response);
+                    successTask.execute(responseXML);
+                }
+            }
+        };
+        Response.ErrorListener errorListener = new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e(TAG, error.getMessage(), error);
+
+                //Call the SDK user defined method.
+                if (failureTask != null) {
+                    failureTask.execute(error);
+                }
+            }
+        };
         xmlapiClient.postResource(api, successListener, errorListener);
     }
 
@@ -95,8 +118,6 @@ public class XMLAPIManager extends BaseManager {
     public void createAnonymousUserList(String listId,
                                         AsyncTask<EngageResponseXML, Void, Object> successTask,
                                         AsyncTask<VolleyError, Void, Object> failureTask) {
-//        XMLAPI createAnonymous = XMLAPI.addRecipientAnonymousToList(listId);
-//        postXMLAPI(createAnonymous, successTask, failureTask);
 
         AnonymousMobileConnectorManager.get().createAnonymousUserList(listId, successTask, failureTask);
     }
@@ -108,56 +129,14 @@ public class XMLAPIManager extends BaseManager {
      * {@link com.silverpop.engage.AnonymousMobileConnectorManager#updateAnonymousUserToKnownUser(String, android.os.AsyncTask, android.os.AsyncTask)}
      * which you are encouraged to use instead.
      *
-     * @param listId
-     * @param successTask
-     * @param failureTask
+     * @param listId      Database identifier.
+     * @param successTask AsyncTask to execute on successful result.
+     * @param failureTask AsyncTask to execute on failure
      */
     public void updateAnonymousUserToKnownUser(String listId, AsyncTask<EngageResponseXML, Void, Object> successTask,
                                                AsyncTask<VolleyError, Void, Object> failureTask) {
-//        XMLAPI createAnonymous = XMLAPI.addRecipientAnonymousToList(listId);
-//        postXMLAPI(createAnonymous, successTask, failureTask);
 
         AnonymousMobileConnectorManager.get().updateAnonymousUserToKnownUser(listId, successTask, failureTask);
-    }
-
-    /**
-     * Handles the successful completion of the XMLAPI post
-     *
-     * @return
-     */
-    private Response.Listener<String> successListenerForXMLAPI(final AsyncTask<EngageResponseXML, Void, Object> successTask) {
-        return new Response.Listener<String>() {
-            public void onResponse(String response) {
-
-                //Perform the EngageSDK internal logic before passing processing off to user defined AsyncTask.
-                EngageResponseXML responseXML = new EngageResponseXML(response);
-
-                //If null the user doesn't want anything special to happen.
-                if (successTask != null) {
-                    successTask.execute(responseXML);
-                }
-            }
-        };
-    }
-
-
-    /**
-     * Handles the failure of a XMLAPI event post.
-     *
-     * @return
-     */
-    private Response.ErrorListener errorListenerForXMLAPI(final AsyncTask<VolleyError, Void, Object> failureTask) {
-        return new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.e(TAG, error.getMessage());
-
-                //Call the SDK user defined method.
-                if (failureTask != null) {
-                    failureTask.execute(error);
-                }
-            }
-        };
     }
 
 }

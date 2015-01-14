@@ -10,6 +10,7 @@ import android.location.Location;
 import android.os.Build;
 import android.provider.Settings;
 
+import android.text.TextUtils;
 import com.silverpop.engage.util.EngageExpirationParser;
 
 import java.util.Date;
@@ -95,12 +96,15 @@ public class EngageConfig {
     }
 
     public static String appName(Context context) {
-        String appName = "UNKNOWN";
+        String appName = null;
         try {
             PackageInfo pInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
             appName = pInfo.versionName;
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
+        }
+        if (TextUtils.isEmpty(appName)) {
+            appName = "UNKNOWN";
         }
         return appName;
     }

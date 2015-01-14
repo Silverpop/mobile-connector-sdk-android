@@ -139,6 +139,7 @@ public class XMLAPI {
 
     /**
      * Replaces the current sync fields with the ones provided.
+     *
      * @param syncFields
      */
     public void setSyncFields(Map<String, Object> syncFields) {
@@ -149,6 +150,7 @@ public class XMLAPI {
 
     /**
      * Adds an additional sync field to the list of existing sync fields
+     *
      * @param key
      * @param value
      */
@@ -268,11 +270,12 @@ public class XMLAPI {
      * Method left here for backwards compatibility, but functionality has been moved to
      * {@link com.silverpop.engage.AnonymousMobileConnectorManager#addRecipientAnonymousToList(String)}
      * which you are encouraged to use instead.
+     *
      * @param listId
      * @return
      */
     public static XMLAPI addRecipientAnonymousToList(String listId) {
-       return AnonymousMobileConnectorManager.addRecipientAnonymousToList(listId);
+        return AnonymousMobileConnectorManager.addRecipientAnonymousToList(listId);
     }
 
     public String envelope() {
@@ -364,8 +367,8 @@ public class XMLAPI {
             for (RelationalTableRow tableRow : tableRows) {
                 builder.append("<").append(XMLAPIElement.ROW.toString()).append(">");
                 for (RelationalTableRow.Column column : tableRow.getColumns()) {
-                    //[Lindsay Thurmond:1/9/15] TODO: data formats?
-                    builder.append("<COLUMN name=\"").append(column.getName()).append("\"><![CDATA[").append(column.getValue().toString()).append("]]></COLUMN>");
+                    builder.append("<COLUMN name=\"").append(column.getName()).append("\"><![CDATA[")
+                            .append(column.getValue() != null ? column.getValue().toString() : "").append("]]></COLUMN>");
                 }
                 builder.append("</").append(XMLAPIElement.ROW.toString()).append(">");
             }
@@ -437,7 +440,7 @@ public class XMLAPI {
         }
 
         public Builder param(XMLAPIElement element, Object value) {
-           return param(element.toString(), value);
+            return param(element.toString(), value);
         }
 
         public Builder column(String key, Object value) {
@@ -483,6 +486,9 @@ public class XMLAPI {
             }
             if (rows != null) {
                 xml.setRows(rows);
+            }
+            if (syncFields != null) {
+                xml.setSyncFields(syncFields);
             }
 
             return xml;

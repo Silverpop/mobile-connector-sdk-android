@@ -23,7 +23,7 @@ import java.util.TimeZone;
 public class UBF
     implements JSONable {
 
-    public static final int EXPECTED_CORE_TEMPLATE_SIZE = 9;
+    public static final int EXPECTED_CORE_TEMPLATE_SIZE = 10;
 
     public static final int INSTALLED = 12;
     public static final int SESSION_STARTED = 13;
