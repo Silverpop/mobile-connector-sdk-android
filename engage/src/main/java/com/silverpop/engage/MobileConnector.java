@@ -1,5 +1,6 @@
 package com.silverpop.engage;
 
+import com.silverpop.engage.recipient.CheckIdentityHandler;
 import com.silverpop.engage.recipient.SetupRecipientHandler;
 
 import java.util.Map;
@@ -9,9 +10,7 @@ import java.util.Map;
  */
 public interface MobileConnector {
 
-
     void setupRecipient(SetupRecipientHandler setupRecipientHandler);
 
-    //[Lindsay Thurmond:1/12/15] TODO: test me
-    void checkIdentity(Map<String, String> idFieldNamesToValues, IdentityHandler identityHandler);
+    void checkIdentity(Map<String, String> idFieldNamesToValues, CheckIdentityHandler identityHandler);
 }

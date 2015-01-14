@@ -9,7 +9,10 @@ import com.silverpop.engage.domain.XMLAPI;
 import com.silverpop.engage.domain.XMLAPIOperation;
 import com.silverpop.engage.exception.EngageConfigException;
 import com.silverpop.engage.exception.XMLAPIResponseException;
+import com.silverpop.engage.recipient.CheckIdentityResult;
+import com.silverpop.engage.recipient.CheckIdentityHandler;
 import com.silverpop.engage.recipient.SetupRecipientHandler;
+import com.silverpop.engage.recipient.SetupRecipientResult;
 import com.silverpop.engage.response.*;
 import com.silverpop.engage.response.handler.AddRecipientResponseHandler;
 import com.silverpop.engage.response.handler.UpdateRecipientResponseHandler;
@@ -60,7 +63,7 @@ public class MobileConnectorManager extends BaseManager implements MobileConnect
 
             if (!TextUtils.isEmpty(existingRecipientId) && !TextUtils.isEmpty(existingMobileUserId)) {
                 // recipient previously setup, no need to go any further
-                setupRecipientHandler.onSuccess(existingRecipientId);
+                setupRecipientHandler.onSuccess(new SetupRecipientResult(existingRecipientId));
                 return;
             }
 
@@ -124,7 +127,7 @@ public class MobileConnectorManager extends BaseManager implements MobileConnect
             @Override
             public void onUpdateRecipientSuccess(UpdateRecipientResponse updateRecipientResponse) {
                 if (setupRecipientHandler != null) {
-                    setupRecipientHandler.onSuccess(updateRecipientResponse.getRecipientId());
+                    setupRecipientHandler.onSuccess(new SetupRecipientResult(updateRecipientResponse.getRecipientId()));
                 }
             }
 
@@ -163,7 +166,7 @@ public class MobileConnectorManager extends BaseManager implements MobileConnect
                     // EngageConfig.storeAnonymousUserId(context, recipientId);
 
                     if (setupRecipientHandler != null) {
-                        setupRecipientHandler.onSuccess(recipientId);
+                        setupRecipientHandler.onSuccess(new SetupRecipientResult(recipientId));
                     }
                 }
             }
@@ -178,11 +181,12 @@ public class MobileConnectorManager extends BaseManager implements MobileConnect
     }
 
     @Override
-    public void checkIdentity(final Map<String, String> idFieldNamesToValues, final IdentityHandler identityHandler) {
+    public void checkIdentity(final Map<String, String> idFieldNamesToValues, final CheckIdentityHandler identityHandler) {
 
         setupRecipient(new SetupRecipientHandler() {
             @Override
-            public void onSuccess(String currentRecipientId) {
+            public void onSuccess(SetupRecipientResult result) {
+                String currentRecipientId = result.getRecipientId();
                 checkForExistingRecipientAndUpdateIfNeeded(idFieldNamesToValues, currentRecipientId, identityHandler);
             }
 
@@ -196,7 +200,8 @@ public class MobileConnectorManager extends BaseManager implements MobileConnect
         });
     }
 
-    private void checkForExistingRecipientAndUpdateIfNeeded(final Map<String, String> idFieldNamesToValues, final String currentRecipientId, final IdentityHandler identityHandler) {
+    private void checkForExistingRecipientAndUpdateIfNeeded(final Map<String, String> idFieldNamesToValues,
+                                                            final String currentRecipientId, final CheckIdentityHandler identityHandler) {
 
         // look up recipient from silverpop
         final String listId = getEngageConfigManager().engageListId();
@@ -262,7 +267,7 @@ public class MobileConnectorManager extends BaseManager implements MobileConnect
      * @param listId
      * @param identityHandler
      */
-    private void handleExistingRecipientWithRecipientId(final SelectRecipientResponse existingRecipientResponse, final String existingMobileUserId, String currentRecipientId, String listId, final IdentityHandler identityHandler) {
+    private void handleExistingRecipientWithRecipientId(final SelectRecipientResponse existingRecipientResponse, final String existingMobileUserId, String currentRecipientId, String listId, final CheckIdentityHandler identityHandler) {
         // mark current recipient as merged
         XMLAPI updateCurrentRecipientXml = XMLAPI.updateRecipient(currentRecipientId, listId);
         if (getEngageConfigManager().mergeHistoryInMergedMarketingDatabase()) {
@@ -283,7 +288,8 @@ public class MobileConnectorManager extends BaseManager implements MobileConnect
                 if (getEngageConfigManager().mergeHistoryInAuditRecordTableDatabase()) {
                     updateAuditRecordWithMergeChanges(oldRecipientId, newRecipientId, identityHandler);
                 } else {
-                    identityHandler.onSuccess(EngageConfig.recipientId(getContext()), EngageConfig.mobileUserId(getContext()));
+                    identityHandler.onSuccess(new CheckIdentityResult(
+                            EngageConfig.recipientId(getContext()), EngageConfig.mobileUserId(getContext())));
                 }
             }
 
@@ -304,7 +310,7 @@ public class MobileConnectorManager extends BaseManager implements MobileConnect
      * @param listId
      */
     private void handleExistingRecipientWithoutRecipientId(final SelectRecipientResponse existingRecipientResponse,
-                                                           final IdentityHandler identityHandler, final String listId) {
+                                                           final CheckIdentityHandler identityHandler, final String listId) {
 
         final String mobileUserIdFromApp = EngageConfig.mobileUserId(getContext());
         if (TextUtils.isEmpty(mobileUserIdFromApp)) {
@@ -352,7 +358,8 @@ public class MobileConnectorManager extends BaseManager implements MobileConnect
                             if (getEngageConfigManager().mergeHistoryInAuditRecordTableDatabase()) {
                                 updateAuditRecordWithMergeChanges(oldRecipientId, newRecipientId, identityHandler);
                             } else {
-                                identityHandler.onSuccess(EngageConfig.recipientId(getContext()), EngageConfig.mobileUserId(getContext()));
+                                identityHandler.onSuccess(new CheckIdentityResult(
+                                        EngageConfig.recipientId(getContext()), EngageConfig.mobileUserId(getContext())));
                             }
                         }
 
@@ -382,7 +389,7 @@ public class MobileConnectorManager extends BaseManager implements MobileConnect
      * <p/>
      * Should only be called if the 'mergeHistoryInAuditRecordTable' config property is {@code true}
      */
-    private void updateAuditRecordWithMergeChanges(String oldRecipientId, String newRecipientId, final IdentityHandler identityHandler) {
+    private void updateAuditRecordWithMergeChanges(String oldRecipientId, String newRecipientId, final CheckIdentityHandler identityHandler) {
         final String auditRecordTableId = EngageConfig.auditRecordTableId(getContext());
         if (TextUtils.isEmpty(auditRecordTableId)) {
             if (identityHandler != null) {
@@ -403,7 +410,8 @@ public class MobileConnectorManager extends BaseManager implements MobileConnect
                     if (response.isSuccess()) {
                         // congratz, we're done!
                         if (identityHandler != null) {
-                            identityHandler.onSuccess(EngageConfig.recipientId(getContext()), EngageConfig.mobileUserId(getContext()));
+                            identityHandler.onSuccess(new CheckIdentityResult(
+                                    EngageConfig.recipientId(getContext()), EngageConfig.mobileUserId(getContext())));
                         }
                     } else {
                         if (identityHandler != null) {
@@ -425,7 +433,7 @@ public class MobileConnectorManager extends BaseManager implements MobileConnect
     /**
      * Scenario 1 - no existing recipient
      */
-    private void updateRecipientWithCustomId(String recipientId, String listId, Map<String, String> idFieldNamesToValues, final IdentityHandler identityHandler) {
+    private void updateRecipientWithCustomId(String recipientId, String listId, Map<String, String> idFieldNamesToValues, final CheckIdentityHandler identityHandler) {
         XMLAPI updateCurrentRecipientXml = XMLAPI.updateRecipient(recipientId, listId);
         for (Map.Entry<String, String> fieldValueEntry : idFieldNamesToValues.entrySet()) {
             String idFieldName = fieldValueEntry.getKey();
@@ -438,7 +446,8 @@ public class MobileConnectorManager extends BaseManager implements MobileConnect
             @Override
             public void onUpdateRecipientSuccess(UpdateRecipientResponse updateRecipientResponse) {
                 if (identityHandler != null) {
-                    identityHandler.onSuccess(updateRecipientResponse.getRecipientId(), EngageConfig.mobileUserId(getContext()));
+                    identityHandler.onSuccess(new CheckIdentityResult(
+                            updateRecipientResponse.getRecipientId(), EngageConfig.mobileUserId(getContext())));
                 }
             }
 

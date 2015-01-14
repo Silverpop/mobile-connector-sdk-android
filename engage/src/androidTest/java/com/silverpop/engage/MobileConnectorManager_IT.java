@@ -5,7 +5,10 @@ import com.silverpop.BaseAndroidTest;
 import com.silverpop.engage.config.EngageConfig;
 import com.silverpop.engage.domain.XMLAPI;
 import com.silverpop.engage.domain.XMLAPIOperation;
+import com.silverpop.engage.recipient.CheckIdentityResult;
+import com.silverpop.engage.recipient.CheckIdentityHandler;
 import com.silverpop.engage.recipient.SetupRecipientHandler;
+import com.silverpop.engage.recipient.SetupRecipientResult;
 import com.silverpop.engage.response.AddRecipientResponse;
 import com.silverpop.engage.response.EngageResponseXML;
 import com.silverpop.engage.response.SelectRecipientResponse;
@@ -71,7 +74,8 @@ public class MobileConnectorManager_IT extends BaseAndroidTest {
 
         MobileConnectorManager.get().setupRecipient(new SetupRecipientHandler() {
             @Override
-            public void onSuccess(String recipientId) {
+            public void onSuccess(SetupRecipientResult result) {
+                String recipientId = result.getRecipientId();
                 scheduleCleanup(recipientId);
 
                 assertThat(recipientId).isNotNull();
@@ -86,6 +90,7 @@ public class MobileConnectorManager_IT extends BaseAndroidTest {
 
             protected void scheduleCleanup(String recipientId) {
                 tearDownAPICalls.add(XMLAPI.builder()
+                        .operation(XMLAPIOperation.REMOVE_RECIPIENT)
                         .listId(getEngageConfigManager().engageListId())
                         .recipientId(recipientId)
                         .column(getEngageConfigManager().mobileUserIdColumnName(), EngageConfig.mobileUserId(getContext()))
@@ -114,7 +119,8 @@ public class MobileConnectorManager_IT extends BaseAndroidTest {
         // calling setup recipient again should return the values that were previously set instead of generating new ones
         MobileConnectorManager.get().setupRecipient(new SetupRecipientHandler() {
             @Override
-            public void onSuccess(String recipientId) {
+            public void onSuccess(SetupRecipientResult result) {
+                String recipientId = result.getRecipientId();
                 assertThat(recipientId).isEqualTo(prevRecipientId);
 
                 // engage config should remain unchanged
@@ -157,7 +163,8 @@ public class MobileConnectorManager_IT extends BaseAndroidTest {
                 // start actual test
                 MobileConnectorManager.get().setupRecipient(new SetupRecipientHandler() {
                     @Override
-                    public void onSuccess(String recipientId) {
+                    public void onSuccess(SetupRecipientResult result) {
+                        String recipientId = result.getRecipientId();
                         // recipient should have been updated with mobile user id
                         assertThat(recipientId).isEqualTo(existingRecipientId);
                         assertThat(EngageConfig.mobileUserId(getContext())).isNotEmpty();
@@ -197,7 +204,8 @@ public class MobileConnectorManager_IT extends BaseAndroidTest {
         // setup recipient on server with recipientId and mobileUserId set
         MobileConnectorManager.get().setupRecipient(new SetupRecipientHandler() {
             @Override
-            public void onSuccess(final String createdRecipientId) {
+            public void onSuccess(SetupRecipientResult result) {
+                final String createdRecipientId = result.getRecipientId();
                 scheduleCleanup(createdRecipientId);
 
                 // recipient is setup, we should have recipientId and mobileUserId now
@@ -211,9 +219,12 @@ public class MobileConnectorManager_IT extends BaseAndroidTest {
                 idFieldNamesToValues.put(CUSTOM_ID_COLUMN, nonExistingCustomIdValue);
 
 
-                MobileConnectorManager.get().checkIdentity(idFieldNamesToValues, new IdentityHandler() {
+                MobileConnectorManager.get().checkIdentity(idFieldNamesToValues, new CheckIdentityHandler() {
                     @Override
-                    public void onSuccess(String recipientId, final String mobileUserId) {
+                    public void onSuccess(CheckIdentityResult result) {
+                        final String recipientId = result.getRecipientId();
+                        final String mobileUserId = result.getMobileUserId();
+
                         // check that existing recipient was updated with a generated mobile user id
                         assertThat(recipientId).isNotEmpty();
                         assertThat(mobileUserId).isNotEmpty();
@@ -279,7 +290,8 @@ public class MobileConnectorManager_IT extends BaseAndroidTest {
         // setup recipient on server with recipientId and mobileUserId set
         MobileConnectorManager.get().setupRecipient(new SetupRecipientHandler() {
             @Override
-            public void onSuccess(final String createdWithMobileUserId_RecipientId) {
+            public void onSuccess(SetupRecipientResult result) {
+                final String createdWithMobileUserId_RecipientId = result.getRecipientId();
                 scheduleCleanup(createdWithMobileUserId_RecipientId);
                 final String originalMobileUserId = EngageConfig.mobileUserId(getContext());
 
@@ -306,9 +318,12 @@ public class MobileConnectorManager_IT extends BaseAndroidTest {
 
                         Map<String, String> idFieldNamesToValues = new HashMap<String, String>();
                         idFieldNamesToValues.put(CUSTOM_ID_COLUMN, customId);
-                        MobileConnectorManager.get().checkIdentity(idFieldNamesToValues, new IdentityHandler() {
+                        MobileConnectorManager.get().checkIdentity(idFieldNamesToValues, new CheckIdentityHandler() {
                             @Override
-                            public void onSuccess(String recipientId, String mobileUserId) {
+                            public void onSuccess(CheckIdentityResult result) {
+
+                                String recipientId = result.getRecipientId();
+                                String mobileUserId = result.getMobileUserId();
 
                                 // check state of recipients on server
                                 // check first recipient
@@ -393,7 +408,8 @@ public class MobileConnectorManager_IT extends BaseAndroidTest {
         // setup recipient on server with recipientId and mobileUserId set
         MobileConnectorManager.get().setupRecipient(new SetupRecipientHandler() {
             @Override
-            public void onSuccess(final String createdWithMobileUserId_RecipientId) {
+            public void onSuccess(SetupRecipientResult result) {
+                final String createdWithMobileUserId_RecipientId = result.getRecipientId();
                 scheduleCleanup(createdWithMobileUserId_RecipientId);
                 final String originalCurrentMobileUserId = EngageConfig.mobileUserId(getContext());
 
@@ -422,9 +438,11 @@ public class MobileConnectorManager_IT extends BaseAndroidTest {
 
                         Map<String, String> idFieldNamesToValues = new HashMap<String, String>();
                         idFieldNamesToValues.put(CUSTOM_ID_COLUMN, customId);
-                        MobileConnectorManager.get().checkIdentity(idFieldNamesToValues, new IdentityHandler() {
+                        MobileConnectorManager.get().checkIdentity(idFieldNamesToValues, new CheckIdentityHandler() {
                             @Override
-                            public void onSuccess(String recipientId, String mobileUserId) {
+                            public void onSuccess(CheckIdentityResult result) {
+                                final String recipientId = result.getRecipientId();
+                                final String mobileUserId = result.getMobileUserId();
 
                                 // verify the app is now using the existing recipient
                                 assertThat(EngageConfig.mobileUserId(getContext())).isEqualTo(originalExistingMobileUserId);
@@ -485,4 +503,11 @@ public class MobileConnectorManager_IT extends BaseAndroidTest {
 
         signal.await(20, TimeUnit.SECONDS);
     }
+
+    //[Lindsay Thurmond:1/13/15] TODO: tests with audit record
+
+    //[Lindsay Thurmond:1/13/15] TODO: check that merged columns only used if not using audit record
+
+    //[Lindsay Thurmond:1/13/15] TODO: scenario 2 add validation for EngageConfig properties set correctly
+
 }
