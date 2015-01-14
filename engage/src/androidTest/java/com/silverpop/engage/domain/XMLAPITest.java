@@ -229,22 +229,18 @@ public class XMLAPITest
         assertTrue(api.envelope().endsWith("</UnitTest></Body></Envelope>"));
     }
 
-    //[Lindsay Thurmond:1/12/15] TODO: fix failing test
     public void testSelectRecipientData() {
         String email = "test@silverpop.com";
         String listId = "12345";
-        XMLAPI api = XMLAPI.selectRecipientData(email, listId);
 
         //Create the base message
-        api = XMLAPI.selectRecipientData(email, listId);
-        Map<String, Object> cols = new HashMap<String, Object>();
-        cols.put("Customer Id", "123-45-6789");
-        api.addColumns(cols);
+        XMLAPI api = XMLAPI.selectRecipientData(email, listId);
+        api.addColumn("Customer Id", "123-45-6789");
 
         String request1 = "<Envelope><Body><SelectRecipientData>" +
-                "<COLUMN><NAME>Customer Id</NAME><VALUE>123-45-6789</VALUE></COLUMN>" +
                 "<LIST_ID>12345</LIST_ID>" +
                 "<EMAIL>test@silverpop.com</EMAIL>" +
+                "<COLUMN><NAME>Customer Id</NAME><VALUE>123-45-6789</VALUE></COLUMN>" +
                 "</SelectRecipientData></Body></Envelope>";
 
         assertEquals(request1, api.envelope());
@@ -285,7 +281,6 @@ public class XMLAPITest
         assertEquals(request1, api.envelope());
     }
 
-    //[Lindsay Thurmond:1/12/15] TODO: fix failing test
     public void testUpdateRecipient() {
 
         String email = "somebody@domain.com";
@@ -305,13 +300,13 @@ public class XMLAPITest
         api.addColumns(columns);
 
         String request1 = "<Envelope><Body><UpdateRecipient>" +
-                "<COLUMN><NAME>Customer Id</NAME><VALUE>123-45-6789</VALUE></COLUMN>" +
-                "<COLUMN><NAME>EMAIL</NAME><VALUE>somebody@domain.com</VALUE></COLUMN>" +
-                "<COLUMN><NAME>Street_Address</NAME><VALUE>123 New Street</VALUE></COLUMN>" +
                 "<LIST_ID>85628</LIST_ID>" +
                 "<RECIPIENT_ID>somebody@domain.com</RECIPIENT_ID>" +
                 "<CREATED_FROM>2</CREATED_FROM>" +
                 "<OLD_EMAIL>somebody@domain.com</OLD_EMAIL>" +
+                "<COLUMN><NAME>Customer Id</NAME><VALUE>123-45-6789</VALUE></COLUMN>" +
+                "<COLUMN><NAME>EMAIL</NAME><VALUE>somebody@domain.com</VALUE></COLUMN>" +
+                "<COLUMN><NAME>Street_Address</NAME><VALUE>123 New Street</VALUE></COLUMN>" +
                 "</UpdateRecipient></Body></Envelope>";
 
         assertEquals(request1, api.envelope());
@@ -333,18 +328,17 @@ public class XMLAPITest
         api.addColumns(columns);
 
         String request2 = "<Envelope><Body><UpdateRecipient>" +
-                "<COLUMN><NAME>Customer Id</NAME><VALUE>123-45-6789</VALUE></COLUMN>" +
-                "<COLUMN><NAME>EMAIL</NAME><VALUE>somebody@domain.com</VALUE></COLUMN>" +
-                "<COLUMN><NAME>OPT_OUT</NAME><VALUE>false</VALUE></COLUMN>" +
-                "<COLUMN><NAME>Street_Address</NAME><VALUE>123 New Street</VALUE></COLUMN>" +
                 "<LIST_ID>85628</LIST_ID>" +
                 "<RECIPIENT_ID>somebody@domain.com</RECIPIENT_ID>" +
                 "<CREATED_FROM>2</CREATED_FROM>" +
                 "<OLD_EMAIL>somebody@domain.com</OLD_EMAIL>" +
+                "<COLUMN><NAME>Customer Id</NAME><VALUE>123-45-6789</VALUE></COLUMN>" +
+                "<COLUMN><NAME>EMAIL</NAME><VALUE>somebody@domain.com</VALUE></COLUMN>" +
+                "<COLUMN><NAME>OPT_OUT</NAME><VALUE>false</VALUE></COLUMN>" +
+                "<COLUMN><NAME>Street_Address</NAME><VALUE>123 New Street</VALUE></COLUMN>" +
                 "</UpdateRecipient></Body></Envelope>";
 
         assertEquals(request2, api.envelope());
-
     }
 
     public void testAddRecipient() {

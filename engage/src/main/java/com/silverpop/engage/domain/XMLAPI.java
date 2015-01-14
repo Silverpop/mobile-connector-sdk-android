@@ -200,18 +200,13 @@ public class XMLAPI {
     }
 
     public static XMLAPI selectRecipientData(String emailAddress, String listId) {
-        XMLAPI api = new XMLAPI(XMLAPIOperation.SELECT_RECIPIENT_DATA);
+        XMLAPI selectRecipientDataXml = builder()
+                .operation(XMLAPIOperation.SELECT_RECIPIENT_DATA)
+                .email(emailAddress)
+                .listId(listId)
+                .build();
 
-        Map<String, Object> rd = new LinkedHashMap<String, Object>();
-        rd.put(XMLAPIElement.LIST_ID.toString(), listId);
-        rd.put(XMLAPIElement.EMAIL.toString(), emailAddress);
-
-        Map<String, Object> in = new LinkedHashMap<String, Object>();
-        in.put(XMLAPIElement.EMAIL.toString(), emailAddress);
-        rd.put(XMLAPIElement.COLUMNS.toString(), in);
-
-        api.setBodyElements(rd);
-        return api;
+        return selectRecipientDataXml;
     }
 
     public static XMLAPI addRecipientWithEmail(String emailAddress, String listId) {
