@@ -26,6 +26,8 @@ import java.util.Map;
 
 /**
  * Created by Lindsay Thurmond on 1/6/15.
+ *
+ * Handles creation of recipients and auto-generates the mobile user id if needed.
  */
 public class MobileConnectorManager extends BaseManager implements MobileConnector {
 
@@ -355,7 +357,7 @@ public class MobileConnectorManager extends BaseManager implements MobileConnect
                         public void onUpdateRecipientSuccess(UpdateRecipientResponse updateCurrentRecipientResponse) {
                             // start using existing recipient id instead
                             final String oldRecipientId = EngageConfig.recipientId(getContext());
-                            final String newRecipientId = updateCurrentRecipientResponse.getRecipientId();
+                            final String newRecipientId = existingRecipientResponse.getRecipientId();
                             EngageConfig.storeRecipientId(getContext(), newRecipientId);
 
                             // both recipients have been updated, time to update audit table

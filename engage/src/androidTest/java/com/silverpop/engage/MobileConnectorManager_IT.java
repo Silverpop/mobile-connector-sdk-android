@@ -305,8 +305,8 @@ public class MobileConnectorManager_IT extends BaseAndroidTest {
                         .build();
                 getXMLAPIManager().postXMLAPI(addRecipientWithCustomIdXml, new AddRecipientResponseHandler() {
                     @Override
-                    public void onAddRecipientSuccess(AddRecipientResponse addRecipientResponse) {
-                        final String createdWithCustomId_RecipientId = addRecipientResponse.getRecipientId();
+                    public void onAddRecipientSuccess(AddRecipientResponse addRecipientWithCustomIdResponse) {
+                        final String createdWithCustomId_RecipientId = addRecipientWithCustomIdResponse.getRecipientId();
                         scheduleCleanup(createdWithCustomId_RecipientId);
 
                         // we now have 2 recipients configured as:
@@ -322,8 +322,9 @@ public class MobileConnectorManager_IT extends BaseAndroidTest {
                             @Override
                             public void onSuccess(CheckIdentityResult result) {
 
-                                String recipientId = result.getRecipientId();
-                                String mobileUserId = result.getMobileUserId();
+                                // verify the app is now using the existing recipient
+                                assertThat(EngageConfig.recipientId(getContext())).isEqualTo(createdWithCustomId_RecipientId);
+                                assertThat(EngageConfig.mobileUserId(getContext())).isEqualTo(originalMobileUserId);
 
                                 // check state of recipients on server
                                 // check first recipient
@@ -441,8 +442,6 @@ public class MobileConnectorManager_IT extends BaseAndroidTest {
                         MobileConnectorManager.get().checkIdentity(idFieldNamesToValues, new CheckIdentityHandler() {
                             @Override
                             public void onSuccess(CheckIdentityResult result) {
-                                final String recipientId = result.getRecipientId();
-                                final String mobileUserId = result.getMobileUserId();
 
                                 // verify the app is now using the existing recipient
                                 assertThat(EngageConfig.mobileUserId(getContext())).isEqualTo(originalExistingMobileUserId);
@@ -506,8 +505,6 @@ public class MobileConnectorManager_IT extends BaseAndroidTest {
 
     //[Lindsay Thurmond:1/13/15] TODO: tests with audit record
 
-    //[Lindsay Thurmond:1/13/15] TODO: check that merged columns only used if not using audit record
-
-    //[Lindsay Thurmond:1/13/15] TODO: scenario 2 add validation for EngageConfig properties set correctly
+    //[Lindsay Thurmond:1/14/15] TODO: tests with multiple ids
 
 }

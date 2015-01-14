@@ -35,6 +35,11 @@ public class EngageConfigTest
         assertEquals(anonUser, EngageConfig.anonymousUserId(getContext()));
     }
 
+    public void testRecipientId() {
+        String recipientId = "1234567";
+        EngageConfig.storeRecipientId(getContext(), recipientId);
+        assertEquals(recipientId, EngageConfig.recipientId(getContext()));
+    }
 
     public void testCurrentCampaign() {
         String currentCampaign = "EngageTestCurrentCampaign";

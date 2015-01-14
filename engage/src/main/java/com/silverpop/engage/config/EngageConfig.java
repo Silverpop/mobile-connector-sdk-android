@@ -120,6 +120,8 @@ public class EngageConfig {
         }
     }
 
+    //[Lindsay Thurmond:1/14/15] TODO: add back primary user id methods? even tho mobile user id is the same thing
+
     public static void storeMobileUserId(Context context, String primaryUserId) {
         getConfigSharedPrefs(context).edit().putString(SharedProperties.PRIMARY_USER_ID.toString(), primaryUserId).commit();
 
@@ -127,9 +129,7 @@ public class EngageConfig {
     }
 
     public static void storeRecipientId(Context context, String recipientId) {
-        SharedPreferences sharedPreferences = getConfigSharedPrefs(context);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString(SharedProperties.RECIPIENT_ID.toString(), recipientId).commit();
+        getConfigSharedPrefs(context).edit().putString(SharedProperties.RECIPIENT_ID.toString(), recipientId).commit();
     }
 
     public static void storeAuditRecordTableId(Context context, String tableId) {
@@ -298,8 +298,7 @@ public class EngageConfig {
     }
 
     public static void storeAppInstalled(Context context, String appInstalled) {
-        SharedPreferences sharedPreferences = getConfigSharedPrefs(context);
-        sharedPreferences.edit().putString(SharedProperties.APP_INSTALLED.toString(), appInstalled).commit();
+        getConfigSharedPrefs(context).edit().putString(SharedProperties.APP_INSTALLED.toString(), appInstalled).commit();
     }
 
     /**
@@ -315,8 +314,7 @@ public class EngageConfig {
      * @param session session started timestamp
      */
     public static void storeSession(Context context, long session) {
-        SharedPreferences sharedPreferences = getConfigSharedPrefs(context);
-        sharedPreferences.edit().putLong(SharedProperties.SESSION.toString(), session).commit();
+        getConfigSharedPrefs(context).edit().putLong(SharedProperties.SESSION.toString(), session).commit();
     }
 
     public static void clearSession(Context context) {
