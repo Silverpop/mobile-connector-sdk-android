@@ -18,6 +18,8 @@ import com.silverpop.engage.response.handler.AddRecipientResponseHandler;
 import com.silverpop.engage.response.handler.UpdateRecipientResponseHandler;
 import com.silverpop.engage.response.handler.XMLAPIResponseHandler;
 import com.silverpop.engage.util.DateUtil;
+import com.silverpop.engage.util.uuid.UUIDGenerator;
+import com.silverpop.engage.util.uuid.plugin.DefaultUUIDGenerator;
 
 import java.util.Date;
 import java.util.Map;
@@ -28,11 +30,13 @@ import java.util.Map;
 public class MobileConnectorManager extends BaseManager implements MobileConnector {
 
     private static final String TAG = MobileConnectorManager.class.getName();
+
+    private static final String DEFAULT_UUID_GENERATOR_CLASS = "com.silverpop.engage.util.uuid.plugin.DefaultUUIDGenerator";
+
     private static MobileConnectorManager instance = null;
 
     protected MobileConnectorManager(Context context) {
         super(context);
-        MobileConnectorManagerImpl.init(context);
         AnonymousMobileConnectorManager.init(context);
     }
 
@@ -118,7 +122,7 @@ public class MobileConnectorManager extends BaseManager implements MobileConnect
         XMLAPI updateRecipientXml = XMLAPI.updateRecipient(existingRecipientId, listId);
 
         // generate new mobile user id
-        String newMobileUserId = MobileConnectorManagerImpl.get().generateMobileUserId();
+        String newMobileUserId = generateMobileUserId();
         EngageConfig.storeMobileUserId(getContext(), newMobileUserId);
         Log.d(TAG, "MobileUserId was auto generated");
         updateRecipientXml.addColumn(mobileUserIdColumn, newMobileUserId);
@@ -144,7 +148,7 @@ public class MobileConnectorManager extends BaseManager implements MobileConnect
         String newMobileUserId = existingMobileUserId;
         // generate mobile user id if needed
         if (TextUtils.isEmpty(newMobileUserId)) {
-            newMobileUserId = MobileConnectorManagerImpl.get().generateMobileUserId();
+            newMobileUserId = generateMobileUserId();
             EngageConfig.storeMobileUserId(getContext(), newMobileUserId);
             Log.d(TAG, "MobileUserId was auto generated");
         }
@@ -458,5 +462,23 @@ public class MobileConnectorManager extends BaseManager implements MobileConnect
                 }
             }
         });
+    }
+
+    public String generateMobileUserId() {
+        String uuidClassFullPackageName = getEngageConfigManager().mobileUserIdGeneratorClassName();
+
+        UUIDGenerator uuidGenerator;
+        try {
+            Class uuidClassName = Class.forName(uuidClassFullPackageName);
+            uuidGenerator = (UUIDGenerator) uuidClassName.newInstance();
+        } catch (Exception ex) {
+            Log.w(TAG, "Unable to initialize UUID generator class '" + uuidClassFullPackageName +
+                    ".' Using default implementation of " + DEFAULT_UUID_GENERATOR_CLASS + ": " + ex.getMessage());
+
+            uuidGenerator = new DefaultUUIDGenerator();
+        }
+
+        String mobileUserId = uuidGenerator.generateUUID();
+        return mobileUserId;
     }
 }

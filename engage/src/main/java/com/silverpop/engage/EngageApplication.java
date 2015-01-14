@@ -24,7 +24,6 @@ import com.silverpop.engage.util.EngageExpirationParser;
 import org.mobiledeeplinking.android.Handler;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -71,22 +70,21 @@ public class EngageApplication
 
         configureLocationServicesIfNeeded();
 
-        //[Lindsay Thurmond:1/7/15] TODO: think through start up ordering
+        // init singletons
         EngageConnectionManager.init(getApplicationContext(), clientId, clientSecret, refreshToken, host,
                 new AuthenticationHandler() {
                     @Override
                     public void onSuccess(String response) {
                         // post any existing events
-                        XMLAPIClient.get().postCachedEvents(); //[Lindsay Thurmond:1/6/15] TODO: add event listener instead?
-                        UBFClient.get().postUBFEngageEvents(); //[Lindsay Thurmond:1/6/15] TODO: add event listener instead?
+                        //[Lindsay Thurmond:1/6/15] TODO: consider add event listeners to handle instead
+                        XMLAPIClient.get().postCachedEvents();
+                        UBFClient.get().postUBFEngageEvents();
                     }
 
                     @Override
                     public void onFailure(Exception exception) {
                     }
                 });
-
-        // init singletons
         XMLAPIManager.init(getApplicationContext());
         UBFManager.init(getApplicationContext());
         MobileConnectorManager.init(getApplicationContext());
@@ -123,14 +121,6 @@ public class EngageApplication
 
         createDatabaseColumn(EngageConfigManager.get(getApplicationContext()).lastKnownLocationTimestampColumn(),
                 XMLAPIColumnType.DATE_COLUMN, "");
-
-        configureAdditionalXmlApiDatabaseTables();
-    }
-
-    /**
-     * Optionally override this to do additional database configuration
-     */
-    protected void configureAdditionalXmlApiDatabaseTables() {
     }
 
     protected void createDatabaseColumn(String columnName, XMLAPIColumnType columnType, Object defaultValue) {
@@ -138,14 +128,13 @@ public class EngageApplication
     }
 
     protected void createDatabaseColumn(String listId, String columnName, XMLAPIColumnType columnType, Object defaultValue) {
-        Map<String, Object> bodyElements = new HashMap<String, Object>();
-        bodyElements.put(XMLAPIElement.LIST_ID.toString(), listId);
-        bodyElements.put(XMLAPIElement.COLUMN_NAME.toString(), columnName);
-        bodyElements.put(XMLAPIElement.COLUMN_TYPE.toString(), columnType.value());
-        bodyElements.put(XMLAPIElement.DEFAULT.toString(), defaultValue);
-
-        XMLAPI createLastKnownLocationColumns = new XMLAPI(XMLAPIOperation.ADD_LIST_COLUMN, bodyElements);
-        XMLAPIManager.get().postXMLAPI(createLastKnownLocationColumns, null, null);
+        XMLAPI createColumnXml = XMLAPI.builder().operation(XMLAPIOperation.ADD_LIST_COLUMN)
+                .listId(listId)
+                .param(XMLAPIElement.COLUMN_NAME, columnName)
+                .param(XMLAPIElement.COLUMN_TYPE, columnType.value())
+                .param(XMLAPIElement.DEFAULT, defaultValue)
+                .build();
+        XMLAPIManager.get().postXMLAPI(createColumnXml, null, null);
     }
 
     private void configureLocationServicesIfNeeded() {
@@ -159,11 +148,11 @@ public class EngageApplication
                     locationManager = (EngageLocationManager) clazz.newInstance();
                     locationManager.setEngageApplication(this);
                 } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
+                    Log.e(TAG, e.getMessage(), e);
                 } catch (InstantiationException e) {
-                    e.printStackTrace();
+                    Log.e(TAG, e.getMessage(), e);
                 } catch (IllegalAccessException e) {
-                    e.printStackTrace();
+                    Log.e(TAG, e.getMessage(), e);
                 }
             }
 
@@ -231,7 +220,6 @@ public class EngageApplication
         UBFManager.get().postEvent(UBF.sessionStarted(getApplicationContext(),
                 null, EngageConfig.currentCampaign(getApplicationContext())));
     }
-
 
     private void waitForPrimaryUserIdThenCreateInstalledEvent() {
         Log.i(TAG, "Registering primary user id listener for installed event");

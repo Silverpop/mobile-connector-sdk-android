@@ -106,7 +106,7 @@ public class MobileConnectorManager_IT extends BaseAndroidTest {
     public void testSetupRecipient_recipientPreviouslySetup() throws Exception {
         final CountDownLatch signal = new CountDownLatch(1);
 
-        final String prevMobileUserId = MobileConnectorManagerImpl.get().generateMobileUserId();
+        final String prevMobileUserId = UUID.randomUUID().toString();
         final String prevRecipientId = "00000";
 
         // pretend these were previously set
