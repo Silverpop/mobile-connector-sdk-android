@@ -478,9 +478,7 @@ NOT_READY_TO_POST, READY_TO_POST, SUCCESSFULLY_POSTED, FAILED_POST, and EXPIRED.
 |READY_TO_POST|UBF events that are ready to be sent to Engage on the next POST.|
 |SUCCESSFULLY_POSTED|UBF events that have already been successfully posted to Engage. These events will be purged after the configurable amount of time has been reached.|
 |FAILED_POST|UBF events that were attempted to be posted to Engage for the maximum number of retries. Once in this state no further attempts to post the UBF event will be made.|
-|EXPIRED|UBF events in this state "timed out" during their augmentation. These events are considered "READY_TO_POST"
-and treated just like a "READY_TO_POST" UBF event when sent to Engage but are labeled differently just
-to differentiate them from the UBF events with successful augmentation.|
+|EXPIRED|UBF events in this state "timed out" during their augmentation. These events are considered "READY_TO_POST" and treated just like a "READY_TO_POST" UBF event when sent to Engage but are labeled differently just to differentiate them from the UBF events with successful augmentation.|
 
 
 ### Deeplinking
