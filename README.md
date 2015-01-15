@@ -240,20 +240,14 @@ is equivalent to:
 ```java
 XMLAPI selectRecipientData = new XMLAPI(XMLAPIOperation.SELECT_RECIPIENT_DATA);
 
-// Map of XMLAPI top level parameters.
-Map<String, Object> xmlapiParams = new HashMap<String, Object>();
-xmlapiParams.put("LIST_ID", "45654");
-xmlapiParams.put("EMAIL", "someone@adomain.com");
+// XMLAPI top level parameters
+selectRecipientData.addParam(XMLAPIElement.LIST_ID.toString(), "45654");
+selectRecipientData.addParam(XMLAPIElement.EMAIL.toString(), "someone@adomain.com");
 
-selectRecipientData.addParams(xmlapiParams);
-
-// Map of XMLAPI NAME/VALUE columns.
-Map<String, Object> columns = new HashMap<String, Object>();
-columns.put("Customer Id", "123-45-6789");
-
-selectRecipientData.addColumns(columns);
+// XMLAPI NAME/VALUE columns
+selectRecipientData.addColumn("Customer Id", "123-45-6789");
 ```
-or you can use the XMLAPI.Builder class to create the same XML as:
+or you can use the XMLAPI Builder class to create the same XML as:
 
 ```java
 XMLAPI selectRecipientData = XMLAPI.builder()
@@ -296,12 +290,9 @@ is equivalent to:
 ```java
 XMLAPI selectRecipientData = new XMLAPI(XMLAPIOperation.SELECT_RECIPIENT_DATA);
 
-// Map of XMLAPI top level parameters.
-Map<String, Object> xmlapiParams = new LinkedHashMap<String, Object>();
-xmlapiParams.put("LIST_ID", "45654");
-xmlapiParams.put("RECIPIENT_ID", "702003");
-
-selectRecipientData.addParams(xmlapiParams);
+// XMLAPI top level parameters.
+selectRecipientData.addParam(XMLAPIElement.LIST_ID.toString(), "45654");
+selectRecipientData.addParam(XMLAPIElement.RECIPIENT_ID.toString(), "702003");
 ```
 
 or using the builder:
@@ -332,12 +323,9 @@ is equivalent to:
 ```java
 XMLAPI selectRecipientData = new XMLAPI(XMLAPIOperation.SELECT_RECIPIENT_DATA);
 
-// Map of XMLAPI top level parameters.
-Map<String, Object> xmlapiParams = new LinkedHashMap<String, Object>();
-xmlapiParams.put("LIST_ID", "45654");
-xmlapiParams.put("EMAIL", "someone@adomain.com");
-
-selectRecipientData.addParams(xmlapiParams);
+// XMLAPI top level parameters.
+selectRecipientData.addParam(XMLAPIElement.LIST_ID.toString(), "45654");
+selectRecipientData.addParam(XMLAPIElement.EMAIL, "someone@adomain.com");
 ```
 
 or using the builder:
@@ -421,13 +409,6 @@ public void postXMLAPI(XMLAPI api,
 }
 ```
 
-##### Setup recipient
-TODO
-
-
-##### Check identity and merge recipients
-TODO
-
 ##### Creating an anonymous user
 
 ```java
@@ -473,24 +454,31 @@ XMLAPIManager.get().postXMLAPI(selectRecipientData,
         });
 ```
 
+### <a name="MobileConnectorManager"/>MobileConnectorManager
+TODO - add description
+
+##### Setup recipient
+```java
+public void setupRecipient(SetupRecipientHandler setupRecipientHandler)
+```
+
+##### Check identity and merge recipients
+```java
+public void checkIdentity(final Map<String, String> idFieldNamesToValues, final CheckIdentityHandler identityHandler)
+```
+
 ### Local Event Storage
 
 UBF events are persisted to a local SQLite DB on the user's device. The event can have only 1 of 5 status. 
 NOT_READY_TO_POST, READY_TO_POST, SUCCESSFULLY_POSTED, FAILED_POST, and EXPIRED. 
 
-* NOT_READY_TO_POST
-** UBF events that are still awaiting augmentation to complete. UBF events will stay in this state
-until the augmentation successfully completes or the augmentation times out.
-* READY_TO_POST 
-** UBF events that are ready to be sent to Engage on the next POST.
-* SUCCESSFULLY_POSTED
-** UBF events that have already been successfully posted to Engage. These events will be purged after the configurable amount of time has been reached.
-* FAILED_POST
-** UBF events that were attempted to be posted to Engage for the maximum number of retries. Once in this state no further attempts to post the UBF event will be made.
-* EXPIRED
-** UBF events in this state "timed out" during their augmentation. These events are considered "READY_TO_POST"
+|NOT_READY_TO_POST|UBF events that are still awaiting augmentation to complete. UBF events will stay in this stateuntil the augmentation successfully completes or the augmentation times out.|
+|READY_TO_POST|UBF events that are ready to be sent to Engage on the next POST.|
+|SUCCESSFULLY_POSTED|UBF events that have already been successfully posted to Engage. These events will be purged after the configurable amount of time has been reached.|
+|FAILED_POST|UBF events that were attempted to be posted to Engage for the maximum number of retries. Once in this state no further attempts to post the UBF event will be made.|
+|EXPIRED|UBF events in this state "timed out" during their augmentation. These events are considered "READY_TO_POST"
 and treated just like a "READY_TO_POST" UBF event when sent to Engage but are labeled differently just
-to differentiate them from the UBF events with successful augmentation.
+to differentiate them from the UBF events with successful augmentation.|
 
 
 ### Deeplinking
@@ -574,13 +562,13 @@ from your application to retrieve desired configuration values.
 |Recipient->enableAutoAnonymousTracking|true||Boolean|
 |Recipient->mobileUserIdGeneratorClassName|com.silverpop.engage.util.uuid.plugin.DefaultUUIDGenerator||String|
 |Recipient->mobileUserIdColumn|Mobile User Id||String|
-|Recipient->mergedRecipientIdColumn|Merged Recipient Id||String|
-|Recipient->mergedDateColumn|Merged Date||String|
-|Recipient->mergeHistoryInMergedMarketingDatabase|true||Boolean|
-|AuditRecord->oldRecipientIdColumnName|Old Recipient Id||String|
-|AuditRecord->newRecipientIdColumnName|New Recipient Id||String|
-|AuditRecord->createDateColumnName|Create Date|||
-|AuditRecord->mergeHistoryInAuditRecordTable|false||Boolean|
+|Recipient->mergedRecipientIdColumn|Merged Recipient Id|TODO|String|
+|Recipient->mergedDateColumn|Merged Date|TODO|String|
+|Recipient->mergeHistoryInMergedMarketingDatabase|true|TODO|Boolean|
+|AuditRecord->oldRecipientIdColumnName|Old Recipient Id|TODO|String|
+|AuditRecord->newRecipientIdColumnName|New Recipient Id|TODO|String|
+|AuditRecord->createDateColumnName|Create Date|TODO|String|
+|AuditRecord->mergeHistoryInAuditRecordTable|false|TODO|Boolean|
 
 ### <a name="EngageExpirationParser"/>EngageExpirationParser
 
