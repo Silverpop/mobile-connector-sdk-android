@@ -213,7 +213,7 @@ will be posted to Engage API in the same state as when it was handed off to the 
 
 The EngageSDK supports the Engage XMLAPI and also provides several convenience methods for developers.
 
-#### <a name="XMLAPIObject"/>XMLAPI Object/Helper
+#### <a name="XMLAPIObject"/>XMLAPI Object/Builder
 
 XMLAPI requests are sent to Engage in XML format. Those XML message are built using the XMLAPI object
 in the EngageSDK. 
@@ -325,7 +325,7 @@ XMLAPI selectRecipientData = new XMLAPI(XMLAPIOperation.SELECT_RECIPIENT_DATA);
 
 // XMLAPI top level parameters.
 selectRecipientData.addParam(XMLAPIElement.LIST_ID.toString(), "45654");
-selectRecipientData.addParam(XMLAPIElement.EMAIL, "someone@adomain.com");
+selectRecipientData.addParam(XMLAPIElement.EMAIL.toString(), "someone@adomain.com");
 ```
 
 or using the builder:
@@ -472,6 +472,8 @@ public void checkIdentity(final Map<String, String> idFieldNamesToValues, final 
 UBF events are persisted to a local SQLite DB on the user's device. The event can have only 1 of 5 status. 
 NOT_READY_TO_POST, READY_TO_POST, SUCCESSFULLY_POSTED, FAILED_POST, and EXPIRED. 
 
+|Event Name|Description|
+|------------------|-------------|
 |NOT_READY_TO_POST|UBF events that are still awaiting augmentation to complete. UBF events will stay in this stateuntil the augmentation successfully completes or the augmentation times out.|
 |READY_TO_POST|UBF events that are ready to be sent to Engage on the next POST.|
 |SUCCESSFULLY_POSTED|UBF events that have already been successfully posted to Engage. These events will be purged after the configurable amount of time has been reached.|
@@ -628,9 +630,14 @@ and if present parses that value and stores it in the device local storage so th
 Below are some deep link examples assuming that your application is configured to open for a URL containing a host value of "Silverpop".
 
 ```
-Silverpop://campaign/TestCurrentCampaign?ParamCampaignValidFor=4hours    //Campaign Name set to "TestCurrentCampaign" and Expires 4 hours from when the link is opened
-Silverpop://campaign/TestCurrentCampaign   //Campaign Name set to "TestCurrentCampaign" and Expires 1 Day (default since none present) after the URL is opened in the application
-Silverpop://campaign/TestCurrentCampaign?ParamCampaignExpiresAt=2014/08/01 07:23:00    //Campaign Name set to "TestCurrentCampaign" and Expires on August 8th 2014 at 7:23AM. Note URL MUST be escaped but wasn't here for demonstration purposes!
+//Campaign Name set to "TestCurrentCampaign" and Expires 4 hours from when the link is opened
+Silverpop://campaign/TestCurrentCampaign?ParamCampaignValidFor=4hours
+
+//Campaign Name set to "TestCurrentCampaign" and Expires 1 Day (default since none present) after the URL is opened in the application
+Silverpop://campaign/TestCurrentCampaign   
+
+//Campaign Name set to "TestCurrentCampaign" and Expires on August 8th 2014 at 7:23AM. Note URL MUST be escaped but wasn't here for demonstration purposes!
+Silverpop://campaign/TestCurrentCampaign?ParamCampaignExpiresAt=2014/08/01 07:23:00
 ```
 
 #### Posting events to Universal Behaviors service
