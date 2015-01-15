@@ -107,7 +107,9 @@ UBFManager.get().postEvent(namedGoalStarted);
 
 #### UBF Sessions
 
-EngageSDK implements predefined Session events for Universal Behaviors. Sessions are configured to timeout if a user leaves your app for at least 5 minutes. At the end of the Session, duration is computed excluding any portion of inactivity.
+EngageSDK implements predefined Session events for Universal Behaviors. Sessions are configured to timeout 
+if a user leaves your app for at least 5 minutes. At the end of the Session, duration is computed excluding 
+any portion of inactivity.
 
 #### UBFManager
 
@@ -139,17 +141,18 @@ by the SDK.
 * Device Id
 * Primary User Id
 * Anonymous Id
+* Recipient Id
 
 ##### UBF Events and their Type Codes
 
 * INSTALLED - 12
-* SESSION_STARTED - 13;
+* SESSION_STARTED - 13
 * SESSION_ENDED - 14
 * GOAL_ABANDONED - 15
 * GOAL_COMPLETED - 16
 * NAMED_EVENT - 17
 * RECEIVED_NOTIFICATION - 48
-* OPENED_NOTIFICATION 49
+* OPENED_NOTIFICATION - 49
 
 #### <a nam="UBFAugmentation"/>UBF Augmentation
 
@@ -235,20 +238,44 @@ in the EngageSDK.
 is equivalent to:
 
 ```java
-XMLAPI selectRecipientData = new XMLAPI("SelectRecipientData", null);
+XMLAPI selectRecipientData = new XMLAPI(XMLAPIOperation.SELECT_RECIPIENT_DATA);
 
-//Map of XMLAPI top level parameters.
+// Map of XMLAPI top level parameters.
 Map<String, Object> xmlapiParams = new HashMap<String, Object>();
 xmlapiParams.put("LIST_ID", "45654");
 xmlapiParams.put("EMAIL", "someone@adomain.com");
 
 selectRecipientData.addParams(xmlapiParams);
 
-//Map of XMLAPI NAME/VALUE columns.
+// Map of XMLAPI NAME/VALUE columns.
 Map<String, Object> columns = new HashMap<String, Object>();
 columns.put("Customer Id", "123-45-6789");
 
 selectRecipientData.addColumns(columns);
+```
+or you can use the XMLAPI.Builder class to create the same XML as:
+
+```java
+XMLAPI selectRecipientData = XMLAPI.builder()
+        .operation(XMLAPIOperation.SELECT_RECIPIENT_DATA)
+        .listId("45654")
+        .email("someone@adomain.com")
+        .column("Customer Id", "123-45-6789")
+        .build();
+```
+
+or you can use a combination of the two ways:
+
+```java
+// use builder for initial creation
+XMLAPI selectRecipientData = XMLAPI.builder()
+        .operation(XMLAPIOperation.SELECT_RECIPIENT_DATA)
+        .listId("45654")
+        .email("someone@adomain.com")
+        .build();
+
+// add additional properties later
+selectRecipientData.addColumn("Customer Id", "123-45-6789");
 ```
 
 ##### Example 2
@@ -267,14 +294,24 @@ selectRecipientData.addColumns(columns);
 is equivalent to:
 
 ```java
-XMLAPI selectRecipientData = new XMLAPI("SelectRecipientData", null);
+XMLAPI selectRecipientData = new XMLAPI(XMLAPIOperation.SELECT_RECIPIENT_DATA);
 
-//Map of XMLAPI top level parameters.
+// Map of XMLAPI top level parameters.
 Map<String, Object> xmlapiParams = new LinkedHashMap<String, Object>();
 xmlapiParams.put("LIST_ID", "45654");
 xmlapiParams.put("RECIPIENT_ID", "702003");
 
 selectRecipientData.addParams(xmlapiParams);
+```
+
+or using the builder:
+
+```java
+XMLAPI selectRecipientData = XMLAPI.builder() 
+        .operation(XMLAPIOperation.SELECT_RECIPIENT_DATA)
+        .listId("45654")
+        .recipientId("702003")
+        .build();
 ```
 
 ##### Example 3
@@ -293,14 +330,24 @@ selectRecipientData.addParams(xmlapiParams);
 is equivalent to:
 
 ```java
-XMLAPI selectRecipientData = new XMLAPI("SelectRecipientData", null);
+XMLAPI selectRecipientData = new XMLAPI(XMLAPIOperation.SELECT_RECIPIENT_DATA);
 
-//Map of XMLAPI top level parameters.
+// Map of XMLAPI top level parameters.
 Map<String, Object> xmlapiParams = new LinkedHashMap<String, Object>();
 xmlapiParams.put("LIST_ID", "45654");
 xmlapiParams.put("EMAIL", "someone@adomain.com");
 
 selectRecipientData.addParams(xmlapiParams);
+```
+
+or using the builder:
+
+```java
+XMLAPI selectRecipientData = XMLAPI.builder()
+        .operation(XMLAPIOperation.SELECT_RECIPIENT_DATA)
+        .listId("45654")
+        .email("someone@adomain.com")
+        .build();
 ```
 
 #### <a name="XMLAPIManager"/>XMLAPIManager
@@ -312,26 +359,74 @@ once the network is accessible again. All XMLAPI requests made to Engage should 
 this XMLAPIManager.
 
 ```java
-    /**
-     * Post an XMLAPI request to Engage
-     *
-     * @param api
-     *      XMLAPI operation desired.
-     *
-     * @param successTask
-     *      AsyncTask to execute on successful result.
-     *
-     * @param failureTask
-     *      AsyncTask to execute on failure
-     */
-    public void postXMLAPI(XMLAPI api,
-                           AsyncTask<EngageResponseXML, Void, Object> successTask,
-                           AsyncTask<VolleyError, Void, Object> failureTask) {
-        Response.Listener<String> successListener = successListenerForXMLAPI(api, successTask);
-        Response.ErrorListener errorListener = null;
-        xmlapiClient.postResource(api, successListener, errorListener);
-    }
+/**
+ * Post an XMLAPI request to Engage using a generic handler (as opposed to AsyncTasks) for the response.
+ *
+ * @param api             XMLAPI operation desired.
+ * @param responseHandler functionality to run on success or failure of the request.
+ */
+public void postXMLAPI(XMLAPI api,
+                       final XMLAPIResponseHandler responseHandler) {
+    xmlapiClient.postResource(api, new Response.Listener<String>() {
+        @Override
+        public void onResponse(String response) {
+            if (responseHandler != null) {
+                responseHandler.onSuccess(new EngageResponseXML(response));
+            }
+        }
+    }, new Response.ErrorListener() {
+        @Override
+        public void onErrorResponse(VolleyError volleyError) {
+            if (responseHandler != null) {
+                responseHandler.onFailure(volleyError);
+            }
+        }
+    });
+}
+
+/**
+ * Post an XMLAPI request to Engage
+ *
+ * @param api         XMLAPI operation desired.
+ * @param successTask AsyncTask to execute on successful result.
+ * @param failureTask AsyncTask to execute on failure
+ */
+public void postXMLAPI(XMLAPI api,
+                       final AsyncTask<EngageResponseXML, Void, Object> successTask,
+                       final AsyncTask<VolleyError, Void, Object> failureTask) {
+
+    Response.Listener<String> successListener = new Response.Listener<String>() {
+        public void onResponse(String response) {
+            //If null the user doesn't want anything special to happen.
+            if (successTask != null) {
+
+                //Perform the EngageSDK internal logic before passing processing off to user defined AsyncTask.
+                EngageResponseXML responseXML = new EngageResponseXML(response);
+                successTask.execute(responseXML);
+            }
+        }
+    };
+    Response.ErrorListener errorListener = new Response.ErrorListener() {
+        @Override
+        public void onErrorResponse(VolleyError error) {
+            Log.e(TAG, error.getMessage(), error);
+
+            //Call the SDK user defined method.
+            if (failureTask != null) {
+                failureTask.execute(error);
+            }
+        }
+    };
+    xmlapiClient.postResource(api, successListener, errorListener);
+}
 ```
+
+##### Setup recipient
+TODO
+
+
+##### Check identity and merge recipients
+TODO
 
 ##### Creating an anonymous user
 
@@ -356,57 +451,26 @@ XMLAPIManager.get().createAnonymousUserList("EngageDBListID",
 ##### Identifying a registered user
 
 ```java
+final XMLAPI selectRecipientData = XMLAPI.builder()
+        .operation(XMLAPIOperation.SELECT_RECIPIENT_DATA)
+        .listId("45654")
+        .email("someone@adomain.com")
+        .build();
 
-XMLAPI selectRecipientData = new XMLAPI("SelectRecipientData", null);
+// You can also provide null for the response handler if you don't need any custom logic on success or failure
+XMLAPIManager.get().postXMLAPI(selectRecipientData,
+        new SelectRecipientResponseHandler() {
+            @Override
+            public void onSelectRecipientSuccess(SelectRecipientResponse selectRecipientResponse) {
+                //custom code here
+            }
 
-//Map of XMLAPI top level parameters.
-Map<String, Object> xmlapiParams = new LinkedHashMap<String, Object>();
-xmlapiParams.put("LIST_ID", "45654");
-xmlapiParams.put("EMAIL", "someone@adomain.com");
-
-selectRecipientData.addParams(xmlapiParams);
-
-//You can also provide null for parameters 2 & 3 if you don't wish to perform any custom logic in success and failure.
-XMLAPIManager.get().postXMLAPI(selectRecipientData, 
-                new AsyncTask<EngageResponseXML, Void, Object>() {
-                    @Override
-                    protected EngageResponseXML doInBackground(EngageResponseXML... engageResponseXMLs) {
-                        return engageResponseXMLs[0];
-                    }
-
-                    //Remember all UI interacting logic should occur here!
-                    @Override
-                    protected void onPostExecute(Object responseObject) {
-                        try {
-                            EngageResponseXML responseXML = (EngageResponseXML)responseObject;
-                            String result = responseXML.valueForKeyPath("envelope.body.result.success");
-                            if (result.equalsIgnoreCase("true")) {
-                                String id = responseXML.valueForKeyPath("envelope.body.result.recipientid");
-                                //custom code here
-                            } else {
-                                String faultString = responseXML.valueForKeyPath("envelope.body.fault.faultstring");
-                                xmlApiResultTextView.setText("ERROR: " + faultString);
-                            }
-
-                            Toast.makeText(getActivity().getApplicationContext(), result, Toast.LENGTH_SHORT).show();
-                        } catch (XMLResponseParseException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }, new AsyncTask<VolleyError, Void, Object>() {
-                    @Override
-                    protected Object doInBackground(VolleyError... volleyErrors) {
-                        Log.e(TAG, "Failure is posting create anonymous user event to silverpop");
-                        return volleyErrors[0];
-                    }
-
-                    @Override
-                    protected void onPostExecute(Object responseObject) {
-                        VolleyError error = (VolleyError)responseObject;
-                        Toast.makeText(getActivity().getApplicationContext(), "Error creating anonymous user: "
-                                + error.getMessage(), Toast.LENGTH_SHORT).show();
-                    }
-                });
+            @Override
+            public void onFailure(Exception exception) {
+                Toast.makeText(getActivity().getApplicationContext(), "Error selecting recipient: "
+                        + exception.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
 ```
 
 ### Local Event Storage
@@ -499,7 +563,7 @@ from your application to retrieve desired configuration values.
 |LocationServices->lastKnownLocationTimestampColumn|Last Location Address Time|Engage DB column name for the last known location time|String|
 |LocationServices->lastKnownLocationColumn|Last Location Address|Engage DB column name for the last known location|String|
 |LocationServices->locationDistanceFilter|10|meters in location change before updated location information delegate is invoked|Number|
-||LocationServices->locationPrecisionLevel|kCLLocationAccuracyBest|desired level of location accuracy|String|
+|LocationServices->locationPrecisionLevel|kCLLocationAccuracyBest|desired level of location accuracy|String|
 |LocationServices->locationCacheLifespan|1 hr|lifespan of location coordinates before they are considered expired|EngageExpirationParser String|
 |LocationServices->coordinatesPlacemarkTimeout|15 sec|timeout on acquiring CLPlacemark before event is posted without that information|EngageExpirationParser String|
 |LocationServices->coordinatesAcquisitionTimeout|15 sec|timeout on acquiring CLLocation before event is posted without that information|EngageExpirationParser String|
@@ -507,7 +571,16 @@ from your application to retrieve desired configuration values.
 |PluggableServices->pluggableLocationManagerClassName|com.silverpop.engage.location.manager.plugin.EngageLocationManagerDefault|Java implementation that will pull the location information from the device|Java Class|
 |Augmentation->augmentationTimeout|15 sec|timeout for augmenting UBF events|EngageExpirationParser String|
 |Augmentation->ubfAugmentorClassNames||JSON Array of Java class names that should be used for augmenting|JSON Array of String Java Classnames|
-
+|Recipient->enableAutoAnonymousTracking|true||Boolean|
+|Recipient->mobileUserIdGeneratorClassName|com.silverpop.engage.util.uuid.plugin.DefaultUUIDGenerator||String|
+|Recipient->mobileUserIdColumn|Mobile User Id||String|
+|Recipient->mergedRecipientIdColumn|Merged Recipient Id||String|
+|Recipient->mergedDateColumn|Merged Date||String|
+|Recipient->mergeHistoryInMergedMarketingDatabase|true||Boolean|
+|AuditRecord->oldRecipientIdColumnName|Old Recipient Id||String|
+|AuditRecord->newRecipientIdColumnName|New Recipient Id||String|
+|AuditRecord->createDateColumnName|Create Date|||
+|AuditRecord->mergeHistoryInAuditRecordTable|false||Boolean|
 
 ### <a name="EngageExpirationParser"/>EngageExpirationParser
 
