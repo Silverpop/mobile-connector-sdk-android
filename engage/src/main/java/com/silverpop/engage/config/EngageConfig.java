@@ -78,8 +78,40 @@ public class EngageConfig {
         return Build.PRODUCT;
     }
 
+    /**
+     * @deprecated Since the PrimaryUserId does not represent a primary key it has been renamed
+     * to MobileUserId to make it more clear.  Use {@link #mobileUserId(android.content.Context)} instead.
+     */
+    public static String primaryUserId(Context context) {
+        return mobileUserId(context);
+    }
+
+    /**
+     * @deprecated Since the PrimaryUserId does not represent a primary key it has been renamed
+     * to MobileUserId to make it more clear.  Use {@link #storeMobileUserId(android.content.Context, String)} instead.
+     */
+    public static void storePrimaryUserId(Context context, String primaryUserId) {
+        storeMobileUserId(context, primaryUserId);
+    }
+
+    /**
+     * The new name for what used to be the Primary User Id.
+     */
+    public static void storeMobileUserId(Context context, String primaryUserId) {
+        getConfigSharedPrefs(context).edit().putString(SharedProperties.PRIMARY_USER_ID.toString(), primaryUserId).commit();
+
+        context.sendBroadcast(new Intent(PRIMARY_USER_ID_SET_EVENT));
+    }
+
+    /**
+     * The new name for what used to be the Primary User Id.
+     */
     public static String mobileUserId(Context context) {
         return getConfigSharedPrefs(context).getString(SharedProperties.PRIMARY_USER_ID.toString(), "");
+    }
+
+    public static void storeRecipientId(Context context, String recipientId) {
+        getConfigSharedPrefs(context).edit().putString(SharedProperties.RECIPIENT_ID.toString(), recipientId).commit();
     }
 
     public static String recipientId(Context context) {
@@ -122,18 +154,6 @@ public class EngageConfig {
         } else {
             return "UNKNOWN";
         }
-    }
-
-    //[Lindsay Thurmond:1/14/15] TODO: add back primary user id methods? even tho mobile user id is the same thing
-
-    public static void storeMobileUserId(Context context, String primaryUserId) {
-        getConfigSharedPrefs(context).edit().putString(SharedProperties.PRIMARY_USER_ID.toString(), primaryUserId).commit();
-
-        context.sendBroadcast(new Intent(PRIMARY_USER_ID_SET_EVENT));
-    }
-
-    public static void storeRecipientId(Context context, String recipientId) {
-        getConfigSharedPrefs(context).edit().putString(SharedProperties.RECIPIENT_ID.toString(), recipientId).commit();
     }
 
     public static void storeAuditRecordTableId(Context context, String tableId) {

@@ -455,15 +455,58 @@ XMLAPIManager.get().postXMLAPI(selectRecipientData,
 ```
 
 ### <a name="MobileConnectorManager"/>MobileConnectorManager
-TODO - add description
 
-##### Setup recipient
+The MobileConnectorManager can be used to manage user identities.  It can auto create new user identities 
+as well as merge existing identities if needed.  This functionality is intended to replace the 
+manual process of creating an anonymous user.
+ 
+In addition to the normal app security token configuration, the following setup must be configured prior to 
+using the MobileConnectorManager methods.
+- Recipient list should already be completed and the ```listId``` should be setup in the configuration.
+- EngageConfig.json should be configured with the columns names representing the _Mobile User Id_, _Merged Recipient Id_, and _Merged Date_.  The EngageConfigDefault.json defines default values if you prefer to use those.
+- The _Mobile User Id_, _Merged Recipient Id_, and _Merged Date_ columns must be created in the recipient list with names that match your EngageConfig.json settings
+- Optional: Configure audit table (TODO - fill in these details when known)
+
+##### Setup recipient identity
 ```java
+/**
+ * Checks if the mobile user id has been configured yet.  If not
+ * and the {@code enableAutoAnonymousTracking} flag is set to true it is auto generated
+ * using either the {@link com.silverpop.engage.util.uuid.plugin.DefaultUUIDGenerator} or
+ * the generator configured as the {@code mobileUserIdGeneratorClassName}.  If
+ * {@code enableAutoAnonymousTracking} is {@code false} you are responsible for
+ * manually setting the id using {@link com.silverpop.engage.config.EngageConfig#storeMobileUserId(android.content.Context, String)}.
+ * <p/>
+ * Once we have a mobile user id (generated or manually set) a new recipient is
+ * created with the mobile user id.
+ * <p/>
+ * On successful completion of this method the EngageConfig will contain the
+ * moible user id and new recipient id.
+ *
+ * @param setupRecipientHandler custom behavior to run on success and failure of this method
+ */
 public void setupRecipient(SetupRecipientHandler setupRecipientHandler)
 ```
 
 ##### Check identity and merge recipients
 ```java
+/**
+ * Checks for an existing recipient with all the specified ids.  If a matching recipient doesn't exist
+ * the currently configured recipient is updated with the searched ids.  If an existing recipient
+ * does exist the two recipients are merged and the engage app config is switched to the existing
+ * recipient.
+ * <p/>
+ * When recipients are merged a history of the merged recipients is recorded using the
+ * Mobile User Id, Merged Recipient Id, and Merged Date columns.
+ *
+ * @param idFieldNamesToValues Map of column name to id value for that column.  Searches for an
+ *                             existing recipient that contains ALL of the column values in this map.
+ *                             <p/>
+ *                             Examples:
+ *                             - Key: facebook_id, Value: 100
+ *                             - Key: twitter_id, Value: 9999
+ * @param identityHandler      custom behavior to run on success and failure of this method
+ */
 public void checkIdentity(final Map<String, String> idFieldNamesToValues, final CheckIdentityHandler identityHandler)
 ```
 

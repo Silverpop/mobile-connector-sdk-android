@@ -9,8 +9,8 @@ import com.silverpop.engage.domain.XMLAPI;
 import com.silverpop.engage.domain.XMLAPIOperation;
 import com.silverpop.engage.exception.EngageConfigException;
 import com.silverpop.engage.exception.XMLAPIResponseException;
-import com.silverpop.engage.recipient.CheckIdentityResult;
 import com.silverpop.engage.recipient.CheckIdentityHandler;
+import com.silverpop.engage.recipient.CheckIdentityResult;
 import com.silverpop.engage.recipient.SetupRecipientHandler;
 import com.silverpop.engage.recipient.SetupRecipientResult;
 import com.silverpop.engage.response.*;
@@ -26,7 +26,7 @@ import java.util.Map;
 
 /**
  * Created by Lindsay Thurmond on 1/6/15.
- *
+ * <p/>
  * Handles creation of recipients and auto-generates the mobile user id if needed.
  */
 public class MobileConnectorManager extends BaseManager {
@@ -58,6 +58,22 @@ public class MobileConnectorManager extends BaseManager {
         return instance;
     }
 
+    /**
+     * Checks if the mobile user id has been configured yet.  If not
+     * and the {@code enableAutoAnonymousTracking} flag is set to true it is auto generated
+     * using either the {@link com.silverpop.engage.util.uuid.plugin.DefaultUUIDGenerator} or
+     * the generator configured as the {@code mobileUserIdGeneratorClassName}.  If
+     * {@code enableAutoAnonymousTracking} is {@code false} you are responsible for
+     * manually setting the id using {@link com.silverpop.engage.config.EngageConfig#storeMobileUserId(android.content.Context, String)}.
+     * <p/>
+     * Once we have a mobile user id (generated or manually set) a new recipient is
+     * created with the mobile user id.
+     * <p/>
+     * On successful completion of this method the EngageConfig will contain the
+     * moible user id and new recipient id.
+     *
+     * @param setupRecipientHandler custom behavior to run on success and failure of this method
+     */
     public void setupRecipient(final SetupRecipientHandler setupRecipientHandler) {
 
         try {
@@ -118,7 +134,7 @@ public class MobileConnectorManager extends BaseManager {
         }
     }
 
-    protected void updateExistingRecipientWithMobileUserId(final SetupRecipientHandler setupRecipientHandler, String existingRecipientId, String listId, String mobileUserIdColumn) {
+    private void updateExistingRecipientWithMobileUserId(final SetupRecipientHandler setupRecipientHandler, String existingRecipientId, String listId, String mobileUserIdColumn) {
         // update the existing recipient with a mobile user id
         XMLAPI updateRecipientXml = XMLAPI.updateRecipient(existingRecipientId, listId);
 
@@ -168,7 +184,6 @@ public class MobileConnectorManager extends BaseManager {
                     }
                 } else {
                     EngageConfig.storeRecipientId(getContext(), recipientId);
-                    // EngageConfig.storeAnonymousUserId(context, recipientId);
 
                     if (setupRecipientHandler != null) {
                         setupRecipientHandler.onSuccess(new SetupRecipientResult(recipientId));
@@ -185,6 +200,24 @@ public class MobileConnectorManager extends BaseManager {
         });
     }
 
+    /**
+     * Checks for an existing recipient with all the specified ids.  If a matching recipient doesn't exist
+     * the currently configured recipient is updated with the searched ids.  If an existing recipient
+     * does exist the two recipients are merged and the engage app config is switched to the existing
+     * recipient.
+     * <p/>
+     * When recipients are merged a history of the merged recipients is recorded using the
+     * Mobile User Id, Merged Recipient Id, and Merged Date columns.
+     * //[Lindsay Thurmond:1/15/15] TODO: update with audit table when applicable
+     *
+     * @param idFieldNamesToValues Map of column name to id value for that column.  Searches for an
+     *                             existing recipient that contains ALL of the column values in this map.
+     *                             <p/>
+     *                             Examples:
+     *                             - Key: facebook_id, Value: 100
+     *                             - Key: twitter_id, Value: 9999
+     * @param identityHandler      custom behavior to run on success and failure of this method
+     */
     public void checkIdentity(final Map<String, String> idFieldNamesToValues, final CheckIdentityHandler identityHandler) {
 
         setupRecipient(new SetupRecipientHandler() {
@@ -264,12 +297,6 @@ public class MobileConnectorManager extends BaseManager {
 
     /**
      * Scenario 3 - existing recipient has a mobileUserId
-     *
-     * @param existingRecipientResponse
-     * @param existingMobileUserId
-     * @param currentRecipientId
-     * @param listId
-     * @param identityHandler
      */
     private void handleExistingRecipientWithRecipientId(final SelectRecipientResponse existingRecipientResponse, final String existingMobileUserId, String currentRecipientId, String listId, final CheckIdentityHandler identityHandler) {
         // mark current recipient as merged
@@ -308,10 +335,6 @@ public class MobileConnectorManager extends BaseManager {
 
     /**
      * Scenario 2 - existing recipient doesn't have a mobileUserId
-     *
-     * @param existingRecipientResponse
-     * @param identityHandler
-     * @param listId
      */
     private void handleExistingRecipientWithoutRecipientId(final SelectRecipientResponse existingRecipientResponse,
                                                            final CheckIdentityHandler identityHandler, final String listId) {
@@ -444,7 +467,6 @@ public class MobileConnectorManager extends BaseManager {
             String idValue = fieldValueEntry.getValue();
             updateCurrentRecipientXml.addColumn(idFieldName, idValue);
         }
-        //[Lindsay Thurmond:1/7/15] TODO: are sync fields needed?
 
         getXMLAPIManager().postXMLAPI(updateCurrentRecipientXml, new UpdateRecipientResponseHandler() {
             @Override
@@ -464,6 +486,13 @@ public class MobileConnectorManager extends BaseManager {
         });
     }
 
+    /**
+     * Generates a mobile user id using the class configured as the {@code mobileUserIdGeneratorClassName}
+     * in the EngageConfig or the {@link com.silverpop.engage.util.uuid.plugin.DefaultUUIDGenerator} if a
+     * valid class isn't configured.
+     *
+     * @return a new unique id
+     */
     public String generateMobileUserId() {
         String uuidClassFullPackageName = getEngageConfigManager().mobileUserIdGeneratorClassName();
 
