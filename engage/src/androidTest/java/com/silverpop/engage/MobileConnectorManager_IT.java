@@ -74,7 +74,7 @@ public class MobileConnectorManager_IT extends BaseAndroidTest {
         assertThat(EngageConfig.mobileUserId(getContext())).isEmpty();
         assertThat(EngageConfig.recipientId(getContext())).isEmpty();
 
-        MobileConnectorManager.get().setupRecipient(new SetupRecipientHandler() {
+        MobileIdentityManager.get().setupRecipient(new SetupRecipientHandler() {
             @Override
             public void onSuccess(SetupRecipientResult result) {
                 String recipientId = result.getRecipientId();
@@ -119,7 +119,7 @@ public class MobileConnectorManager_IT extends BaseAndroidTest {
         assertThat(EngageConfig.recipientId(getContext())).isEqualTo(prevRecipientId);
 
         // calling setup recipient again should return the values that were previously set instead of generating new ones
-        MobileConnectorManager.get().setupRecipient(new SetupRecipientHandler() {
+        MobileIdentityManager.get().setupRecipient(new SetupRecipientHandler() {
             @Override
             public void onSuccess(SetupRecipientResult result) {
                 String recipientId = result.getRecipientId();
@@ -163,7 +163,7 @@ public class MobileConnectorManager_IT extends BaseAndroidTest {
                 // setup complete, we now have an existing recipient with an email and recipient id only, not a mobile user id
 
                 // start actual test
-                MobileConnectorManager.get().setupRecipient(new SetupRecipientHandler() {
+                MobileIdentityManager.get().setupRecipient(new SetupRecipientHandler() {
                     @Override
                     public void onSuccess(SetupRecipientResult result) {
                         String recipientId = result.getRecipientId();
@@ -204,7 +204,7 @@ public class MobileConnectorManager_IT extends BaseAndroidTest {
         final CountDownLatch signal = new CountDownLatch(1);
 
         // setup recipient on server with recipientId and mobileUserId set
-        MobileConnectorManager.get().setupRecipient(new SetupRecipientHandler() {
+        MobileIdentityManager.get().setupRecipient(new SetupRecipientHandler() {
             @Override
             public void onSuccess(SetupRecipientResult result) {
                 final String createdRecipientId = result.getRecipientId();
@@ -221,7 +221,7 @@ public class MobileConnectorManager_IT extends BaseAndroidTest {
                 idFieldNamesToValues.put(CUSTOM_ID_COLUMN, nonExistingCustomIdValue);
 
 
-                MobileConnectorManager.get().checkIdentity(idFieldNamesToValues, new CheckIdentityHandler() {
+                MobileIdentityManager.get().checkIdentity(idFieldNamesToValues, new CheckIdentityHandler() {
                     @Override
                     public void onSuccess(CheckIdentityResult result) {
                         final String recipientId = result.getRecipientId();
@@ -296,7 +296,7 @@ public class MobileConnectorManager_IT extends BaseAndroidTest {
                 // look for an existing recipient with customId
                 final String customId = existingRecipient.customIdFields.get(CUSTOM_ID_COLUMN);
 
-                MobileConnectorManager.get().checkIdentity(existingRecipient.customIdFields, new CheckIdentityHandler() {
+                MobileIdentityManager.get().checkIdentity(existingRecipient.customIdFields, new CheckIdentityHandler() {
                     @Override
                     public void onSuccess(CheckIdentityResult result) {
 
@@ -364,7 +364,7 @@ public class MobileConnectorManager_IT extends BaseAndroidTest {
         final String RECIPIENT_LIST_ID = getEngageConfigManager().engageListId();
 
         // setup recipient on server with recipientId and mobileUserId set
-        MobileConnectorManager.get().setupRecipient(new SetupRecipientHandler() {
+        MobileIdentityManager.get().setupRecipient(new SetupRecipientHandler() {
             @Override
             public void onSuccess(SetupRecipientResult result) {
                 final String createdWithMobileUserId_RecipientId = result.getRecipientId();
@@ -438,7 +438,7 @@ public class MobileConnectorManager_IT extends BaseAndroidTest {
 
                 Map<String, String> idFieldNamesToValues = new HashMap<String, String>();
                 idFieldNamesToValues.put(CUSTOM_ID_COLUMN, customId);
-                MobileConnectorManager.get().checkIdentity(idFieldNamesToValues, new CheckIdentityHandler() {
+                MobileIdentityManager.get().checkIdentity(idFieldNamesToValues, new CheckIdentityHandler() {
                     @Override
                     public void onSuccess(CheckIdentityResult result) {
 
@@ -495,7 +495,7 @@ public class MobileConnectorManager_IT extends BaseAndroidTest {
 
                 // look for an existing recipient with both custom ids
 
-                MobileConnectorManager.get().checkIdentity(existingRecipient.customIdFields, new CheckIdentityHandler() {
+                MobileIdentityManager.get().checkIdentity(existingRecipient.customIdFields, new CheckIdentityHandler() {
                     @Override
                     public void onSuccess(CheckIdentityResult result) {
 
@@ -546,7 +546,7 @@ public class MobileConnectorManager_IT extends BaseAndroidTest {
         final String RECIPIENT_LIST_ID = getEngageConfigManager().engageListId();
 
         // setup recipient on server with recipientId and mobileUserId set
-        MobileConnectorManager.get().setupRecipient(new SetupRecipientHandler() {
+        MobileIdentityManager.get().setupRecipient(new SetupRecipientHandler() {
             @Override
             public void onSuccess(SetupRecipientResult result) {
                 final String createdWithMobileUserId_RecipientId = result.getRecipientId();

@@ -4,7 +4,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.test.AndroidTestCase;
-import com.silverpop.engage.MobileConnectorManager;
+import com.silverpop.engage.AnonymousMobileIdentityManager;
+import com.silverpop.engage.MobileIdentityManager;
 import com.silverpop.engage.UBFManager;
 import com.silverpop.engage.XMLAPIManager;
 import com.silverpop.engage.config.EngageConfig;
@@ -72,7 +73,8 @@ public class BaseAndroidTest extends AndroidTestCase {
         // init singletons
         XMLAPIManager.init(getContext());
         UBFManager.init(getContext());
-        MobileConnectorManager.init(getContext());
+        MobileIdentityManager.init(getContext());
+        AnonymousMobileIdentityManager.init(getContext());
     }
 
     protected void clearSharedPreferences() throws Exception {

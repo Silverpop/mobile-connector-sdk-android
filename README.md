@@ -409,26 +409,6 @@ public void postXMLAPI(XMLAPI api,
 }
 ```
 
-##### Creating an anonymous user
-
-```java
-//You can also provide null for parameters 2 & 3 if you don't wish to perform any custom logic in success and failure.
-XMLAPIManager.get().createAnonymousUserList("EngageDBListID", 
-                new AsyncTask<EngageResponseXML, Void, Object>() {
-                    @Override
-                    protected EngageResponseXML doInBackground(EngageResponseXML... engageResponseXMLs) {
-                        Log.d(TAG, "Successful response");
-                        return engageResponseXMLs[0];
-                    }
-                }, new AsyncTask<VolleyError, Void, Object>() {
-                    @Override
-                    protected Object doInBackground(VolleyError... volleyErrors) {
-                        Log.e(TAG, "Failure is posting create anonymous user event to Silverpop");
-                        return volleyErrors[0];
-                    }
-                });
-```
-
 ##### Identifying a registered user
 
 ```java
@@ -438,12 +418,13 @@ final XMLAPI selectRecipientData = XMLAPI.builder()
         .email("someone@adomain.com")
         .build();
 
-// You can also provide null for the response handler if you don't need any custom logic on success or failure
+// You can also provide null for the response handler if you don't need custom success/failure logic
 XMLAPIManager.get().postXMLAPI(selectRecipientData,
         new SelectRecipientResponseHandler() {
             @Override
             public void onSelectRecipientSuccess(SelectRecipientResponse selectRecipientResponse) {
                 //custom code here
+                Toast.makeText(getActivity().getApplicationContext(), "SUCCESS", Toast.LENGTH_SHORT).show();
             }
 
             @Override
@@ -454,14 +435,14 @@ XMLAPIManager.get().postXMLAPI(selectRecipientData,
         });
 ```
 
-### <a name="MobileConnectorManager"/>MobileConnectorManager
+### <a name="MobileIdentityManager"/>MobileIdentityManager
 
-The MobileConnectorManager can be used to manage user identities.  It can auto create new user identities 
+The ```MobileIdentityManager``` can be used to manage user identities.  It can auto create new user identities 
 as well as merge existing identities if needed.  This functionality is intended to replace the 
 manual process of creating an anonymous user.
  
 In addition to the normal app security token configuration, the following setup must be configured prior to 
-using the MobileConnectorManager methods.
+using the ```MobileIdentityManager``` methods.
 - Recipient list should already be completed and the ```listId``` should be setup in the configuration.
 - EngageConfig.json should be configured with the columns names representing the _Mobile User Id_, _Merged Recipient Id_, and _Merged Date_.  The EngageConfigDefault.json defines default values if you prefer to use those.
 - The _Mobile User Id_, _Merged Recipient Id_, and _Merged Date_ columns must be created in the recipient list with names that match your EngageConfig.json settings
@@ -499,6 +480,9 @@ public void setupRecipient(SetupRecipientHandler setupRecipientHandler)
  * When recipients are merged a history of the merged recipients is recorded using the
  * Mobile User Id, Merged Recipient Id, and Merged Date columns.
  *
+ * WARNING: The merge process is not currently transactional.  If this method errors the data is likely to
+ * be left in an inconsistent state.
+ *
  * @param idFieldNamesToValues Map of column name to id value for that column.  Searches for an
  *                             existing recipient that contains ALL of the column values in this map.
  *                             <p/>
@@ -510,6 +494,36 @@ public void setupRecipient(SetupRecipientHandler setupRecipientHandler)
 public void checkIdentity(final Map<String, String> idFieldNamesToValues, final CheckIdentityHandler identityHandler)
 ```
 
+### <a name="AnonymousMobileIdentityManager"/>AnonymousMobileIdentityManager
+
+Before the ```MobileIdentityManager``` was available SDK users could create an anonymous user manually.
+That functionality still exists but the logic has been moved to a central class which is now the
+```AnonymousMobileIdentityManager```.
+
+##### Creating an anonymous user
+
+```java
+// You can also provide null for parameters 2 & 3 if you don't need custom success/failure logic
+AnonymousMobileIdentityManager.get().createAnonymousUserList("EngageDBListID",
+        new AsyncTask<EngageResponseXML, Void, Object>() {
+            @Override
+            protected EngageResponseXML doInBackground(EngageResponseXML... engageResponseXMLs) {
+                Log.d(TAG, "Successful response");
+                return engageResponseXMLs[0];
+            }
+        }, new AsyncTask<VolleyError, Void, Object>() {
+            @Override
+            protected Object doInBackground(VolleyError... volleyErrors) {
+                Log.e(TAG, "Failure is posting create anonymous user event to Silverpop");
+                return volleyErrors[0];
+            }
+        });
+```
+
+Note: Using this method from the ```XMLAPIManager``` is now depreciated.  You should start using it from
+the ```AnonymousMobileIdentityManager``` instead.
+
+
 ### Local Event Storage
 
 UBF events are persisted to a local SQLite DB on the user's device. The event can have only 1 of 5 status. 
@@ -517,7 +531,7 @@ NOT_READY_TO_POST, READY_TO_POST, SUCCESSFULLY_POSTED, FAILED_POST, and EXPIRED.
 
 |Event Name|Description|
 |------------------|-------------|
-|NOT_READY_TO_POST|UBF events that are still awaiting augmentation to complete. UBF events will stay in this stateuntil the augmentation successfully completes or the augmentation times out.|
+|NOT_READY_TO_POST|UBF events that are still awaiting augmentation to complete. UBF events will stay in this state until the augmentation successfully completes or the augmentation times out.|
 |READY_TO_POST|UBF events that are ready to be sent to Engage on the next POST.|
 |SUCCESSFULLY_POSTED|UBF events that have already been successfully posted to Engage. These events will be purged after the configurable amount of time has been reached.|
 |FAILED_POST|UBF events that were attempted to be posted to Engage for the maximum number of retries. Once in this state no further attempts to post the UBF event will be made.|

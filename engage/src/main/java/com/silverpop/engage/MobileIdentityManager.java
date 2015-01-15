@@ -27,31 +27,28 @@ import java.util.Map;
 /**
  * Created by Lindsay Thurmond on 1/6/15.
  * <p/>
- * Handles creation of recipients and auto-generates the mobile user id if needed.
+ * Handles the creation and merging of recipients and auto-generates the mobile user id if needed.
  */
-public class MobileConnectorManager extends BaseManager {
+public class MobileIdentityManager extends BaseManager {
 
-    private static final String TAG = MobileConnectorManager.class.getName();
+    private static final String TAG = MobileIdentityManager.class.getName();
 
-    private static final String DEFAULT_UUID_GENERATOR_CLASS = "com.silverpop.engage.util.uuid.plugin.DefaultUUIDGenerator";
+    private static MobileIdentityManager instance = null;
 
-    private static MobileConnectorManager instance = null;
-
-    protected MobileConnectorManager(Context context) {
+    protected MobileIdentityManager(Context context) {
         super(context);
-        AnonymousMobileConnectorManager.init(context);
     }
 
-    public static synchronized MobileConnectorManager init(Context context) {
+    public static synchronized MobileIdentityManager init(Context context) {
         if (instance == null) {
-            instance = new MobileConnectorManager(context);
+            instance = new MobileIdentityManager(context);
         }
         return instance;
     }
 
-    public static MobileConnectorManager get() {
+    public static MobileIdentityManager get() {
         if (instance == null) {
-            final String error = MobileConnectorManager.class.getName() + " must be initialized before it can be retrieved";
+            final String error = MobileIdentityManager.class.getName() + " must be initialized before it can be retrieved";
             Log.e(TAG, error);
             throw new RuntimeException(error);
         }
@@ -209,6 +206,9 @@ public class MobileConnectorManager extends BaseManager {
      * When recipients are merged a history of the merged recipients is recorded using the
      * Mobile User Id, Merged Recipient Id, and Merged Date columns.
      * //[Lindsay Thurmond:1/15/15] TODO: update with audit table when applicable
+     *
+     * WARNING: The merge process is not currently transactional.  If this method errors the data is likely to
+     * be left in an inconsistent state.
      *
      * @param idFieldNamesToValues Map of column name to id value for that column.  Searches for an
      *                             existing recipient that contains ALL of the column values in this map.
@@ -502,7 +502,7 @@ public class MobileConnectorManager extends BaseManager {
             uuidGenerator = (UUIDGenerator) uuidClassName.newInstance();
         } catch (Exception ex) {
             Log.w(TAG, "Unable to initialize UUID generator class '" + uuidClassFullPackageName +
-                    ".' Using default implementation of " + DEFAULT_UUID_GENERATOR_CLASS + ": " + ex.getMessage());
+                    ".' Using default implementation of " + DefaultUUIDGenerator.class.getName() + ": " + ex.getMessage());
 
             uuidGenerator = new DefaultUUIDGenerator();
         }

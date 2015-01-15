@@ -1,7 +1,7 @@
 package com.silverpop.engage.domain;
 
 import android.text.TextUtils;
-import com.silverpop.engage.AnonymousMobileConnectorManager;
+import com.silverpop.engage.AnonymousMobileIdentityManager;
 
 import java.util.*;
 
@@ -263,14 +263,14 @@ public class XMLAPI {
 
     /**
      * Method left here for backwards compatibility, but functionality has been moved to
-     * {@link com.silverpop.engage.AnonymousMobileConnectorManager#addRecipientAnonymousToList(String)}
+     * {@link com.silverpop.engage.AnonymousMobileIdentityManager#addRecipientAnonymousToList(String)}
      * which you are encouraged to use instead.
      *
      * @param listId
      * @return
      */
     public static XMLAPI addRecipientAnonymousToList(String listId) {
-        return AnonymousMobileConnectorManager.addRecipientAnonymousToList(listId);
+        return AnonymousMobileIdentityManager.addRecipientAnonymousToList(listId);
     }
 
     public String envelope() {

@@ -1,7 +1,11 @@
 package com.silverpop.engage.domain;
 
+import android.os.AsyncTask;
 import android.test.AndroidTestCase;
-import com.silverpop.engage.AnonymousMobileConnectorManager;
+import android.util.Log;
+import com.android.volley.VolleyError;
+import com.silverpop.engage.AnonymousMobileIdentityManager;
+import com.silverpop.engage.response.EngageResponseXML;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -361,8 +365,7 @@ public class XMLAPITest
 
     public void testAddRecipientAnonymousToList() {
         String listId = "85628";
-//        XMLAPI api = XMLAPI.addRecipientAnonymousToList(listId);
-        XMLAPI api = AnonymousMobileConnectorManager.addRecipientAnonymousToList(listId);
+        XMLAPI api = AnonymousMobileIdentityManager.addRecipientAnonymousToList(listId);
 
         String expected = "<Envelope><Body><AddRecipient>" +
                 "<LIST_ID>85628</LIST_ID>" +

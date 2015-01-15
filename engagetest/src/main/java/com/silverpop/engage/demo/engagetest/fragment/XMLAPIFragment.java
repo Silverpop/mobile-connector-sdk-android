@@ -12,8 +12,8 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.android.volley.VolleyError;
-import com.silverpop.engage.AnonymousMobileConnectorManager;
-import com.silverpop.engage.MobileConnectorManager;
+import com.silverpop.engage.AnonymousMobileIdentityManager;
+import com.silverpop.engage.MobileIdentityManager;
 import com.silverpop.engage.XMLAPIManager;
 import com.silverpop.engage.config.EngageConfig;
 import com.silverpop.engage.config.EngageConfigManager;
@@ -75,7 +75,7 @@ public class XMLAPIFragment
             @Override
             public void onClick(View v) {
 
-                MobileConnectorManager.get().setupRecipient(new SetupRecipientHandler() {
+                MobileIdentityManager.get().setupRecipient(new SetupRecipientHandler() {
                     @Override
                     public void onSuccess(SetupRecipientResult result) {
                         String message = "Setup recipient auto configured recipient id: " + result.getRecipientId();
@@ -183,7 +183,7 @@ public class XMLAPIFragment
         mCreateAnonymousUserButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                AnonymousMobileConnectorManager.get().createAnonymousUserList(EngageConfigManager.get(getActivity()).engageListId(), new AsyncTask<EngageResponseXML, Void, Object>() {
+                AnonymousMobileIdentityManager.get().createAnonymousUserList(EngageConfigManager.get(getActivity()).engageListId(), new AsyncTask<EngageResponseXML, Void, Object>() {
                     @Override
                     protected EngageResponseXML doInBackground(EngageResponseXML... engageResponseXMLs) {
                         return engageResponseXMLs[0];

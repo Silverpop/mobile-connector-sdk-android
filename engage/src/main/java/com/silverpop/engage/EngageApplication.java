@@ -87,7 +87,8 @@ public class EngageApplication
                 });
         XMLAPIManager.init(getApplicationContext());
         UBFManager.init(getApplicationContext());
-        MobileConnectorManager.init(getApplicationContext());
+        MobileIdentityManager.init(getApplicationContext());
+        AnonymousMobileIdentityManager.init(getApplicationContext());
 
         //Registers a default deep linking handler for parsing URL parameters
         EngageDeepLinkManager.registerHandler(EngageDeepLinkManager.DEFAULT_HANDLER_NAME, new Handler() {

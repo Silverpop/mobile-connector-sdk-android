@@ -13,30 +13,33 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * Anonymous user support is now all in one place.  Keeping it around for legacy backwards compatibility.
+ * Anonymous user support is now all in one place.  Keeping it around for backwards compatibility.
+ *
+ * The new approach is to use the {@link MobileIdentityManager} to create
+ * the recipient's identity.
  *
  * Created by Lindsay Thurmond on 1/5/15.
  */
-public class AnonymousMobileConnectorManager extends BaseManager {
+public class AnonymousMobileIdentityManager extends BaseManager {
 
-    private static final String TAG = AnonymousMobileConnectorManager.class.getName();
+    private static final String TAG = AnonymousMobileIdentityManager.class.getName();
 
-    private static AnonymousMobileConnectorManager instance = null;
+    private static AnonymousMobileIdentityManager instance = null;
 
-    protected AnonymousMobileConnectorManager(Context context) {
+    protected AnonymousMobileIdentityManager(Context context) {
         super(context);
     }
 
-    public static synchronized AnonymousMobileConnectorManager init(Context context) {
+    public static synchronized AnonymousMobileIdentityManager init(Context context) {
         if (instance == null) {
-            instance = new AnonymousMobileConnectorManager(context);
+            instance = new AnonymousMobileIdentityManager(context);
         }
         return instance;
     }
 
-    public static AnonymousMobileConnectorManager get() {
+    public static AnonymousMobileIdentityManager get() {
         if (instance == null) {
-            final String error = AnonymousMobileConnectorManager.class.getName() + " must be initialized before it can be retrieved";
+            final String error = AnonymousMobileIdentityManager.class.getName() + " must be initialized before it can be retrieved";
             Log.e(TAG, error);
             throw new RuntimeException(error);
         }
