@@ -29,7 +29,7 @@ import java.util.Map;
  *
  * Handles creation of recipients and auto-generates the mobile user id if needed.
  */
-public class MobileConnectorManager extends BaseManager implements MobileConnector {
+public class MobileConnectorManager extends BaseManager {
 
     private static final String TAG = MobileConnectorManager.class.getName();
 
@@ -58,7 +58,6 @@ public class MobileConnectorManager extends BaseManager implements MobileConnect
         return instance;
     }
 
-    @Override
     public void setupRecipient(final SetupRecipientHandler setupRecipientHandler) {
 
         try {
@@ -186,7 +185,6 @@ public class MobileConnectorManager extends BaseManager implements MobileConnect
         });
     }
 
-    @Override
     public void checkIdentity(final Map<String, String> idFieldNamesToValues, final CheckIdentityHandler identityHandler) {
 
         setupRecipient(new SetupRecipientHandler() {
