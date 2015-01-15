@@ -32,7 +32,5 @@ public class AddRecipientResponseTest extends AndroidTestCase {
 
     public void testGetFaultString() throws Exception {
         assertNull(response.getFaultString());
-
-        //[Lindsay Thurmond:1/7/15] TODO: add example with actual fault string
     }
 }

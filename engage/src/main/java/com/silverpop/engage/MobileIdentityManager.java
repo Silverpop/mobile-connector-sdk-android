@@ -206,7 +206,7 @@ public class MobileIdentityManager extends BaseManager {
      * When recipients are merged a history of the merged recipients is recorded using the
      * Mobile User Id, Merged Recipient Id, and Merged Date columns.
      * //[Lindsay Thurmond:1/15/15] TODO: update with audit table when applicable
-     *
+     * <p/>
      * WARNING: The merge process is not currently transactional.  If this method errors the data is likely to
      * be left in an inconsistent state.
      *
@@ -256,8 +256,6 @@ public class MobileIdentityManager extends BaseManager {
                 final SelectRecipientResponse existingRecipientResponse = new SelectRecipientResponse(response);
                 Log.d(TAG, response.getXml());
 
-                //[Lindsay Thurmond:1/8/15] TODO: what if selected recipient has same recipient id? merge? ignore?
-
                 // scenario 1 - recipient not found
                 if (!existingRecipientResponse.isSuccess()) {
 
@@ -275,15 +273,23 @@ public class MobileIdentityManager extends BaseManager {
                 }
                 // we found an existing recipient - does it have a mobileUserId?
                 else {
+
+                    final String existingRecipientId = existingRecipientResponse.getRecipientId();
                     final String existingMobileUserId = existingRecipientResponse.getColumnValue(getEngageConfigManager().mobileUserIdColumnName());
 
-                    // scenario 2 - existing recipient doesn't have a mobileUserId
-                    if (TextUtils.isEmpty(existingMobileUserId)) {
-                        handleExistingRecipientWithoutRecipientId(existingRecipientResponse, identityHandler, listId);
-                    }
-                    // scenario 3 - existing recipient has a mobileUserId
-                    else {
-                        handleExistingRecipientWithRecipientId(existingRecipientResponse, existingMobileUserId, currentRecipientId, listId, identityHandler);
+                    // make sure we didn't find our self
+                    if (existingRecipientId.equals(EngageConfig.recipientId(getContext()))) {
+                        handleExistingRecipientIsSameAsInApp(existingMobileUserId, identityHandler);
+
+                    } else {
+                        // scenario 2 - existing recipient doesn't have a mobileUserId
+                        if (TextUtils.isEmpty(existingMobileUserId)) {
+                            handleExistingRecipientWithoutRecipientId(existingRecipientResponse, identityHandler, listId);
+                        }
+                        // scenario 3 - existing recipient has a mobileUserId
+                        else {
+                            handleExistingRecipientWithRecipientId(existingRecipientResponse, existingMobileUserId, currentRecipientId, listId, identityHandler);
+                        }
                     }
                 }
             }
@@ -293,6 +299,42 @@ public class MobileIdentityManager extends BaseManager {
                 Log.d(TAG, exception.getMessage(), exception);
             }
         });
+    }
+
+    protected void handleExistingRecipientIsSameAsInApp(final String existingMobileUserId, final CheckIdentityHandler identityHandler) {
+        // we did find our self
+        if (TextUtils.isEmpty(existingMobileUserId)) {
+            // update with mobile user id
+            final String existingRecipientId = EngageConfig.recipientId(getContext());
+            XMLAPI updateExistingRecipientXml = XMLAPI.builder().operation(XMLAPIOperation.UPDATE_RECIPIENT)
+                    .listId(getEngageConfigManager().engageListId())
+                    .recipientId(existingRecipientId)
+                    .column(getEngageConfigManager().mobileUserIdColumnName(), existingMobileUserId)
+                    .build();
+            getXMLAPIManager().postXMLAPI(updateExistingRecipientXml, new UpdateRecipientResponseHandler() {
+                @Override
+                public void onUpdateRecipientSuccess(UpdateRecipientResponse updateRecipientResponse) {
+                    if (identityHandler != null) {
+                        identityHandler.onSuccess(new CheckIdentityResult(existingRecipientId, existingMobileUserId));
+                    }
+                }
+
+                @Override
+                public void onFailure(Exception exception) {
+                    Log.e(TAG, exception.getMessage(), exception);
+                    if (identityHandler != null) {
+                        identityHandler.onFailure(exception);
+                    }
+                }
+            });
+
+        } else {
+            // nothing to do here, we're done
+            if (identityHandler != null) {
+                identityHandler.onSuccess(new CheckIdentityResult(
+                        EngageConfig.recipientId(getContext()), EngageConfig.mobileUserId(getContext())));
+            }
+        }
     }
 
     /**
@@ -320,7 +362,7 @@ public class MobileIdentityManager extends BaseManager {
                     updateAuditRecordWithMergeChanges(oldRecipientId, newRecipientId, identityHandler);
                 } else {
                     identityHandler.onSuccess(new CheckIdentityResult(
-                            EngageConfig.recipientId(getContext()), EngageConfig.mobileUserId(getContext())));
+                            newRecipientId, oldRecipientId, existingMobileUserId));
                 }
             }
 
@@ -386,7 +428,7 @@ public class MobileIdentityManager extends BaseManager {
                                 updateAuditRecordWithMergeChanges(oldRecipientId, newRecipientId, identityHandler);
                             } else {
                                 identityHandler.onSuccess(new CheckIdentityResult(
-                                        EngageConfig.recipientId(getContext()), EngageConfig.mobileUserId(getContext())));
+                                        newRecipientId, oldRecipientId, EngageConfig.mobileUserId(getContext())));
                             }
                         }
 
@@ -416,7 +458,7 @@ public class MobileIdentityManager extends BaseManager {
      * <p/>
      * Should only be called if the 'mergeHistoryInAuditRecordTable' config property is {@code true}
      */
-    private void updateAuditRecordWithMergeChanges(String oldRecipientId, String newRecipientId, final CheckIdentityHandler identityHandler) {
+    private void updateAuditRecordWithMergeChanges(final String oldRecipientId, final String newRecipientId, final CheckIdentityHandler identityHandler) {
         final String auditRecordTableId = EngageConfig.auditRecordTableId(getContext());
         if (TextUtils.isEmpty(auditRecordTableId)) {
             if (identityHandler != null) {
@@ -438,7 +480,7 @@ public class MobileIdentityManager extends BaseManager {
                         // congratz, we're done!
                         if (identityHandler != null) {
                             identityHandler.onSuccess(new CheckIdentityResult(
-                                    EngageConfig.recipientId(getContext()), EngageConfig.mobileUserId(getContext())));
+                                   newRecipientId, oldRecipientId, EngageConfig.mobileUserId(getContext())));
                         }
                     } else {
                         if (identityHandler != null) {

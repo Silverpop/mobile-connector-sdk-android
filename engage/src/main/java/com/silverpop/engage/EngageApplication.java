@@ -132,7 +132,7 @@ public class EngageApplication
         XMLAPI createColumnXml = XMLAPI.builder().operation(XMLAPIOperation.ADD_LIST_COLUMN)
                 .listId(listId)
                 .param(XMLAPIElement.COLUMN_NAME, columnName)
-                .param(XMLAPIElement.COLUMN_TYPE, columnType.value())
+                .param(XMLAPIElement.COLUMN_TYPE, columnType.code())
                 .param(XMLAPIElement.DEFAULT, defaultValue)
                 .build();
         XMLAPIManager.get().postXMLAPI(createColumnXml, null, null);

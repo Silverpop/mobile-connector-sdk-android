@@ -25,11 +25,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Integration tests that actually hit the Silverpop Xml Api web service.
  */
-public class MobileConnectorManager_IT extends BaseAndroidTest {
+public class MobileIdentityManager_IT extends BaseAndroidTest {
 
     private List<XMLAPI> tearDownAPICalls = new ArrayList<XMLAPI>();
 
-    private static final String TAG = MobileConnectorManager_IT.class.getName();
+    private static final String TAG = MobileIdentityManager_IT.class.getName();
 
     // note: these columns are expected to be setup before the tests are run
     private static final String CUSTOM_ID_COLUMN = "Custom Integration Test Id";
@@ -225,10 +225,12 @@ public class MobileConnectorManager_IT extends BaseAndroidTest {
                     @Override
                     public void onSuccess(CheckIdentityResult result) {
                         final String recipientId = result.getRecipientId();
+                        final String mergedRecipientId = result.getMergedRecipientId();
                         final String mobileUserId = result.getMobileUserId();
 
                         // check that existing recipient was updated with a generated mobile user id
                         assertThat(recipientId).isNotEmpty();
+                        assertThat(mergedRecipientId).isNullOrEmpty();
                         assertThat(mobileUserId).isNotEmpty();
 
                         // double check that the server is updated correctly
@@ -299,6 +301,11 @@ public class MobileConnectorManager_IT extends BaseAndroidTest {
                 MobileIdentityManager.get().checkIdentity(existingRecipient.customIdFields, new CheckIdentityHandler() {
                     @Override
                     public void onSuccess(CheckIdentityResult result) {
+
+                        // verify correct values passed in result
+                        assertThat(result.getRecipientId()).isEqualTo(EngageConfig.recipientId(getContext()));
+                        assertThat(result.getMergedRecipientId()).isNotEmpty().isNotEqualTo(result.getRecipientId());
+                        assertThat(result.getMobileUserId()).isEqualTo(EngageConfig.mobileUserId(getContext()));
 
                         // verify the app is now using the existing recipient
                         assertThat(EngageConfig.recipientId(getContext())).isEqualTo(existingRecipient.recipientId);
@@ -442,6 +449,11 @@ public class MobileConnectorManager_IT extends BaseAndroidTest {
                     @Override
                     public void onSuccess(CheckIdentityResult result) {
 
+                        // verify correct values passed in result
+                        assertThat(result.getRecipientId()).isEqualTo(EngageConfig.recipientId(getContext()));
+                        assertThat(result.getMergedRecipientId()).isNotEmpty().isNotEqualTo(result.getRecipientId());
+                        assertThat(result.getMobileUserId()).isEqualTo(EngageConfig.mobileUserId(getContext()));
+
                         // verify the app is now using the existing recipient
                         assertThat(EngageConfig.mobileUserId(getContext())).isEqualTo(existingRecipient.mobileUserId);
                         assertThat(EngageConfig.recipientId(getContext())).isEqualTo(existingRecipient.recipientId);
@@ -498,6 +510,11 @@ public class MobileConnectorManager_IT extends BaseAndroidTest {
                 MobileIdentityManager.get().checkIdentity(existingRecipient.customIdFields, new CheckIdentityHandler() {
                     @Override
                     public void onSuccess(CheckIdentityResult result) {
+
+                        // verify correct values passed in result
+                        assertThat(result.getRecipientId()).isEqualTo(EngageConfig.recipientId(getContext()));
+                        assertThat(result.getMergedRecipientId()).isNotEmpty().isNotEqualTo(result.getRecipientId());
+                        assertThat(result.getMobileUserId()).isEqualTo(EngageConfig.mobileUserId(getContext()));
 
                         // verify the app is now using the existing recipient
                         assertThat(EngageConfig.mobileUserId(getContext())).isEqualTo(existingRecipient.mobileUserId);
