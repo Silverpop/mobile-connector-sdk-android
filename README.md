@@ -139,7 +139,7 @@ by the SDK.
 * App Name
 * App Version
 * Device Id
-* Primary User Id
+* Mobile User Id/Primary User Id
 * Anonymous Id
 * Recipient Id
 
@@ -290,7 +290,7 @@ is equivalent to:
 ```java
 XMLAPI selectRecipientData = new XMLAPI(XMLAPIOperation.SELECT_RECIPIENT_DATA);
 
-// XMLAPI top level parameters.
+// XMLAPI top level parameters
 selectRecipientData.addParam(XMLAPIElement.LIST_ID.toString(), "45654");
 selectRecipientData.addParam(XMLAPIElement.RECIPIENT_ID.toString(), "702003");
 ```
@@ -497,8 +497,7 @@ public void checkIdentity(final Map<String, String> idFieldNamesToValues, final 
 ### <a name="AnonymousMobileIdentityManager"/>AnonymousMobileIdentityManager
 
 Before the ```MobileIdentityManager``` was available SDK users could create an anonymous user manually.
-That functionality still exists but the logic has been moved to a central class which is now the
-```AnonymousMobileIdentityManager```.
+That functionality still exists but the logic has been moved to a central class which is now the ```AnonymousMobileIdentityManager```.
 
 ##### Creating an anonymous user
 
@@ -581,51 +580,51 @@ from your application to retrieve desired configuration values.
 |Configuration Name|Default Value|Meaning|Format|
 |------------------|-------------|-------|------|
 |LocalEventStore->expireLocalEventsAfterNumDays|30 days|Number of days before engage events are purged from local storage|Number|
-|General->databaseListId|{YOUR_LIST_ID}|Engage Database ListID from Engage Portal|String|
-|General->ubfEventCacheSize|3|Events to cache locally before batch post|Number|
-|General->defaultCurrentCampaignExpiration|1 day|time before current campaign expires by default|EngageExpirationParser String|
-|General->deepLinkScheme|{YOUR_DEEP_LINK_SCHEME}|Application deeplink scheme|String|
-|ParamFieldNames->ParamCampaignValidFor|CampaignValidFor|External event parameter name to parse Campaign valid from|String|
-|ParamFieldNames->ParamCampaignExpiresAt|CampaignExpiresAt|External event parameter name to parse Campaign expires at from|String|
-|ParamFieldNames->ParamCurrentCampaign|CurrentCampaign|External event parameter name to parse Current Campaign from|String|
-|ParamFieldNames->ParamCallToAction|CallToAction|External event parameter name to parse Call To Action from|String|
-|Session->sessionLifecycleExpiration|5 minutes|time local application session is valid for before triggering session ended event|EngageExpirationParser String|
-|Networking->maxNumRetries|3|Number of times that an event is retried before it is finally marked as failed in the local event store and no more attempts are made|Number|
-|Networking->secureConnection|true|true if underlying connection should be https(and it should be) false otherwise. False only available for debugging purposes.|Boolean|
-|UBFFieldNames->UBFSessionDurationFieldName|Session Duration|JSON Universal Event Session Duration field name|String|
-|UBFFieldNames->UBFTagsFieldName|Tags|JSON Universal Event Tags field name|String|
-|UBFFieldNames->UBFDisplayedMessageFieldName|Displayed Message|JSON Universal Event Displayed Message field name|String|
-|UBFFieldNames->UBFCallToActionFieldName|Call To Action|JSON Universal Event Call To Action field name|String|
-|UBFFieldNames->UBFEventNameFieldName|Event Name|JSON Universal Event name field name|String|
-|UBFFieldNames->UBFGoalNameFieldName|Goal Name|JSON Universal Event goal field name|String|
-|UBFFieldNames->UBFCurrentCampaignFieldName|Campaign Name|JSON Universal Event current campaign field name|String|
-|UBFFieldNames->UBFLastCampaignFieldName|Last Campaign|JSON Universal Event last campaign field name|String|
-|UBFFieldNames->UBFLocationAddressFieldName|Location Address|JSON Universal Event location address field name|String|
-|UBFFieldNames->UBFLocationNameFieldName|Location Name|JSON Universal Event location name field name|String|
-|UBFFieldNames->UBFLatitudeFieldName|Latitude|JSON Universal Event Latitude field name|String|
-|UBFFieldNames->UBFLongitudeFieldName|Longitude|JSON Universal Event Longitude field name|String|
-|LocationServices->lastKnownLocationDateFormat|yyyy'-'MM'-'dd|User last known location date format|String|
-|LocationServices->lastKnownLocationTimestampColumn|Last Location Address Time|Engage DB column name for the last known location time|String|
-|LocationServices->lastKnownLocationColumn|Last Location Address|Engage DB column name for the last known location|String|
-|LocationServices->locationDistanceFilter|10|meters in location change before updated location information delegate is invoked|Number|
-|LocationServices->locationPrecisionLevel|kCLLocationAccuracyBest|desired level of location accuracy|String|
-|LocationServices->locationCacheLifespan|1 hr|lifespan of location coordinates before they are considered expired|EngageExpirationParser String|
-|LocationServices->coordinatesPlacemarkTimeout|15 sec|timeout on acquiring CLPlacemark before event is posted without that information|EngageExpirationParser String|
-|LocationServices->coordinatesAcquisitionTimeout|15 sec|timeout on acquiring CLLocation before event is posted without that information|EngageExpirationParser String|
-|LocationServices->enabled|YES|Are Location services enabled for UBF events|Boolean|
-|PluggableServices->pluggableLocationManagerClassName|com.silverpop.engage.location.manager.plugin.EngageLocationManagerDefault|Java implementation that will pull the location information from the device|Java Class|
-|Augmentation->augmentationTimeout|15 sec|timeout for augmenting UBF events|EngageExpirationParser String|
-|Augmentation->ubfAugmentorClassNames||JSON Array of Java class names that should be used for augmenting|JSON Array of String Java Classnames|
-|Recipient->enableAutoAnonymousTracking|true||Boolean|
-|Recipient->mobileUserIdGeneratorClassName|com.silverpop.engage.util.uuid.plugin.DefaultUUIDGenerator||String|
-|Recipient->mobileUserIdColumn|Mobile User Id||String|
-|Recipient->mergedRecipientIdColumn|Merged Recipient Id|TODO|String|
-|Recipient->mergedDateColumn|Merged Date|TODO|String|
-|Recipient->mergeHistoryInMergedMarketingDatabase|true|TODO|Boolean|
-|AuditRecord->oldRecipientIdColumnName|Old Recipient Id|TODO|String|
-|AuditRecord->newRecipientIdColumnName|New Recipient Id|TODO|String|
-|AuditRecord->createDateColumnName|Create Date|TODO|String|
-|AuditRecord->mergeHistoryInAuditRecordTable|false|TODO|Boolean|
+|General>databaseListId|{YOUR_LIST_ID}|Engage Database ListID from Engage Portal|String|
+|General>ubfEventCacheSize|3|Events to cache locally before batch post|Number|
+|General>defaultCurrentCampaignExpiration|1 day|time before current campaign expires by default|EngageExpirationParser String|
+|General>deepLinkScheme|{YOUR_DEEP_LINK_SCHEME}|Application deeplink scheme|String|
+|ParamFieldNames>ParamCampaignValidFor|CampaignValidFor|External event parameter name to parse Campaign valid from|String|
+|ParamFieldNames>ParamCampaignExpiresAt|CampaignExpiresAt|External event parameter name to parse Campaign expires at from|String|
+|ParamFieldNames>ParamCurrentCampaign|CurrentCampaign|External event parameter name to parse Current Campaign from|String|
+|ParamFieldNames>ParamCallToAction|CallToAction|External event parameter name to parse Call To Action from|String|
+|Session>sessionLifecycleExpiration|5 minutes|time local application session is valid for before triggering session ended event|EngageExpirationParser String|
+|Networking>maxNumRetries|3|Number of times that an event is retried before it is finally marked as failed in the local event store and no more attempts are made|Number|
+|Networking>secureConnection|true|true if underlying connection should be https(and it should be) false otherwise. False only available for debugging purposes.|Boolean|
+|UBFFieldNames>UBFSessionDurationFieldName|Session Duration|JSON Universal Event Session Duration field name|String|
+|UBFFieldNames>UBFTagsFieldName|Tags|JSON Universal Event Tags field name|String|
+|UBFFieldNames>UBFDisplayedMessageFieldName|Displayed Message|JSON Universal Event Displayed Message field name|String|
+|UBFFieldNames>UBFCallToActionFieldName|Call To Action|JSON Universal Event Call To Action field name|String|
+|UBFFieldNames>UBFEventNameFieldName|Event Name|JSON Universal Event name field name|String|
+|UBFFieldNames>UBFGoalNameFieldName|Goal Name|JSON Universal Event goal field name|String|
+|UBFFieldNames>UBFCurrentCampaignFieldName|Campaign Name|JSON Universal Event current campaign field name|String|
+|UBFFieldNames>UBFLastCampaignFieldName|Last Campaign|JSON Universal Event last campaign field name|String|
+|UBFFieldNames>UBFLocationAddressFieldName|Location Address|JSON Universal Event location address field name|String|
+|UBFFieldNames>UBFLocationNameFieldName|Location Name|JSON Universal Event location name field name|String|
+|UBFFieldNames>UBFLatitudeFieldName|Latitude|JSON Universal Event Latitude field name|String|
+|UBFFieldNames>UBFLongitudeFieldName|Longitude|JSON Universal Event Longitude field name|String|
+|LocationServices>lastKnownLocationDateFormat|yyyy'-'MM'-'dd|User last known location date format|String|
+|LocationServices>lastKnownLocationTimestampColumn|Last Location Address Time|Engage DB column name for the last known location time|String|
+|LocationServices>lastKnownLocationColumn|Last Location Address|Engage DB column name for the last known location|String|
+|LocationServices>locationDistanceFilter|10|meters in location change before updated location information delegate is invoked|Number|
+|LocationServices>locationPrecisionLevel|kCLLocationAccuracyBest|desired level of location accuracy|String|
+|LocationServices>locationCacheLifespan|1 hr|lifespan of location coordinates before they are considered expired|EngageExpirationParser String|
+|LocationServices>coordinatesPlacemarkTimeout|15 sec|timeout on acquiring CLPlacemark before event is posted without that information|EngageExpirationParser String|
+|LocationServices>coordinatesAcquisitionTimeout|15 sec|timeout on acquiring CLLocation before event is posted without that information|EngageExpirationParser String|
+|LocationServices>enabled|YES|Are Location services enabled for UBF events|Boolean|
+|PluggableServices>pluggableLocationManagerClassName|com.silverpop.engage.location.manager.plugin.EngageLocationManagerDefault|Java implementation that will pull the location information from the device|Java Class|
+|Augmentation>augmentationTimeout|15 sec|timeout for augmenting UBF events|EngageExpirationParser String|
+|Augmentation>ubfAugmentorClassNames||JSON Array of Java class names that should be used for augmenting|JSON Array of String Java Classnames|
+|Recipient>enableAutoAnonymousTracking|true|If set to true it allows mobile user ids to be auto generated for recipients.  If set to false you are responsible for manually setting the mobile user id.|Boolean|
+|Recipient>mobileUserIdGeneratorClassName|com.silverpop.engage.util.uuid.plugin.DefaultUUIDGenerator|The class to use for auto generating mobile user ids if the ```enableAutoAnonymousTracking``` property is set to true.|String|
+|Recipient>mobileUserIdColumn|Mobile User Id|Column name to store the mobile user id in.|String|
+|Recipient>mergedRecipientIdColumn|Merged Recipient Id|Column name to store the merged recipient id in.  The merged recipient id column is populated if needed during the check identity process.|String|
+|Recipient>mergedDateColumn|Merged Date|Column name to store the merged date in. The merged recipient id column is populated if needed during the check identity process.|String|
+|Recipient>mergeHistoryInMergedMarketingDatabase|true|If the audit history for merged recipients should be stored in the marketing database.|Boolean|
+|AuditRecord>oldRecipientIdColumnName|Old Recipient Id|Only required if ```mergeHistoryInAuditRecordTable``` is set to ```true```. When a recipient is merged during the check identity process, this is the column name for old recipient id.|String|
+|AuditRecord>newRecipientIdColumnName|New Recipient Id|Only required if ```mergeHistoryInAuditRecordTable``` is set to ```true```. When a recipient is merged during the check identity process, this is the column name for assumed recipient id.|String|
+|AuditRecord>createDateColumnName|Create Date|Only required if ```mergeHistoryInAuditRecordTable``` is set to ```true```. When a recipient is merged during the check identity process, this is the column name for the timestamp for when the merge occurred.|String|
+|AuditRecord>mergeHistoryInAuditRecordTable|false|If the audit history for merged recipients should be stored in a separate audit record table.|Boolean|
 
 ### <a name="EngageExpirationParser"/>EngageExpirationParser
 
