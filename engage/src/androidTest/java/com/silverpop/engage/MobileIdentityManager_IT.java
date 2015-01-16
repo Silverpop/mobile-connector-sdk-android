@@ -442,6 +442,8 @@ public class MobileIdentityManager_IT extends BaseAndroidTest {
 
         final String RECIPIENT_LIST_ID = getEngageConfigManager().engageListId();
 
+//        EngageConfig.storeAuditRecordTableId(getContext(), "29392");
+
         setupScenario3(false, new ScenarioSetupHandler() {
             @Override
             public void onSuccess(final Recipient currentRecipient, final Recipient existingRecipient) {

@@ -473,6 +473,7 @@ public class MobileIdentityManager extends BaseManager {
         } else {
             XMLAPI updateAuditRecordApi = XMLAPI.insertUpdateRelationalTable(auditRecordTableId);
             RelationalTableRow newAuditRecordRow = new RelationalTableRow();
+            newAuditRecordRow.addColumn(getEngageConfigManager().auditRecordPrimaryKeyColumnName(), generateAuditRecordPrimaryKey());
             newAuditRecordRow.addColumn(getEngageConfigManager().auditRecordOldRecipientIdColumnName(), oldRecipientId);
             newAuditRecordRow.addColumn(getEngageConfigManager().auditRecordNewRecipientIdColumnName(), newRecipientId);
             newAuditRecordRow.addColumn(getEngageConfigManager().auditRecordCreateDateColumnName(), DateUtil.toGmtString(new Date()));
@@ -543,6 +544,31 @@ public class MobileIdentityManager extends BaseManager {
      */
     public String generateMobileUserId() {
         String uuidClassFullPackageName = getEngageConfigManager().mobileUserIdGeneratorClassName();
+
+        UUIDGenerator uuidGenerator;
+        try {
+            Class uuidClassName = Class.forName(uuidClassFullPackageName);
+            uuidGenerator = (UUIDGenerator) uuidClassName.newInstance();
+        } catch (Exception ex) {
+            Log.w(TAG, "Unable to initialize UUID generator class '" + uuidClassFullPackageName +
+                    ".' Using default implementation of " + DefaultUUIDGenerator.class.getName() + ": " + ex.getMessage());
+
+            uuidGenerator = new DefaultUUIDGenerator();
+        }
+
+        String mobileUserId = uuidGenerator.generateUUID();
+        return mobileUserId;
+    }
+
+    /**
+     * Generates a unique id using the class configured as the {@code auditRecordPrimaryKeyGeneratorClassName}
+     * in the EngageConfig or the {@link com.silverpop.engage.util.uuid.plugin.DefaultUUIDGenerator} if a
+     * valid class isn't configured.
+     *
+     * @return a new unique id
+     */
+    public String generateAuditRecordPrimaryKey() {
+        String uuidClassFullPackageName = getEngageConfigManager().auditRecordPrimaryKeyGeneratorClassName();
 
         UUIDGenerator uuidGenerator;
         try {

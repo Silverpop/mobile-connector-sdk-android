@@ -515,6 +515,28 @@ public class EngageConfigManager {
         return mergeHistoryInMergedMarketingDatabase;
     }
 
+    public String auditRecordPrimaryKeyColumnName() {
+        String propName = "auditRecordPrimaryKeyColumnName";
+        String auditRecordPrimaryKeyColumnName = null;
+        try {
+            auditRecordPrimaryKeyColumnName = getAuditRecordConfigJson().getString(propName);
+        } catch (JSONException ex) {
+            Log.w(TAG, "Unable to find " + propName + " configuration.  ");
+        }
+        return auditRecordPrimaryKeyColumnName;
+    }
+
+    public String auditRecordPrimaryKeyGeneratorClassName() {
+        String propName = "auditRecordPrimaryKeyGeneratorClassName";
+        String auditRecordPrimaryKeyGeneratorClassName = null;
+        try {
+            auditRecordPrimaryKeyGeneratorClassName = getAuditRecordConfigJson().getString(propName);
+        } catch (JSONException ex) {
+            Log.w(TAG, "Unable to find " + propName + " configuration.  ");
+        }
+        return auditRecordPrimaryKeyGeneratorClassName;
+    }
+
     public String auditRecordOldRecipientIdColumnName() {
         String propName = "oldRecipientIdColumnName";
         String oldRecipientIdColumnName = null;
