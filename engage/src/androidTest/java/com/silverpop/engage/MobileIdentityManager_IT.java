@@ -15,8 +15,12 @@ import com.silverpop.engage.response.SelectRecipientResponse;
 import com.silverpop.engage.response.handler.AddRecipientResponseHandler;
 import com.silverpop.engage.response.handler.SelectRecipientResponseHandler;
 import com.silverpop.engage.response.handler.XMLAPIResponseHandler;
+import com.silverpop.engage.util.uuid.plugin.DefaultUUIDGenerator;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -34,6 +38,8 @@ public class MobileIdentityManager_IT extends BaseAndroidTest {
     // note: these columns are expected to be setup before the tests are run
     private static final String CUSTOM_ID_COLUMN = "Custom Integration Test Id";
     private static final String CUSTOM_ID_COLUMN_2 = "Custom Integration Test Id 2";
+
+    private DefaultUUIDGenerator uuidGenerator = new DefaultUUIDGenerator();
 
     @Override
     public void setUp() throws Exception {
@@ -108,7 +114,7 @@ public class MobileIdentityManager_IT extends BaseAndroidTest {
     public void testSetupRecipient_recipientPreviouslySetup() throws Exception {
         final CountDownLatch signal = new CountDownLatch(1);
 
-        final String prevMobileUserId = UUID.randomUUID().toString();
+        final String prevMobileUserId = uuidGenerator.generateUUID();
         final String prevRecipientId = "00000";
 
         // pretend these were previously set
@@ -150,7 +156,7 @@ public class MobileIdentityManager_IT extends BaseAndroidTest {
         final CountDownLatch signal = new CountDownLatch(1);
 
         // setup - create a user without a mobile user id
-        final String email = UUID.randomUUID().toString() + "@makeandbuild.com";
+        final String email = uuidGenerator.generateUUID() + "@makeandbuild.com";
         final String listId = getEngageConfigManager().engageListId();
         XMLAPI setupExistingRecipientXml = XMLAPI.addRecipientWithEmail(email, listId);
         getXMLAPIManager().postXMLAPI(setupExistingRecipientXml, new AddRecipientResponseHandler() {
@@ -215,7 +221,7 @@ public class MobileIdentityManager_IT extends BaseAndroidTest {
                 assertThat(EngageConfig.mobileUserId(getContext())).isNotEmpty();
 
                 // look for an existing recipient with the following
-                final String nonExistingCustomIdValue = UUID.randomUUID().toString();
+                final String nonExistingCustomIdValue = uuidGenerator.generateUUID();
 
                 Map<String, String> idFieldNamesToValues = new HashMap<String, String>();
                 idFieldNamesToValues.put(CUSTOM_ID_COLUMN, nonExistingCustomIdValue);
@@ -378,7 +384,7 @@ public class MobileIdentityManager_IT extends BaseAndroidTest {
                 scheduleCleanup(createdWithMobileUserId_RecipientId);
                 final String originalMobileUserId = EngageConfig.mobileUserId(getContext());
 
-                final String customId = UUID.randomUUID().toString();
+                final String customId = uuidGenerator.generateUUID();
 
                 // setup existing recipient on server with custom id but not a mobile user id
                 XMLAPI addRecipientWithCustomIdXml = XMLAPI.builder()
@@ -570,9 +576,9 @@ public class MobileIdentityManager_IT extends BaseAndroidTest {
                 scheduleCleanup(createdWithMobileUserId_RecipientId);
                 final String originalCurrentMobileUserId = EngageConfig.mobileUserId(getContext());
 
-                final String customId = UUID.randomUUID().toString();
-                final String originalExistingMobileUserId = UUID.randomUUID().toString();
-                final String customId2 = UUID.randomUUID().toString();
+                final String customId = uuidGenerator.generateUUID();
+                final String originalExistingMobileUserId = uuidGenerator.generateUUID();
+                final String customId2 = uuidGenerator.generateUUID();
 
                 // setup existing recipient on server with custom id(s) and a different mobileUserId
                 XMLAPI addRecipientWithCustomIdXml = XMLAPI.builder()
@@ -632,6 +638,53 @@ public class MobileIdentityManager_IT extends BaseAndroidTest {
             }
         });
 
+    }
+
+    public void testCheckIdentity_selfFoundAsExistingRecipient_WithMobileUserId() throws Exception {
+        final CountDownLatch signal = new CountDownLatch(1);
+        // setup
+        final String mobileUseId = uuidGenerator.generateUUID();
+        final String customId = uuidGenerator.generateUUID();
+        getXMLAPIManager().postXMLAPI(XMLAPI.builder().operation(XMLAPIOperation.ADD_RECIPIENT)
+                        .listId(getEngageConfigManager().engageListId())
+                        .column(getEngageConfigManager().mobileUserIdColumnName(), mobileUseId)
+                        .column(CUSTOM_ID_COLUMN, customId).build(),
+                new AddRecipientResponseHandler() {
+                    @Override
+                    public void onAddRecipientSuccess(final AddRecipientResponse addRecipientResponse) {
+                        EngageConfig.storeRecipientId(getContext(), addRecipientResponse.getRecipientId());
+                        EngageConfig.storeMobileUserId(getContext(), mobileUseId);
+
+                        // recipient setup with mobile user id and custom id, lets search for that user
+                        Map<String, String> customIdMap = new HashMap<String, String>();
+                        customIdMap.put(CUSTOM_ID_COLUMN, customId);
+                        MobileIdentityManager.get().checkIdentity(customIdMap, new CheckIdentityHandler() {
+                            @Override
+                            public void onSuccess(CheckIdentityResult result) {
+                                // nothing should have happened, no merging and EngageConfig should remain the same
+                                assertThat(result.getMobileUserId()).isEqualTo(mobileUseId).isEqualTo(EngageConfig.mobileUserId(getContext()));
+                                assertThat(result.getMergedRecipientId()).isNullOrEmpty();
+                                assertThat(result.getRecipientId()).isNotEmpty()
+                                        .isEqualTo(addRecipientResponse.getRecipientId()).isEqualTo(EngageConfig.recipientId(getContext()));
+
+                                signal.countDown();
+                            }
+
+                            @Override
+                            public void onFailure(Exception exception) {
+                                Log.e(TAG, exception.getMessage(), exception);
+                                fail(exception.getMessage());
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onFailure(Exception exception) {
+                        Log.e(TAG, exception.getMessage(), exception);
+                        fail(exception.getMessage());
+                    }
+                });
+        signal.await(10, TimeUnit.SECONDS);
     }
 
     class Recipient {

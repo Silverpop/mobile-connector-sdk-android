@@ -36,8 +36,8 @@ public class XMLAPI {
     /**
      * Calling add elements with and existing elementName will result in all existing elements
      * with that same name being replaced. One should take care to make sure that all existing elements
-     * are merged with the new ones before this is called. Refer to addSyncFields method for example
-     * of this happening.
+     * are merged with the new ones before this is called. Refer to {@link #addSyncFields(java.util.Map)}
+     * method for example of this happening.
      *
      * @param elements
      * @param elementName

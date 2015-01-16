@@ -131,7 +131,8 @@ public class MobileIdentityManager extends BaseManager {
         }
     }
 
-    private void updateExistingRecipientWithMobileUserId(final SetupRecipientHandler setupRecipientHandler, String existingRecipientId, String listId, String mobileUserIdColumn) {
+    private void updateExistingRecipientWithMobileUserId(final SetupRecipientHandler setupRecipientHandler,
+                                                         String existingRecipientId, String listId, String mobileUserIdColumn) {
         // update the existing recipient with a mobile user id
         XMLAPI updateRecipientXml = XMLAPI.updateRecipient(existingRecipientId, listId);
 
@@ -304,18 +305,22 @@ public class MobileIdentityManager extends BaseManager {
     protected void handleExistingRecipientIsSameAsInApp(final String existingMobileUserId, final CheckIdentityHandler identityHandler) {
         // we did find our self
         if (TextUtils.isEmpty(existingMobileUserId)) {
+            // It really shouldn't be possible to get here since the first thing CheckIdentity does
+            // is call setupRecipient which would fill in the mobile user id for the recipient if
+            // it was missing before we got here - but just in case let's handle it here again
+
             // update with mobile user id
             final String existingRecipientId = EngageConfig.recipientId(getContext());
             XMLAPI updateExistingRecipientXml = XMLAPI.builder().operation(XMLAPIOperation.UPDATE_RECIPIENT)
                     .listId(getEngageConfigManager().engageListId())
                     .recipientId(existingRecipientId)
-                    .column(getEngageConfigManager().mobileUserIdColumnName(), existingMobileUserId)
+                    .column(getEngageConfigManager().mobileUserIdColumnName(), EngageConfig.mobileUserId(getContext()))
                     .build();
             getXMLAPIManager().postXMLAPI(updateExistingRecipientXml, new UpdateRecipientResponseHandler() {
                 @Override
                 public void onUpdateRecipientSuccess(UpdateRecipientResponse updateRecipientResponse) {
                     if (identityHandler != null) {
-                        identityHandler.onSuccess(new CheckIdentityResult(existingRecipientId, existingMobileUserId));
+                        identityHandler.onSuccess(new CheckIdentityResult(existingRecipientId, EngageConfig.mobileUserId(getContext())));
                     }
                 }
 
@@ -340,7 +345,8 @@ public class MobileIdentityManager extends BaseManager {
     /**
      * Scenario 3 - existing recipient has a mobileUserId
      */
-    private void handleExistingRecipientWithRecipientId(final SelectRecipientResponse existingRecipientResponse, final String existingMobileUserId, String currentRecipientId, String listId, final CheckIdentityHandler identityHandler) {
+    private void handleExistingRecipientWithRecipientId(final SelectRecipientResponse existingRecipientResponse, final String existingMobileUserId,
+                                                        String currentRecipientId, String listId, final CheckIdentityHandler identityHandler) {
         // mark current recipient as merged
         XMLAPI updateCurrentRecipientXml = XMLAPI.updateRecipient(currentRecipientId, listId);
         if (getEngageConfigManager().mergeHistoryInMergedMarketingDatabase()) {
