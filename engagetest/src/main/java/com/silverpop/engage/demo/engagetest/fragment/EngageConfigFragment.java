@@ -53,6 +53,7 @@ public class EngageConfigFragment
         m.put("Device Name", EngageConfig.deviceName());
         m.put("Device Version", EngageConfig.deviceVersion());
         m.put("Anonymous User ID", EngageConfig.anonymousUserId(context));
+        m.put("Recipient ID", EngageConfig.recipientId(context));
         m.put("Primary User ID", EngageConfig.mobileUserId(context));
         m.put("OS Name", EngageConfig.osName(context));
         m.put("OS Version", EngageConfig.osVersion(context));
@@ -62,8 +63,8 @@ public class EngageConfigFragment
         m.put("Expiration Time", EngageConfig.currentCampaignExpirationDate() != null ? EngageConfig.currentCampaignExpirationDate().toString() : "-");
         m.put("Last Campaign", EngageConfig.lastCampaign(context));
         if (EngageConfig.currentLocationCache() != null) {
-            m.put("Longitude", new Double(EngageConfig.currentLocationCache().getLongitude()).toString());
-            m.put("Latitude", new Double(EngageConfig.currentLocationCache().getLatitude()).toString());
+            m.put("Longitude", Double.valueOf(EngageConfig.currentLocationCache().getLongitude()).toString());
+            m.put("Latitude", Double.valueOf(EngageConfig.currentLocationCache().getLatitude()).toString());
         }
         if (EngageConfig.currentAddressCache() != null) {
             m.put("Location Address", EngageConfig.buildLocationAddress());
