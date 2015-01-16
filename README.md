@@ -616,7 +616,7 @@ from your application to retrieve desired configuration values.
 |Augmentation>augmentationTimeout|15 sec|timeout for augmenting UBF events|EngageExpirationParser String|
 |Augmentation>ubfAugmentorClassNames||JSON Array of Java class names that should be used for augmenting|JSON Array of String Java Classnames|
 |Recipient>enableAutoAnonymousTracking|true|If set to true it allows mobile user ids to be auto generated for recipients.  If set to false you are responsible for manually setting the mobile user id.|Boolean|
-|Recipient>mobileUserIdGeneratorClassName|com.silverpop.engage.util.uuid.plugin.DefaultUUIDGenerator|The class to use for auto generating mobile user ids if the ```enableAutoAnonymousTracking``` property is set to true.|String|
+|Recipient>mobileUserIdGeneratorClassName|com.silverpop.engage.util.uuid.plugin.DefaultUUIDGenerator|The class to use for auto generating mobile user ids if the ```enableAutoAnonymousTracking``` property is set to true.|Java Class|
 |Recipient>mobileUserIdColumn|Mobile User Id|Column name to store the mobile user id in.|String|
 |Recipient>mergedRecipientIdColumn|Merged Recipient Id|Column name to store the merged recipient id in.  The merged recipient id column is populated if needed during the check identity process.|String|
 |Recipient>mergedDateColumn|Merged Date|Column name to store the merged date in. The merged recipient id column is populated if needed during the check identity process.|String|
