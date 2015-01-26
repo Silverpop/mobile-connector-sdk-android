@@ -1,4 +1,4 @@
-def globalVersion = new Version("1.0.0")
+def globalVersion = new Version("1.1.0")
 
 // Define the artifacts coordinates
 group = 'com.silverpop'
