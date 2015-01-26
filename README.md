@@ -579,9 +579,9 @@ AnonymousMobileIdentityManager.get().createAnonymousUserList("EngageDBListID",
         });
 ```
 
-Note: Using this method from the ```XMLAPIManager``` is now depreciated.  You should start using it from
-the ```AnonymousMobileIdentityManager``` instead.
-
+Note: These methods have been moved from the ```XMLAPIManager``` to the ```AnonymousMobileIdentityManager```, 
+however it is recommended to use the ```setupRecipient()``` and ```checkIdentity()``` methods 
+in the [MobileIdentityManager](MobileIdentityManager) instead to manage mobile identities. 
 
 ### Local Event Storage
 
