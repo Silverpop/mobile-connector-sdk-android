@@ -4,6 +4,7 @@ import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,19 +22,21 @@ import com.silverpop.engage.demo.engagetest.R;
 import com.silverpop.engage.domain.XMLAPI;
 import com.silverpop.engage.exception.XMLAPIResponseException;
 import com.silverpop.engage.exception.XMLResponseParseException;
-import com.silverpop.engage.recipient.SetupRecipientFailure;
-import com.silverpop.engage.recipient.SetupRecipientHandler;
-import com.silverpop.engage.recipient.SetupRecipientResult;
+import com.silverpop.engage.recipient.*;
 import com.silverpop.engage.response.AddRecipientResponse;
 import com.silverpop.engage.response.EngageResponseXML;
 import com.silverpop.engage.response.handler.AddRecipientResponseHandler;
 import com.silverpop.engage.response.handler.XMLAPIResponseFailure;
+import com.silverpop.engage.util.uuid.plugin.DefaultUUIDGenerator;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by jeremydyer on 6/5/14.
  */
 public class XMLAPIFragment
-    extends Fragment {
+        extends Fragment {
 
     private static final String TAG = XMLAPIFragment.class.getName();
 
@@ -41,6 +44,7 @@ public class XMLAPIFragment
     private Button mUpgradeAnonymousUserButton;
     private Button mMergeAnonymousUserButton;
     private Button setupRecipientUserButton;
+    private Button checkIdentityButton;
 
     private XMLAPIManager xmlapiManager = null;
     private TextView xmlApiResultTextView = null;
@@ -61,14 +65,59 @@ public class XMLAPIFragment
 
         xmlapiManager = XMLAPIManager.get();
 
-        xmlApiResultTextView = (TextView)view.findViewById(R.id.xmlApiResultTextView);
+        xmlApiResultTextView = (TextView) view.findViewById(R.id.xmlApiResultTextView);
 
         createAnonymousUserButton(view);
         createUpgradeAnonymousUserButton(view);
         createMergeAnonymousUserButton(view);
         setupRecipientUserButton(view);
+        createCheckIdentityButton(view);
 
         return view;
+    }
+
+    private void createCheckIdentityButton(View view) {
+        checkIdentityButton = (Button) view.findViewById(R.id.checkIdentityButton);
+        checkIdentityButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                // pass your own value(s) here
+                Map<String, String> fieldToValue = new HashMap<String, String>();
+                fieldToValue.put("Custom Integration Test Id", new DefaultUUIDGenerator().generateUUID());
+
+                MobileIdentityManager.get().checkIdentity(fieldToValue, new CheckIdentityHandler() {
+                    @Override
+                    public void onSuccess(CheckIdentityResult result) {
+                        String recipientId = result.getRecipientId();
+                        if (TextUtils.isEmpty(recipientId)) {
+                            recipientId = "Unknown";
+                        }
+                        String mergedRecipientId = result.getMergedRecipientId();
+                        if (TextUtils.isEmpty(mergedRecipientId)) {
+                            mergedRecipientId = "Unknown";
+                        }
+                        String mobileUserId = result.getMobileUserId();
+                        if (TextUtils.isEmpty(mobileUserId)) {
+                            mobileUserId = "Unknown";
+                        }
+
+                        String message = "Check Identity success.  Current recipient id: '" + recipientId
+                                + ",' merged recipient id: '" + mergedRecipientId + "', mobile user id: '"
+                                + mobileUserId;
+                        Log.i(TAG, message);
+                        showToast(message);
+                    }
+
+                    @Override
+                    public void onFailure(CheckIdentityFailure failure) {
+                        String message = "ERROR in check identity";
+                        Log.e(TAG, message + ": " + failure.getMessage(), failure.getException());
+                        showToast(message);
+                    }
+                });
+            }
+        });
     }
 
     private void setupRecipientUserButton(View view) {
@@ -97,7 +146,7 @@ public class XMLAPIFragment
     }
 
     private void createMergeAnonymousUserButton(View view) {
-        mMergeAnonymousUserButton = (Button)view.findViewById(R.id.mergeAnonymousUserButton);
+        mMergeAnonymousUserButton = (Button) view.findViewById(R.id.mergeAnonymousUserButton);
         mMergeAnonymousUserButton.setEnabled(false);
         mMergeAnonymousUserButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -113,7 +162,7 @@ public class XMLAPIFragment
                     @Override
                     protected void onPostExecute(Object responseObject) {
                         try {
-                            EngageResponseXML responseXML = (EngageResponseXML)responseObject;
+                            EngageResponseXML responseXML = (EngageResponseXML) responseObject;
                             String result = responseXML.valueForKeyPath("envelope.body.result.success");
                             if (result.equalsIgnoreCase("true")) {
                                 showToast(responseXML.getXml());
@@ -139,7 +188,7 @@ public class XMLAPIFragment
 
                     @Override
                     protected void onPostExecute(Object responseObject) {
-                        VolleyError error = (VolleyError)responseObject;
+                        VolleyError error = (VolleyError) responseObject;
                         showToast("Error creating anonymous user: "
                                 + error.getMessage());
                     }
@@ -184,7 +233,7 @@ public class XMLAPIFragment
     }
 
     private void createAnonymousUserButton(View view) {
-        mCreateAnonymousUserButton = (Button)view.findViewById(R.id.createAnonymousUserButton);
+        mCreateAnonymousUserButton = (Button) view.findViewById(R.id.createAnonymousUserButton);
         mCreateAnonymousUserButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

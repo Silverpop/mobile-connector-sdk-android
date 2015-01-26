@@ -437,8 +437,6 @@ XMLAPIManager.get().postXMLAPI(selectRecipientData,
 
 ### <a name="MobileIdentityManager"/>MobileIdentityManager
 
-TODO - ADD USAGE INSTRUCTIONS FOR THIS CLASS
-
 The ```MobileIdentityManager``` can be used to manage user identities.  It can auto create new user identities 
 as well as merge existing identities if needed.  This functionality is intended to replace the 
 manual process of creating an anonymous user.
@@ -448,7 +446,10 @@ using the ```MobileIdentityManager``` methods.
 - Recipient list should already be completed and the ```listId``` should be setup in the configuration.
 - EngageConfig.json should be configured with the columns names representing the _Mobile User Id_, _Merged Recipient Id_, and _Merged Date_.  The EngageConfigDefault.json defines default values if you prefer to use those.
 - The _Mobile User Id_, _Merged Recipient Id_, and _Merged Date_ columns must be created in the recipient list with names that match your EngageConfig.json settings
-- Optional: Configure audit table (TODO - fill in these details when known)
+- Optional: If you prefer to save the merge history in a separate AuditRecord relational table you can 
+set ```mergeHistoryInAuditRecordTable``` to true.  If enabled you are responsible for creating the AuditRecord
+ table with the columns for _Audit Record Id_, _Old Recipient Id_, _New Recipient Id_, and _Create Date_ prior to
+ calling ```checkIdentity()```.
 
 ##### Setup recipient identity
 ```java
@@ -464,11 +465,30 @@ using the ```MobileIdentityManager``` methods.
  * created with the mobile user id.
  * <p/>
  * On successful completion of this method the EngageConfig will contain the
- * moible user id and new recipient id.
+ * mobile user id and new recipient id.
  *
  * @param setupRecipientHandler custom behavior to run on success and failure of this method
  */
 public void setupRecipient(SetupRecipientHandler setupRecipientHandler)
+```
+
+##### Setup Recipient Usage
+```java
+MobileIdentityManager.get().setupRecipient(new SetupRecipientHandler() {
+        @Override
+        public void onSuccess(SetupRecipientResult result) {
+            String message = "Setup recipient auto configured recipient id: " + result.getRecipientId();
+            Log.i(TAG, message);
+            showToast(message);
+        }
+    
+        @Override
+        public void onFailure(SetupRecipientFailure failure) {
+            String message = "Failed to setup recipient";
+            Log.e(TAG, message + ": " + failure.getMessage(), failure.getException());
+            showToast(message);
+        }
+    });
 ```
 
 ##### Check identity and merge recipients
@@ -494,6 +514,44 @@ public void setupRecipient(SetupRecipientHandler setupRecipientHandler)
  * @param identityHandler      custom behavior to run on success and failure of this method
  */
 public void checkIdentity(final Map<String, String> idFieldNamesToValues, final CheckIdentityHandler identityHandler)
+```
+
+##### Check Identity Usage
+```java
+// pass your own value(s) here
+Map<String, String> fieldToValue = new HashMap<String, String>();
+fieldToValue.put("Custom Integration Test Id", new DefaultUUIDGenerator().generateUUID());
+
+MobileIdentityManager.get().checkIdentity(fieldToValue, new CheckIdentityHandler() {
+    @Override
+    public void onSuccess(CheckIdentityResult result) {
+        String recipientId = result.getRecipientId();
+        if (TextUtils.isEmpty(recipientId)) {
+            recipientId = "Unknown";
+        }
+        String mergedRecipientId = result.getMergedRecipientId();
+        if (TextUtils.isEmpty(mergedRecipientId)) {
+            mergedRecipientId = "Unknown";
+        }
+        String mobileUserId = result.getMobileUserId();
+        if (TextUtils.isEmpty(mobileUserId)) {
+            mobileUserId = "Unknown";
+        }
+
+        String message = "Check Identity success.  Current recipient id: '" + recipientId
+                + ",' merged recipient id: '" + mergedRecipientId + "', mobile user id: '"
+                + mobileUserId;
+        Log.i(TAG, message);
+        showToast(message);
+    }
+
+    @Override
+    public void onFailure(CheckIdentityFailure failure) {
+        String message = "ERROR in check identity";
+        Log.e(TAG, message + ": " + failure.getMessage(), failure.getException());
+        showToast(message);
+    }
+});
 ```
 
 ### <a name="AnonymousMobileIdentityManager"/>AnonymousMobileIdentityManager

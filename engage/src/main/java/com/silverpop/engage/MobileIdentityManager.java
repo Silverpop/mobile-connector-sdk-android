@@ -64,7 +64,7 @@ public class MobileIdentityManager extends BaseManager {
      * created with the mobile user id.
      * <p/>
      * On successful completion of this method the EngageConfig will contain the
-     * moible user id and new recipient id.
+     * mobile user id and new recipient id.
      *
      * @param setupRecipientHandler custom behavior to run on success and failure of this method
      */
