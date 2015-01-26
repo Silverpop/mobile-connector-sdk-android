@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Represents the relational table row that is part of an Engage XML API request.
+ *
  * Created by Lindsay Thurmond on 1/9/15.
  */
 public class RelationalTableRow {

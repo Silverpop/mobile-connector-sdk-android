@@ -32,7 +32,7 @@ regular jar file but contains other Android bundled resources such as a base And
 You can include the EngageSDK into a new or existing application by adding a gradle dependency of 
 
 ```
-compile(group: 'com.silverpop', name: 'engage', version: '1.0.0', ext: 'aar')
+compile(group: 'com.silverpop', name: 'engage', version: '1.1.0', ext: 'aar')
 ```
 
 Adding the dependency will result in the SDK code and all SDK dependencies being pulled into your project.
@@ -437,6 +437,8 @@ XMLAPIManager.get().postXMLAPI(selectRecipientData,
 
 ### <a name="MobileIdentityManager"/>MobileIdentityManager
 
+TODO - ADD USAGE INSTRUCTIONS FOR THIS CLASS
+
 The ```MobileIdentityManager``` can be used to manage user identities.  It can auto create new user identities 
 as well as merge existing identities if needed.  This functionality is intended to replace the 
 manual process of creating an anonymous user.
@@ -620,7 +622,7 @@ from your application to retrieve desired configuration values.
 |Recipient>mobileUserIdColumn|Mobile User Id|Column name to store the mobile user id in.|String|
 |Recipient>mergedRecipientIdColumn|Merged Recipient Id|Column name to store the merged recipient id in.  The merged recipient id column is populated if needed during the check identity process.|String|
 |Recipient>mergedDateColumn|Merged Date|Column name to store the merged date in. The merged recipient id column is populated if needed during the check identity process.|String|
-|Recipient>mergeHistoryInMergedMarketingDatabase|true|If the audit history for merged recipients should be stored in the marketing database.|Boolean|
+|Recipient>mergeHistoryInMarketingDatabase|true|If the audit history for merged recipients should be stored in the marketing database.|Boolean|
 |AuditRecord>auditRecordPrimaryKeyColumnName|Audit Record Id|Only required if ```mergeHistoryInAuditRecordTable``` is set to ```true```.  The column name for the generated primary key in the audit record table.|String|
 |AuditRecord>auditRecordPrimaryKeyGeneratorClassName|com.silverpop.engage.util.uuid.plugin.DefaultUUIDGenerator|Only required if ```mergeHistoryInAuditRecordTable``` is set to ```true```.  The class to use to generate primary keys for the audit record table.|Java Class|
 |AuditRecord>oldRecipientIdColumnName|Old Recipient Id|Only required if ```mergeHistoryInAuditRecordTable``` is set to ```true```. When a recipient is merged during the check identity process, this is the column name for old recipient id.|String|

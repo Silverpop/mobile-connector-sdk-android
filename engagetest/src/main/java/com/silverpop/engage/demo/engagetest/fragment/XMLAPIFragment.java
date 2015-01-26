@@ -21,11 +21,13 @@ import com.silverpop.engage.demo.engagetest.R;
 import com.silverpop.engage.domain.XMLAPI;
 import com.silverpop.engage.exception.XMLAPIResponseException;
 import com.silverpop.engage.exception.XMLResponseParseException;
+import com.silverpop.engage.recipient.SetupRecipientFailure;
 import com.silverpop.engage.recipient.SetupRecipientHandler;
 import com.silverpop.engage.recipient.SetupRecipientResult;
 import com.silverpop.engage.response.AddRecipientResponse;
 import com.silverpop.engage.response.EngageResponseXML;
 import com.silverpop.engage.response.handler.AddRecipientResponseHandler;
+import com.silverpop.engage.response.handler.XMLAPIResponseFailure;
 
 /**
  * Created by jeremydyer on 6/5/14.
@@ -84,9 +86,9 @@ public class XMLAPIFragment
                     }
 
                     @Override
-                    public void onFailure(Exception exception) {
+                    public void onFailure(SetupRecipientFailure failure) {
                         String message = "Failed to setup recipient";
-                        Log.e(TAG, message + ": " + exception.getMessage(), exception);
+                        Log.e(TAG, message + ": " + failure.getMessage(), failure.getException());
                         showToast(message);
                     }
                 });
@@ -164,13 +166,16 @@ public class XMLAPIFragment
                     }
 
                     @Override
-                    public void onFailure(Exception error) {
-                        if (error instanceof XMLAPIResponseException) {
-                            String faultString = ((XMLAPIResponseException) error).getXmlResponse().getFaultString();
+                    public void onFailure(XMLAPIResponseFailure failure) {
+                        if (failure.getException() != null && failure.getException() instanceof XMLAPIResponseException) {
+                            EngageResponseXML responseXML = ((XMLAPIResponseException) failure.getException()).getXmlResponse();
+                            String faultString = responseXML != null ? responseXML.getFaultString() : "Error creating anonymous user";
                             xmlApiResultTextView.setText("ERROR: " + faultString);
                             showToast("ERROR");
+                        } else if (failure.getResponseXml() != null) {
+                            showToast("ERROR: " + failure.getResponseXml().getFaultString());
                         } else {
-                            showToast("Error creating anonymous user: " + error.getMessage());
+                            showToast("Error creating anonymous user");
                         }
                     }
                 });

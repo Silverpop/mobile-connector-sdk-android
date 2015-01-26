@@ -9,6 +9,6 @@ public interface XMLAPIResponseHandler {
 
     public void onSuccess(EngageResponseXML response);
 
-    public void onFailure(Exception exception);
+    public void onFailure(XMLAPIResponseFailure failure);
 
 }

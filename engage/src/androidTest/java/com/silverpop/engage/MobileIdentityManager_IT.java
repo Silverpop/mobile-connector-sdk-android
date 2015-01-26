@@ -5,15 +5,13 @@ import com.silverpop.BaseAndroidTest;
 import com.silverpop.engage.config.EngageConfig;
 import com.silverpop.engage.domain.XMLAPI;
 import com.silverpop.engage.domain.XMLAPIOperation;
-import com.silverpop.engage.recipient.CheckIdentityHandler;
-import com.silverpop.engage.recipient.CheckIdentityResult;
-import com.silverpop.engage.recipient.SetupRecipientHandler;
-import com.silverpop.engage.recipient.SetupRecipientResult;
+import com.silverpop.engage.recipient.*;
 import com.silverpop.engage.response.AddRecipientResponse;
 import com.silverpop.engage.response.EngageResponseXML;
 import com.silverpop.engage.response.SelectRecipientResponse;
 import com.silverpop.engage.response.handler.AddRecipientResponseHandler;
 import com.silverpop.engage.response.handler.SelectRecipientResponseHandler;
+import com.silverpop.engage.response.handler.XMLAPIResponseFailure;
 import com.silverpop.engage.response.handler.XMLAPIResponseHandler;
 import com.silverpop.engage.util.uuid.plugin.DefaultUUIDGenerator;
 
@@ -63,7 +61,7 @@ public class MobileIdentityManager_IT extends BaseAndroidTest {
                     }
 
                     @Override
-                    public void onFailure(Exception exception) {
+                    public void onFailure(XMLAPIResponseFailure failure) {
                         Log.d(TAG, "Error running cleanup");
                     }
                 });
@@ -92,7 +90,7 @@ public class MobileIdentityManager_IT extends BaseAndroidTest {
             }
 
             @Override
-            public void onFailure(Exception error) {
+            public void onFailure(SetupRecipientFailure error) {
                 fail(error.getMessage());
             }
 
@@ -140,7 +138,7 @@ public class MobileIdentityManager_IT extends BaseAndroidTest {
             }
 
             @Override
-            public void onFailure(Exception error) {
+            public void onFailure(SetupRecipientFailure error) {
                 fail(error.getMessage());
             }
         });
@@ -182,7 +180,7 @@ public class MobileIdentityManager_IT extends BaseAndroidTest {
                     }
 
                     @Override
-                    public void onFailure(Exception error) {
+                    public void onFailure(SetupRecipientFailure error) {
                         fail(error.getMessage());
                     }
                 });
@@ -198,8 +196,9 @@ public class MobileIdentityManager_IT extends BaseAndroidTest {
             }
 
             @Override
-            public void onFailure(Exception exception) {
-                fail("Failed to setup test recipient: " + exception.getMessage());
+            public void onFailure(XMLAPIResponseFailure failure) {
+                fail("Failed to setup test recipient: " +
+                        failure.getException() != null ? failure.getException().getMessage() : "Error adding recipient");
             }
         });
 
@@ -259,14 +258,14 @@ public class MobileIdentityManager_IT extends BaseAndroidTest {
                             }
 
                             @Override
-                            public void onFailure(Exception exception) {
-                                fail(exception.getMessage());
+                            public void onFailure(XMLAPIResponseFailure exception) {
+                                fail();
                             }
                         });
                     }
 
                     @Override
-                    public void onFailure(Exception e) {
+                    public void onFailure(CheckIdentityFailure e) {
                         fail(e.getMessage());
                     }
                 });
@@ -281,8 +280,8 @@ public class MobileIdentityManager_IT extends BaseAndroidTest {
             }
 
             @Override
-            public void onFailure(Exception error) {
-                fail(error.getMessage());
+            public void onFailure(SetupRecipientFailure failure) {
+                fail(failure.getMessage());
             }
         });
 
@@ -348,21 +347,21 @@ public class MobileIdentityManager_IT extends BaseAndroidTest {
                                                     }
 
                                                     @Override
-                                                    public void onFailure(Exception exception) {
-                                                        fail(exception.getMessage());
+                                                    public void onFailure(XMLAPIResponseFailure failure) {
+                                                        fail(failure.getException() != null ? failure.getException().getMessage() : "Error selecting recipient");
                                                     }
                                                 });
                                     }
 
                                     @Override
-                                    public void onFailure(Exception exception) {
-                                        fail(exception.getMessage());
+                                    public void onFailure(XMLAPIResponseFailure failure) {
+                                        fail(failure.getException() != null ? failure.getException().getMessage() : "Error selecting recipient");
                                     }
                                 });
                     }
 
                     @Override
-                    public void onFailure(Exception e) {
+                    public void onFailure(CheckIdentityFailure e) {
                         fail(e.getMessage());
                     }
                 });
@@ -415,15 +414,15 @@ public class MobileIdentityManager_IT extends BaseAndroidTest {
                     }
 
                     @Override
-                    public void onFailure(Exception exception) {
-                        fail(exception.getMessage());
+                    public void onFailure(XMLAPIResponseFailure failure) {
+                        fail(failure.getException() != null ? failure.getException().getMessage() : "Error adding recipient");
                     }
                 });
             }
 
             @Override
-            public void onFailure(Exception error) {
-                fail(error.getMessage());
+            public void onFailure(SetupRecipientFailure failure) {
+                fail(failure.getException() != null ? failure.getException().getMessage() : "Error setuing up recipient");
             }
 
             protected void scheduleCleanup(String createdRecipientId) {
@@ -485,14 +484,14 @@ public class MobileIdentityManager_IT extends BaseAndroidTest {
                                     }
 
                                     @Override
-                                    public void onFailure(Exception exception) {
-                                        fail(exception.getMessage());
+                                    public void onFailure(XMLAPIResponseFailure failure) {
+                                        fail(failure.getException() != null ? failure.getException().getMessage() : "Error selecting recipient");
                                     }
                                 });
                     }
 
                     @Override
-                    public void onFailure(Exception e) {
+                    public void onFailure(CheckIdentityFailure e) {
                         fail(e.getMessage());
                     }
                 });
@@ -502,6 +501,7 @@ public class MobileIdentityManager_IT extends BaseAndroidTest {
         signal.await(20, TimeUnit.SECONDS);
     }
 
+    //[Lindsay Thurmond:1/24/15] TODO: fix me
     public void testCheckIdentity_s3_existingRecipientWithMobileUserId_multipleCustomIds() throws Exception {
         final CountDownLatch signal = new CountDownLatch(1);
 
@@ -548,14 +548,14 @@ public class MobileIdentityManager_IT extends BaseAndroidTest {
                                     }
 
                                     @Override
-                                    public void onFailure(Exception exception) {
-                                        fail(exception.getMessage());
+                                    public void onFailure(XMLAPIResponseFailure failure) {
+                                        fail(failure.getException() != null ? failure.getException().getMessage() : "Error adding recipient");
                                     }
                                 });
                     }
 
                     @Override
-                    public void onFailure(Exception e) {
+                    public void onFailure(CheckIdentityFailure e) {
                         fail(e.getMessage());
                     }
                 });
@@ -620,14 +620,14 @@ public class MobileIdentityManager_IT extends BaseAndroidTest {
                     }
 
                     @Override
-                    public void onFailure(Exception exception) {
-                        fail(exception.getMessage());
+                    public void onFailure(XMLAPIResponseFailure failure) {
+                        fail(failure.getException() != null ? failure.getException().getMessage() : "Error adding recipient");
                     }
                 });
             }
 
             @Override
-            public void onFailure(Exception error) {
+            public void onFailure(SetupRecipientFailure error) {
                 fail(error.getMessage());
             }
 
@@ -673,17 +673,19 @@ public class MobileIdentityManager_IT extends BaseAndroidTest {
                             }
 
                             @Override
-                            public void onFailure(Exception exception) {
-                                Log.e(TAG, exception.getMessage(), exception);
-                                fail(exception.getMessage());
+                            public void onFailure(CheckIdentityFailure failure) {
+                                String error = failure.getException() != null ? failure.getException().getMessage() : "Check identity failure";
+                                Log.e(TAG, error, failure.getException());
+                                fail(error);
                             }
                         });
                     }
 
                     @Override
-                    public void onFailure(Exception exception) {
-                        Log.e(TAG, exception.getMessage(), exception);
-                        fail(exception.getMessage());
+                    public void onFailure(XMLAPIResponseFailure failure) {
+                        String error = failure.getException() != null ? failure.getException().getMessage() : "Add recipient failure";
+                        Log.e(TAG, error, failure.getException());
+                        fail(error);
                     }
                 });
         signal.await(10, TimeUnit.SECONDS);
@@ -698,8 +700,5 @@ public class MobileIdentityManager_IT extends BaseAndroidTest {
     interface ScenarioSetupHandler {
         void onSuccess(Recipient currentRecipient, Recipient existingRecipient);
     }
-
-
-    //[Lindsay Thurmond:1/13/15] TODO: tests with audit record
 
 }

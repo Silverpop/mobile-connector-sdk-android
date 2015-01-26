@@ -8,14 +8,11 @@ import com.silverpop.engage.domain.RelationalTableRow;
 import com.silverpop.engage.domain.XMLAPI;
 import com.silverpop.engage.domain.XMLAPIOperation;
 import com.silverpop.engage.exception.EngageConfigException;
-import com.silverpop.engage.exception.XMLAPIResponseException;
-import com.silverpop.engage.recipient.CheckIdentityHandler;
-import com.silverpop.engage.recipient.CheckIdentityResult;
-import com.silverpop.engage.recipient.SetupRecipientHandler;
-import com.silverpop.engage.recipient.SetupRecipientResult;
+import com.silverpop.engage.recipient.*;
 import com.silverpop.engage.response.*;
 import com.silverpop.engage.response.handler.AddRecipientResponseHandler;
 import com.silverpop.engage.response.handler.UpdateRecipientResponseHandler;
+import com.silverpop.engage.response.handler.XMLAPIResponseFailure;
 import com.silverpop.engage.response.handler.XMLAPIResponseHandler;
 import com.silverpop.engage.util.DateUtil;
 import com.silverpop.engage.util.uuid.UUIDGenerator;
@@ -110,7 +107,9 @@ public class MobileIdentityManager extends BaseManager {
 
             } catch (EngageConfigException e) {
                 // failed validation, no need to keep trying
-                setupRecipientHandler.onFailure(e);
+                if (setupRecipientHandler != null) {
+                    setupRecipientHandler.onFailure(new SetupRecipientFailure(e));
+                }
                 return;
             }
 
@@ -126,7 +125,7 @@ public class MobileIdentityManager extends BaseManager {
             // just in case something unexpected happens
             Log.e(TAG, e.getMessage(), e);
             if (setupRecipientHandler != null) {
-                setupRecipientHandler.onFailure(e);
+                setupRecipientHandler.onFailure(new SetupRecipientFailure(e));
             }
         }
     }
@@ -151,9 +150,9 @@ public class MobileIdentityManager extends BaseManager {
             }
 
             @Override
-            public void onFailure(Exception exception) {
+            public void onFailure(XMLAPIResponseFailure failure) {
                 if (setupRecipientHandler != null) {
-                    setupRecipientHandler.onFailure(exception);
+                    setupRecipientHandler.onFailure(new SetupRecipientFailure(failure.getException(), failure.getResponseXml()));
                 }
             }
         });
@@ -169,8 +168,8 @@ public class MobileIdentityManager extends BaseManager {
         }
 
 
-        XMLAPI addRecipient = XMLAPI.addRecipient(mobileUserIdColumn, newMobileUserId, listId, false);
-        getXMLAPIManager().postXMLAPI(addRecipient, new AddRecipientResponseHandler() {
+        XMLAPI addRecipientXml = XMLAPI.addRecipient(mobileUserIdColumn, newMobileUserId, listId, false);
+        getXMLAPIManager().postXMLAPI(addRecipientXml, new AddRecipientResponseHandler() {
             @Override
             public void onAddRecipientSuccess(AddRecipientResponse addRecipientResponse) {
                 String recipientId = addRecipientResponse.getRecipientId();
@@ -178,7 +177,7 @@ public class MobileIdentityManager extends BaseManager {
                 if (TextUtils.isEmpty(recipientId)) {
                     if (setupRecipientHandler != null) {
                         setupRecipientHandler.onFailure(
-                                new XMLAPIResponseException("Empty recipientId returned from Silverpop", addRecipientResponse.getResponseXml()));
+                                new SetupRecipientFailure("Empty recipientId returned from Silverpop", addRecipientResponse.getResponseXml()));
                     }
                 } else {
                     EngageConfig.storeRecipientId(getContext(), recipientId);
@@ -190,9 +189,9 @@ public class MobileIdentityManager extends BaseManager {
             }
 
             @Override
-            public void onFailure(Exception exception) {
+            public void onFailure(XMLAPIResponseFailure failure) {
                 if (setupRecipientHandler != null) {
-                    setupRecipientHandler.onFailure(new XMLAPIResponseException(exception));
+                    setupRecipientHandler.onFailure(new SetupRecipientFailure(failure.getException(), failure.getResponseXml()));
                 }
             }
         });
@@ -229,10 +228,11 @@ public class MobileIdentityManager extends BaseManager {
             }
 
             @Override
-            public void onFailure(Exception e) {
+            public void onFailure(SetupRecipientFailure failure) {
                 if (identityHandler != null) {
-                    Log.e(TAG, e.getMessage(), e);
-                    identityHandler.onFailure(e);
+                    Log.e(TAG, failure.getMessage(), failure.getException());
+                    identityHandler.onFailure(new CheckIdentityFailure(
+                            failure.getMessage(), failure.getException(), failure.getResponseXml()));
                 }
             }
         });
@@ -268,7 +268,7 @@ public class MobileIdentityManager extends BaseManager {
                         // an error happened with the request/response
                         if (identityHandler != null) {
                             // request failed for unknown reason, time to bail
-                            identityHandler.onFailure(new XMLAPIResponseException(response));
+                            identityHandler.onFailure(new CheckIdentityFailure(response));
                         }
                     }
                 }
@@ -296,8 +296,14 @@ public class MobileIdentityManager extends BaseManager {
             }
 
             @Override
-            public void onFailure(Exception exception) {
-                Log.d(TAG, exception.getMessage(), exception);
+            public void onFailure(XMLAPIResponseFailure failure) {
+                if (failure.getException() != null) {
+                    Log.d(TAG, failure.getException().getMessage(), failure.getException());
+                } else if (failure.getResponseXml() != null) {
+                    Log.d(TAG, failure.getResponseXml().getFaultString());
+                } else {
+                    Log.d(TAG, "Unexpected XMLAPI exception selecting recipient");
+                }
             }
         });
     }
@@ -325,10 +331,16 @@ public class MobileIdentityManager extends BaseManager {
                 }
 
                 @Override
-                public void onFailure(Exception exception) {
-                    Log.e(TAG, exception.getMessage(), exception);
+                public void onFailure(XMLAPIResponseFailure failure) {
+                    if (failure.getException() != null) {
+                        Log.d(TAG, failure.getException().getMessage(), failure.getException());
+                    } else if (failure.getResponseXml() != null) {
+                        Log.d(TAG, failure.getResponseXml().getFaultString());
+                    } else {
+                        Log.d(TAG, "Unexpected XMLAPI exception updating recipient");
+                    }
                     if (identityHandler != null) {
-                        identityHandler.onFailure(exception);
+                        identityHandler.onFailure(new CheckIdentityFailure(failure.getException(), failure.getResponseXml()));
                     }
                 }
             });
@@ -349,7 +361,7 @@ public class MobileIdentityManager extends BaseManager {
                                                         String currentRecipientId, String listId, final CheckIdentityHandler identityHandler) {
         // mark current recipient as merged
         XMLAPI updateCurrentRecipientXml = XMLAPI.updateRecipient(currentRecipientId, listId);
-        if (getEngageConfigManager().mergeHistoryInMergedMarketingDatabase()) {
+        if (getEngageConfigManager().mergeHistoryInMarketingDatabase()) {
             updateCurrentRecipientXml.addColumn(getEngageConfigManager().mergedRecipientIdColumnName(), existingRecipientResponse.getRecipientId());
             updateCurrentRecipientXml.addColumn(getEngageConfigManager().mergedDateColumnName(), DateUtil.toGmtString(new Date()));
         }
@@ -373,9 +385,9 @@ public class MobileIdentityManager extends BaseManager {
             }
 
             @Override
-            public void onFailure(Exception exception) {
+            public void onFailure(XMLAPIResponseFailure failure) {
                 if (identityHandler != null) {
-                    identityHandler.onFailure(exception);
+                    identityHandler.onFailure(new CheckIdentityFailure(failure.getException(), failure.getResponseXml()));
                 }
             }
         });
@@ -393,7 +405,7 @@ public class MobileIdentityManager extends BaseManager {
             Log.e(TAG, error);
             // time to bail, can't go any further
             if (identityHandler != null) {
-                identityHandler.onFailure(new EngageConfigException(error));
+                identityHandler.onFailure(new CheckIdentityFailure(error));
             }
         } else {
 
@@ -416,7 +428,7 @@ public class MobileIdentityManager extends BaseManager {
                     XMLAPI updateCurrentRecipient = XMLAPI.updateRecipient(
                             EngageConfig.recipientId(getContext()), listId);
                     updateCurrentRecipient.addColumn(getEngageConfigManager().mobileUserIdColumnName(), "");
-                    if (getEngageConfigManager().mergeHistoryInMergedMarketingDatabase()) {
+                    if (getEngageConfigManager().mergeHistoryInMarketingDatabase()) {
                         updateCurrentRecipient.addColumn(getEngageConfigManager().mergedDateColumnName(), DateUtil.toGmtString(new Date()));
                         updateCurrentRecipient.addColumn(getEngageConfigManager().mergedRecipientIdColumnName(), existingRecipientResponse.getRecipientId());
                     }
@@ -439,20 +451,20 @@ public class MobileIdentityManager extends BaseManager {
                         }
 
                         @Override
-                        public void onFailure(Exception exception) {
+                        public void onFailure(XMLAPIResponseFailure failure) {
                             // failed to update current recipient, can't continue
                             if (identityHandler != null) {
-                                identityHandler.onFailure(exception);
+                                identityHandler.onFailure(new CheckIdentityFailure(failure.getException(), failure.getResponseXml()));
                             }
                         }
                     });
                 }
 
                 @Override
-                public void onFailure(Exception exception) {
+                public void onFailure(XMLAPIResponseFailure failure) {
                     // first recipient update failed, can't go any further
                     if (identityHandler != null) {
-                        identityHandler.onFailure(exception);
+                        identityHandler.onFailure(new CheckIdentityFailure(failure.getException(), failure.getResponseXml()));
                     }
                 }
             });
@@ -468,7 +480,7 @@ public class MobileIdentityManager extends BaseManager {
         final String auditRecordTableId = EngageConfig.auditRecordTableId(getContext());
         if (TextUtils.isEmpty(auditRecordTableId)) {
             if (identityHandler != null) {
-                identityHandler.onFailure(new EngageConfigException("Cannot update audit record without audit table id"));
+                identityHandler.onFailure(new CheckIdentityFailure("Cannot update audit record without audit table id"));
             }
         } else {
             XMLAPI updateAuditRecordApi = XMLAPI.insertUpdateRelationalTable(auditRecordTableId);
@@ -491,15 +503,15 @@ public class MobileIdentityManager extends BaseManager {
                         }
                     } else {
                         if (identityHandler != null) {
-                            identityHandler.onFailure(new XMLAPIResponseException(response));
+                            identityHandler.onFailure(new CheckIdentityFailure(response));
                         }
                     }
                 }
 
                 @Override
-                public void onFailure(Exception exception) {
+                public void onFailure(XMLAPIResponseFailure failure) {
                     if (identityHandler != null) {
-                        identityHandler.onFailure(exception);
+                        identityHandler.onFailure(new CheckIdentityFailure(failure.getException(), failure.getResponseXml()));
                     }
                 }
             });
@@ -527,9 +539,9 @@ public class MobileIdentityManager extends BaseManager {
             }
 
             @Override
-            public void onFailure(Exception exception) {
+            public void onFailure(XMLAPIResponseFailure failure) {
                 if (identityHandler != null) {
-                    identityHandler.onFailure(exception);
+                    identityHandler.onFailure(new CheckIdentityFailure(failure.getException(), failure.getResponseXml()));
                 }
             }
         });

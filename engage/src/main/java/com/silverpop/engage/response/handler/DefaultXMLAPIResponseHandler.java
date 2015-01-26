@@ -1,6 +1,5 @@
 package com.silverpop.engage.response.handler;
 
-import com.silverpop.engage.exception.XMLAPIResponseException;
 import com.silverpop.engage.response.EngageResponseXML;
 
 /**
@@ -12,7 +11,7 @@ public abstract class DefaultXMLAPIResponseHandler implements XMLAPIResponseHand
     public void onSuccess(EngageResponseXML response) {
         if (!response.isSuccess()) {
             // call on failure instead
-            onFailure(new XMLAPIResponseException(response));
+            onFailure(new XMLAPIResponseFailure(response));
         }
         onSuccessfulResponse(response);
     }

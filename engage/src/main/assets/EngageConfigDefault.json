@@ -61,7 +61,7 @@
         "mobileUserIdColumn" : "Mobile User Id",
         "mergedRecipientIdColumn" : "Merged Recipient Id",
         "mergedDateColumn" : "Merged Date",
-        "mergeHistoryInMergedMarketingDatabase" : true
+        "mergeHistoryInMarketingDatabase" : true
     },
     "AuditRecord": {
         "auditRecordPrimaryKeyColumnName" : "Audit Record Id",

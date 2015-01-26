@@ -5,6 +5,7 @@ import android.util.Log;
 import com.silverpop.BaseAndroidTest;
 import com.silverpop.engage.domain.*;
 import com.silverpop.engage.response.EngageResponseXML;
+import com.silverpop.engage.response.handler.XMLAPIResponseFailure;
 import com.silverpop.engage.response.handler.XMLAPIResponseHandler;
 
 import java.util.concurrent.CountDownLatch;
@@ -50,8 +51,8 @@ public class ManualConfigUtil_IT extends BaseAndroidTest {
             }
 
             @Override
-            public void onFailure(Exception exception) {
-                fail(exception.getMessage());
+            public void onFailure(XMLAPIResponseFailure exception) {
+                fail();
             }
         });
 
@@ -82,8 +83,8 @@ public class ManualConfigUtil_IT extends BaseAndroidTest {
             }
 
             @Override
-            public void onFailure(Exception exception) {
-                fail(exception.getMessage());
+            public void onFailure(XMLAPIResponseFailure exception) {
+                fail();
             }
         });
 
@@ -125,8 +126,8 @@ public class ManualConfigUtil_IT extends BaseAndroidTest {
             }
 
             @Override
-            public void onFailure(Exception exception) {
-                fail(exception.getMessage());
+            public void onFailure(XMLAPIResponseFailure exception) {
+                fail();
             }
         });
 
@@ -188,9 +189,8 @@ public class ManualConfigUtil_IT extends BaseAndroidTest {
             }
 
             @Override
-            public void onFailure(Exception exception) {
-                Log.e(TAG, exception.getMessage(), exception);
-                fail(exception.getMessage());
+            public void onFailure(XMLAPIResponseFailure exception) {
+                fail();
             }
         });
 

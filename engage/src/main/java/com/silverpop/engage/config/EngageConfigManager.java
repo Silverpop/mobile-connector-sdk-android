@@ -504,8 +504,8 @@ public class EngageConfigManager {
         return mergedDateColumnName;
     }
 
-    public boolean mergeHistoryInMergedMarketingDatabase() {
-        String propName = "mergeHistoryInMergedMarketingDatabase";
+    public boolean mergeHistoryInMarketingDatabase() {
+        String propName = "mergeHistoryInMarketingDatabase";
         boolean mergeHistoryInMergedMarketingDatabase = false;
         try {
             mergeHistoryInMergedMarketingDatabase = getRecipientConfigJson().getBoolean(propName);

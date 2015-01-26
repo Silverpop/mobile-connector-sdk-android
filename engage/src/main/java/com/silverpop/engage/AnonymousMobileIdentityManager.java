@@ -14,11 +14,13 @@ import java.util.Map;
 
 /**
  * Anonymous user support is now all in one place.  Keeping it around for backwards compatibility.
- *
+ * <p/>
  * The new approach is to use the {@link MobileIdentityManager} to create
  * the recipient's identity.
- *
+ * <p/>
  * Created by Lindsay Thurmond on 1/5/15.
+ *
+ * @deprecated
  */
 public class AnonymousMobileIdentityManager extends BaseManager {
 
@@ -52,6 +54,7 @@ public class AnonymousMobileIdentityManager extends BaseManager {
      * @param listId      Database identifier.
      * @param successTask AsyncTask to execute on successful result.
      * @param failureTask AsyncTask to execute on failure
+     * @deprecated
      */
     public void createAnonymousUserList(String listId,
                                         AsyncTask<EngageResponseXML, Void, Object> successTask,
@@ -62,12 +65,17 @@ public class AnonymousMobileIdentityManager extends BaseManager {
 
 
     //[Lindsay Thurmond:12/29/14] TODO: identical to createAnonymousUserList() - fix or delete me
-    public void updateAnonymousUserToKnownUser(String listId, AsyncTask<EngageResponseXML, Void, Object> successTask,
-                                               AsyncTask<VolleyError, Void, Object> failureTask) {
-        XMLAPI createAnonymous = addRecipientAnonymousToList(listId);
-        XMLAPIManager.get().postXMLAPI(createAnonymous, successTask, failureTask);
-    }
+//    public void updateAnonymousUserToKnownUser(String listId, AsyncTask<EngageResponseXML, Void, Object> successTask,
+//                                               AsyncTask<VolleyError, Void, Object> failureTask) {
+//        XMLAPI createAnonymous = addRecipientAnonymousToList(listId);
+//        XMLAPIManager.get().postXMLAPI(createAnonymous, successTask, failureTask);
+//    }
 
+    /**
+     * @param listId
+     * @return
+     * @deprecated
+     */
     public static XMLAPI addRecipientAnonymousToList(String listId) {
         Map<String, Object> bodyElements = new LinkedHashMap<String, Object>();
         bodyElements.put(XMLAPIElement.LIST_ID.toString(), listId);

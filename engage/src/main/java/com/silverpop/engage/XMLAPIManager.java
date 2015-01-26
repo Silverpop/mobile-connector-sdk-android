@@ -8,6 +8,7 @@ import com.android.volley.VolleyError;
 import com.silverpop.engage.domain.XMLAPI;
 import com.silverpop.engage.network.XMLAPIClient;
 import com.silverpop.engage.response.EngageResponseXML;
+import com.silverpop.engage.response.handler.XMLAPIResponseFailure;
 import com.silverpop.engage.response.handler.XMLAPIResponseHandler;
 
 /**
@@ -98,7 +99,7 @@ public class XMLAPIManager extends BaseManager {
             @Override
             public void onErrorResponse(VolleyError volleyError) {
                 if (responseHandler != null) {
-                    responseHandler.onFailure(volleyError);
+                    responseHandler.onFailure(new XMLAPIResponseFailure(volleyError));
                 }
             }
         });
@@ -126,21 +127,21 @@ public class XMLAPIManager extends BaseManager {
 
 
     //[Lindsay Thurmond:12/29/14] TODO: identical to createAnonymousUserList() - fix or delete me
-    /**
-     * Method left here for backwards compatibility, but functionality has been moved to
-     * {@link AnonymousMobileIdentityManager#updateAnonymousUserToKnownUser(String, android.os.AsyncTask, android.os.AsyncTask)}
-     * which you are encouraged to use instead.
-     *
-     * @param listId      Database identifier.
-     * @param successTask AsyncTask to execute on successful result.
-     * @param failureTask AsyncTask to execute on failure
-     *
-     * @deprecated Functionality has been moved to {@link com.silverpop.engage.AnonymousMobileIdentityManager#updateAnonymousUserToKnownUser(String, android.os.AsyncTask, android.os.AsyncTask)}
-     */
-    public void updateAnonymousUserToKnownUser(String listId, AsyncTask<EngageResponseXML, Void, Object> successTask,
-                                               AsyncTask<VolleyError, Void, Object> failureTask) {
-
-        AnonymousMobileIdentityManager.get().updateAnonymousUserToKnownUser(listId, successTask, failureTask);
-    }
+//    /**
+//     * Method left here for backwards compatibility, but functionality has been moved to
+//     * {@link AnonymousMobileIdentityManager#updateAnonymousUserToKnownUser(String, android.os.AsyncTask, android.os.AsyncTask)}
+//     * which you are encouraged to use instead.
+//     *
+//     * @param listId      Database identifier.
+//     * @param successTask AsyncTask to execute on successful result.
+//     * @param failureTask AsyncTask to execute on failure
+//     *
+//     * @deprecated Functionality has been moved to {@link com.silverpop.engage.AnonymousMobileIdentityManager#updateAnonymousUserToKnownUser(String, android.os.AsyncTask, android.os.AsyncTask)}
+//     */
+//    public void updateAnonymousUserToKnownUser(String listId, AsyncTask<EngageResponseXML, Void, Object> successTask,
+//                                               AsyncTask<VolleyError, Void, Object> failureTask) {
+//
+//        AnonymousMobileIdentityManager.get().updateAnonymousUserToKnownUser(listId, successTask, failureTask);
+//    }
 
 }
