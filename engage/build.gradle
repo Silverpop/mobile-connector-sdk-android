@@ -111,6 +111,7 @@ dependencies {
     //Setup local test compile
     androidTestCompile fileTree(dir: 'libs', include: ['*.jar'])
     androidTestCompile 'com.android.support:appcompat-v7:19.+'
+    androidTestCompile 'org.assertj:assertj-core:1.7.1'
 }
 
 class Version {
