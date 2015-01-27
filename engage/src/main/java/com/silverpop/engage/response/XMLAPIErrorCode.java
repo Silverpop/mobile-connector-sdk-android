@@ -3,7 +3,7 @@ package com.silverpop.engage.response;
 /**
  * Created by Lindsay Thurmond on 1/7/15.
  */
-public enum ErrorCode {
+public enum XMLAPIErrorCode {
 
     /**
      * Not defined by the Silverpop API, but is returned when a matching error isn't found.
@@ -139,7 +139,7 @@ public enum ErrorCode {
     private int number;
     private String description;
 
-    ErrorCode(int number, String description) {
+    XMLAPIErrorCode(int number, String description) {
         this.number = number;
         this.description = description;
     }
@@ -152,8 +152,8 @@ public enum ErrorCode {
         return description;
     }
 
-    public static ErrorCode findByNumber(int number) {
-        for (ErrorCode errorCode : values()) {
+    public static XMLAPIErrorCode findByNumber(int number) {
+        for (XMLAPIErrorCode errorCode : values()) {
             if (errorCode.number == number) {
                 return errorCode;
             }

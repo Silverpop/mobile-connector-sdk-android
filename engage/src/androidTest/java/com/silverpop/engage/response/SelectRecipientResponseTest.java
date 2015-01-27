@@ -106,7 +106,7 @@ public class SelectRecipientResponseTest extends AndroidTestCase {
 
     public void testGetErrorCode() throws Exception {
         assertNull(successResponse.getErrorCode());
-        assertEquals(failureResponse.getErrorCode(), ErrorCode.RECIPIENT_NOT_LIST_MEMBER);
+        assertEquals(failureResponse.getErrorCode(), XMLAPIErrorCode.RECIPIENT_NOT_LIST_MEMBER);
 
     }
 

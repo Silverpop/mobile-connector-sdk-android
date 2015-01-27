@@ -245,11 +245,7 @@ public class MobileIdentityManager extends BaseManager {
         final String listId = getEngageConfigManager().engageListId();
         final XMLAPI selectRecipientData = XMLAPI.selectRecipientData();
         selectRecipientData.addListIdParam(listId);
-        for (Map.Entry<String, String> fieldValueEntry : idFieldNamesToValues.entrySet()) {
-            String idFieldName = fieldValueEntry.getKey();
-            String idValue = fieldValueEntry.getValue();
-            selectRecipientData.addColumn(idFieldName, idValue);
-        }
+        selectRecipientData.addColumns((Map<String, Object>)((Object)idFieldNamesToValues));
 
         getXMLAPIManager().postXMLAPI(selectRecipientData, new XMLAPIResponseHandler() {
             @Override
@@ -261,7 +257,7 @@ public class MobileIdentityManager extends BaseManager {
                 if (!existingRecipientResponse.isSuccess()) {
 
                     // user not found or error with actual request?
-                    if (existingRecipientResponse.getErrorCode() == ErrorCode.RECIPIENT_NOT_LIST_MEMBER) {
+                    if (existingRecipientResponse.getErrorCode() == XMLAPIErrorCode.RECIPIENT_NOT_LIST_MEMBER) {
                         // recipient doesn't exist
                         updateRecipientWithCustomId(currentRecipientId, listId, idFieldNamesToValues, identityHandler);
                     } else {

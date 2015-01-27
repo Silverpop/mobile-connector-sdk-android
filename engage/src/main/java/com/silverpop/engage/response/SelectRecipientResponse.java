@@ -88,10 +88,10 @@ public class SelectRecipientResponse {
         return errorId;
     }
 
-    public ErrorCode getErrorCode() {
+    public XMLAPIErrorCode getErrorCode() {
         Integer errorId = getErrorId();
         if (errorId != null) {
-            return ErrorCode.findByNumber(errorId);
+            return XMLAPIErrorCode.findByNumber(errorId);
         }
         return null;
     }
