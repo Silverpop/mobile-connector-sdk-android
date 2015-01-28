@@ -1,5 +1,8 @@
 package com.silverpop.engage;
 
+import java.util.Map;
+import java.util.HashMap;
+
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
@@ -9,6 +12,8 @@ import com.android.volley.VolleyError;
 import com.silverpop.engage.domain.XMLAPI;
 import com.silverpop.engage.network.XMLAPIClient;
 import com.silverpop.engage.response.EngageResponseXML;
+import com.silverpop.engage.config.EngageConfig;
+import com.silverpop.engage.exception.XMLResponseParseException;
 
 
 /**
@@ -78,18 +83,86 @@ public class XMLAPIManager {
      *      AsyncTask to execute on failure
      */
     public void createAnonymousUserList(String listId,
-                                        AsyncTask<EngageResponseXML, Void, Object> successTask,
-                                        AsyncTask<VolleyError, Void, Object> failureTask) {
+                                        final AsyncTask<EngageResponseXML, Void, Object> successTask,
+                                        final AsyncTask<VolleyError, Void, Object> failureTask) {
         XMLAPI createAnonymous = XMLAPI.addRecipientAnonymousToList(listId);
-        postXMLAPI(createAnonymous, successTask, failureTask);
-    }
+        postXMLAPI(createAnonymous, new AsyncTask<EngageResponseXML, Void, Object>() {
+            @Override
+            protected EngageResponseXML doInBackground(EngageResponseXML... engageResponseXMLs) {
+                return engageResponseXMLs[0];
+            }
 
+            @Override
+            protected void onPostExecute(Object responseObject) {
+                try {
+                    EngageResponseXML responseXML = (EngageResponseXML) responseObject;
+                    String result = responseXML.valueForKeyPath("envelope.body.result.success");
+                    if (result.equalsIgnoreCase("true")) {
+                    	String id = responseXML.valueForKeyPath("envelope.body.result.recipientid");
+                    	EngageConfig.storeAnonymousUserId(context, id);
+                    	successTask.execute(responseXML);
+                    } else {
+                    	callFailureTask(failureTask);
+                    }
+                } catch (XMLResponseParseException e) {
+                    e.printStackTrace();
+                	callFailureTask(failureTask);
+                }
+            }
+        }, failureTask);
+    }
+    private void callFailureTask(AsyncTask<VolleyError, Void, Object> failureTask){
+    	//TODO: implement
+    }
 
     public void updateAnonymousUserToKnownUser(String listId, AsyncTask<EngageResponseXML, Void, Object> successTask,
                                                AsyncTask<VolleyError, Void, Object> failureTask) {
         XMLAPI createAnonymous = XMLAPI.addRecipientAnonymousToList(listId);
         postXMLAPI(createAnonymous, successTask, failureTask);
     }
+    public void updateAnonymousUserToKnownUser(final String userId, final String listId, final String primaryUserColumn, final String mergeColumn, final AsyncTask<EngageResponseXML, Void, Object> successTask,
+            final AsyncTask<VolleyError, Void, Object> failureTask) {
+    	EngageConfig.storePrimaryUserId(context, userId);
+    	
+    	String anonymousId = EngageConfig.anonymousUserId(context);
+    	XMLAPI anonymousUser = XMLAPI.updateRecipient(anonymousId, listId);
+    	Map<String, Object> cols = new HashMap<String, Object>();
+    	cols.put(mergeColumn, userId);    	
+    	anonymousUser.addColumns(cols);
+    	postXMLAPI(anonymousUser, new AsyncTask<EngageResponseXML, Void, Object>() {
+            @Override
+            protected EngageResponseXML doInBackground(EngageResponseXML... engageResponseXMLs) {
+                return engageResponseXMLs[0];
+            }
+
+            @Override
+            protected void onPostExecute(Object responseObject) {
+                try {
+                    EngageResponseXML responseXML = (EngageResponseXML) responseObject;
+                    String result = responseXML.valueForKeyPath("envelope.body.result.success");
+                    if (result.equalsIgnoreCase("true")) {
+                    	Map<String, Object> params = new HashMap<String, Object>();
+                    	params.put("LIST_ID", listId); 
+                    	XMLAPI mobileUser = new XMLAPI("UpdateRecipient", params);
+                    	
+                    	Map<String, Object> syncFields = new HashMap<String, Object>();
+                    	syncFields.put(primaryUserColumn, userId); 
+                    	mobileUser.addSyncFields(syncFields);
+
+                    	Map<String, Object> columns = new HashMap<String, Object>();
+                    	columns.put(mergeColumn, userId); 
+                    	mobileUser.addColumns(columns);
+                    	postXMLAPI(mobileUser, successTask, failureTask);
+                    } else {
+                    	callFailureTask(failureTask);
+                    }
+                } catch (XMLResponseParseException e) {
+                    e.printStackTrace();
+                	callFailureTask(failureTask);
+                }
+            }
+        }, failureTask);
+	}
 
     /**
      * Handles the successful completion of the UBF post

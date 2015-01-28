@@ -16,6 +16,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
+import com.silverpop.engage.config.EngageConfig;
 
 /**
  * Created by jeremydyer on 5/19/14.
@@ -36,7 +37,8 @@ public class UBF
 
     private int code;
     private Date eventTimestamp;
-
+    private Context context;
+    
     private Map<String, Object> params;
     private Map<String, Object> coreTemplate;
 
@@ -48,6 +50,7 @@ public class UBF
     }
 
     public UBF(Context context, int code, Map<String, Object> params) {
+    	this.context = context;
         setCode(code);
         setParams(params);
         setEventTimestamp(new Date());
@@ -300,6 +303,15 @@ public class UBF
     public JSONObject toJSONObject() {
         JSONObject jo = new JSONObject();
         try {
+        	String recipientId = EngageConfig.primaryUserId(this.context);
+        	if (recipientId!=null && !recipientId.equals("")){
+                jo.put("contactId", recipientId);
+        	} else {
+        		String anonymousId = EngageConfig.anonymousUserId(this.context);
+        		if (anonymousId!=null && !anonymousId.equals("")){
+                    jo.put("contactId", anonymousId);
+        		}
+        	}
             jo.put("eventTypeCode", this.getCode());
             jo.put("eventTimestamp", rfc3339.format(this.getEventTimestamp()));
             jo.put("attributes", initAttributes(getParams()));
