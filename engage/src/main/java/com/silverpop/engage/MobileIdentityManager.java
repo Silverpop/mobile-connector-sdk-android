@@ -229,8 +229,8 @@ public class MobileIdentityManager extends BaseManager {
 
             @Override
             public void onFailure(SetupRecipientFailure failure) {
+                Log.e(TAG, failure.getMessage(), failure.getException());
                 if (identityHandler != null) {
-                    Log.e(TAG, failure.getMessage(), failure.getException());
                     identityHandler.onFailure(new CheckIdentityFailure(
                             failure.getMessage(), failure.getException(), failure.getResponseXml()));
                 }
@@ -397,7 +397,7 @@ public class MobileIdentityManager extends BaseManager {
 
         final String mobileUserIdFromApp = EngageConfig.mobileUserId(getContext());
         if (TextUtils.isEmpty(mobileUserIdFromApp)) {
-            final String error = "Cannot find mobileUserId to update the existing applicant with for recipientId = " + existingRecipientResponse.getRecipientId();
+            final String error = "Cannot find mobileUserId to update the existing recipient with for recipientId = " + existingRecipientResponse.getRecipientId();
             Log.e(TAG, error);
             // time to bail, can't go any further
             if (identityHandler != null) {
@@ -441,8 +441,10 @@ public class MobileIdentityManager extends BaseManager {
                             if (getEngageConfigManager().mergeHistoryInAuditRecordTableDatabase()) {
                                 updateAuditRecordWithMergeChanges(oldRecipientId, newRecipientId, identityHandler);
                             } else {
-                                identityHandler.onSuccess(new CheckIdentityResult(
-                                        newRecipientId, oldRecipientId, EngageConfig.mobileUserId(getContext())));
+                                if (identityHandler != null) {
+                                    identityHandler.onSuccess(new CheckIdentityResult(
+                                            newRecipientId, oldRecipientId, EngageConfig.mobileUserId(getContext())));
+                                }
                             }
                         }
 
@@ -517,13 +519,12 @@ public class MobileIdentityManager extends BaseManager {
     /**
      * Scenario 1 - no existing recipient
      */
-    private void updateRecipientWithCustomId(String recipientId, String listId, Map<String, String> idFieldNamesToValues, final CheckIdentityHandler identityHandler) {
+    private void updateRecipientWithCustomId(String recipientId, String listId, Map<String, String> idFieldNamesToValues,
+                                             final CheckIdentityHandler identityHandler) {
+
+        // update recipient with custom id(s)
         XMLAPI updateCurrentRecipientXml = XMLAPI.updateRecipient(recipientId, listId);
-        for (Map.Entry<String, String> fieldValueEntry : idFieldNamesToValues.entrySet()) {
-            String idFieldName = fieldValueEntry.getKey();
-            String idValue = fieldValueEntry.getValue();
-            updateCurrentRecipientXml.addColumn(idFieldName, idValue);
-        }
+        updateCurrentRecipientXml.addColumns((Map<String, Object>)(Object)idFieldNamesToValues);
 
         getXMLAPIManager().postXMLAPI(updateCurrentRecipientXml, new UpdateRecipientResponseHandler() {
             @Override

@@ -85,6 +85,10 @@ public class MobileIdentityManager_IT extends BaseAndroidTest {
                 scheduleCleanup(recipientId);
 
                 assertThat(recipientId).isNotNull();
+                // verify recipient id and mobile user id are configured in app
+                assertThat(EngageConfig.recipientId(getContext())).isNotEmpty();
+                assertThat(EngageConfig.mobileUserId(getContext())).isNotEmpty();
+
                 // release countdown
                 signal.countDown();
             }
@@ -97,9 +101,9 @@ public class MobileIdentityManager_IT extends BaseAndroidTest {
             protected void scheduleCleanup(String recipientId) {
                 tearDownAPICalls.add(XMLAPI.builder()
                         .operation(XMLAPIOperation.REMOVE_RECIPIENT)
-                        .listId(getEngageConfigManager().engageListId())
+                        .listId(getListId())
                         .recipientId(recipientId)
-                        .column(getEngageConfigManager().mobileUserIdColumnName(), EngageConfig.mobileUserId(getContext()))
+                        .column(mobileUserIdColumnName(), EngageConfig.mobileUserId(getContext()))
                         .build());
             }
         });
@@ -155,7 +159,7 @@ public class MobileIdentityManager_IT extends BaseAndroidTest {
 
         // setup - create a user without a mobile user id
         final String email = uuidGenerator.generateUUID() + "@makeandbuild.com";
-        final String listId = getEngageConfigManager().engageListId();
+        final String listId = getListId();
         XMLAPI setupExistingRecipientXml = XMLAPI.addRecipientWithEmail(email, listId);
         getXMLAPIManager().postXMLAPI(setupExistingRecipientXml, new AddRecipientResponseHandler() {
             @Override
@@ -242,12 +246,12 @@ public class MobileIdentityManager_IT extends BaseAndroidTest {
                         XMLAPI selectRecipientXml = XMLAPI.builder()
                                 .operation(XMLAPIOperation.SELECT_RECIPIENT_DATA)
                                 .recipientId(recipientId)
-                                .listId(getEngageConfigManager().engageListId())
+                                .listId(getListId())
                                 .build();
                         getXMLAPIManager().postXMLAPI(selectRecipientXml, new SelectRecipientResponseHandler() {
                             @Override
                             public void onSelectRecipientSuccess(SelectRecipientResponse selectRecipientResponse) {
-                                String foundMobileUserId = selectRecipientResponse.getColumnValue(getEngageConfigManager().mobileUserIdColumnName());
+                                String foundMobileUserId = selectRecipientResponse.getColumnValue(mobileUserIdColumnName());
                                 String foundCustomId = selectRecipientResponse.getColumnValue(CUSTOM_ID_COLUMN);
 
                                 // verify that mobileUserId and custom Id were actually saved to the server
@@ -274,7 +278,7 @@ public class MobileIdentityManager_IT extends BaseAndroidTest {
             protected void scheduleCleanup(String createdRecipientId) {
                 tearDownAPICalls.add(XMLAPI.builder()
                         .operation(XMLAPIOperation.REMOVE_RECIPIENT)
-                        .listId(getEngageConfigManager().engageListId())
+                        .listId(getListId())
                         .recipientId(createdRecipientId)
                         .build());
             }
@@ -294,7 +298,7 @@ public class MobileIdentityManager_IT extends BaseAndroidTest {
     public void testCheckIdentity_s2_existingRecipientWithoutMobileUserId() throws Exception {
         final CountDownLatch signal = new CountDownLatch(1);
 
-        final String RECIPIENT_LIST_ID = getEngageConfigManager().engageListId();
+        final String RECIPIENT_LIST_ID = getListId();
 
         setupScenario2(new ScenarioSetupHandler() {
             @Override
@@ -325,10 +329,10 @@ public class MobileIdentityManager_IT extends BaseAndroidTest {
                                     public void onSelectRecipientSuccess(SelectRecipientResponse selectRecipientResponse) {
 
                                         // mobile id cleared
-                                        assertThat(selectRecipientResponse.getColumnValue(getEngageConfigManager().mobileUserIdColumnName())).isNullOrEmpty();
+                                        assertThat(selectRecipientResponse.getColumnValue(mobileUserIdColumnName())).isNullOrEmpty();
                                         // merged properties set
-                                        assertThat(selectRecipientResponse.getColumnValue(getEngageConfigManager().mergedRecipientIdColumnName())).isEqualTo(existingRecipient.recipientId);
-                                        assertThat(selectRecipientResponse.getColumnValue(getEngageConfigManager().mergedDateColumnName())).isNotEmpty();
+                                        assertThat(selectRecipientResponse.getColumnValue(mergedRecipientIdColumnName())).isEqualTo(existingRecipient.recipientId);
+                                        assertThat(selectRecipientResponse.getColumnValue(mergedDateColumnName())).isNotEmpty();
 
                                         // check second recipient
                                         getXMLAPIManager().postXMLAPI(XMLAPI.builder().operation(XMLAPIOperation.SELECT_RECIPIENT_DATA)
@@ -338,10 +342,10 @@ public class MobileIdentityManager_IT extends BaseAndroidTest {
                                                     public void onSelectRecipientSuccess(SelectRecipientResponse selectRecipientResponse) {
 
                                                         // mobile id set to merged recipient id
-                                                        assertThat(selectRecipientResponse.getColumnValue(getEngageConfigManager().mobileUserIdColumnName())).isEqualTo(currentRecipient.mobileUserId);
+                                                        assertThat(selectRecipientResponse.getColumnValue(mobileUserIdColumnName())).isEqualTo(currentRecipient.mobileUserId);
                                                         assertThat(selectRecipientResponse.getColumnValue(CUSTOM_ID_COLUMN)).isEqualTo(customId);
-                                                        assertThat(selectRecipientResponse.getColumnValue(getEngageConfigManager().mergedRecipientIdColumnName())).isNullOrEmpty();
-                                                        assertThat(selectRecipientResponse.getColumnValue(getEngageConfigManager().mergedDateColumnName())).isNullOrEmpty();
+                                                        assertThat(selectRecipientResponse.getColumnValue(mergedRecipientIdColumnName())).isNullOrEmpty();
+                                                        assertThat(selectRecipientResponse.getColumnValue(mergedDateColumnName())).isNullOrEmpty();
 
                                                         signal.countDown();
                                                     }
@@ -373,7 +377,7 @@ public class MobileIdentityManager_IT extends BaseAndroidTest {
 
     public void setupScenario2(final ScenarioSetupHandler setupHandler) throws Exception {
 
-        final String RECIPIENT_LIST_ID = getEngageConfigManager().engageListId();
+        final String RECIPIENT_LIST_ID = getListId();
 
         // setup recipient on server with recipientId and mobileUserId set
         MobileIdentityManager.get().setupRecipient(new SetupRecipientHandler() {
@@ -422,13 +426,13 @@ public class MobileIdentityManager_IT extends BaseAndroidTest {
 
             @Override
             public void onFailure(SetupRecipientFailure failure) {
-                fail(failure.getException() != null ? failure.getException().getMessage() : "Error setuing up recipient");
+                fail(failure.getException() != null ? failure.getException().getMessage() : "Error setting up recipient");
             }
 
             protected void scheduleCleanup(String createdRecipientId) {
                 tearDownAPICalls.add(XMLAPI.builder()
                         .operation(XMLAPIOperation.REMOVE_RECIPIENT)
-                        .listId(getEngageConfigManager().engageListId())
+                        .listId(getListId())
                         .recipientId(createdRecipientId)
                         .build());
             }
@@ -439,20 +443,16 @@ public class MobileIdentityManager_IT extends BaseAndroidTest {
     public void testCheckIdentity_s3_existingRecipientWithMobileUserId() throws Exception {
         final CountDownLatch signal = new CountDownLatch(1);
 
-        final String RECIPIENT_LIST_ID = getEngageConfigManager().engageListId();
+        final String RECIPIENT_LIST_ID = getListId();
 
 //        EngageConfig.storeAuditRecordTableId(getContext(), "29392");
 
         setupScenario3(false, new ScenarioSetupHandler() {
             @Override
             public void onSuccess(final Recipient currentRecipient, final Recipient existingRecipient) {
-                String customId = existingRecipient.customIdFields.get(CUSTOM_ID_COLUMN);
 
                 // look for an existing recipient with customId
-
-                Map<String, String> idFieldNamesToValues = new HashMap<String, String>();
-                idFieldNamesToValues.put(CUSTOM_ID_COLUMN, customId);
-                MobileIdentityManager.get().checkIdentity(idFieldNamesToValues, new CheckIdentityHandler() {
+                MobileIdentityManager.get().checkIdentity(existingRecipient.customIdFields, new CheckIdentityHandler() {
                     @Override
                     public void onSuccess(CheckIdentityResult result) {
 
@@ -470,15 +470,15 @@ public class MobileIdentityManager_IT extends BaseAndroidTest {
                                         .listId(RECIPIENT_LIST_ID).recipientId(currentRecipient.recipientId).build(),
                                 new SelectRecipientResponseHandler() {
                                     @Override
-                                    public void onSelectRecipientSuccess(SelectRecipientResponse selectRecipientResponse) {
+                                    public void onSelectRecipientSuccess(SelectRecipientResponse selectMergedRecipientResponse) {
 
                                         // check that properties didn't change
-                                        assertThat(selectRecipientResponse.getColumnValue(getEngageConfigManager().mobileUserIdColumnName())).isEqualTo(currentRecipient.mobileUserId);
-                                        assertThat(selectRecipientResponse.getColumnValue(CUSTOM_ID_COLUMN)).isNullOrEmpty();
+                                        assertThat(selectMergedRecipientResponse.getColumnValue(mobileUserIdColumnName())).isEqualTo(currentRecipient.mobileUserId);
+                                        assertThat(selectMergedRecipientResponse.getColumnValue(CUSTOM_ID_COLUMN)).isNullOrEmpty();
 
                                         // check marked as merged
-                                        assertThat(selectRecipientResponse.getColumnValue(getEngageConfigManager().mergedRecipientIdColumnName())).isEqualTo(existingRecipient.recipientId);
-                                        assertThat(selectRecipientResponse.getColumnValue(getEngageConfigManager().mergedDateColumnName())).isNotEmpty();
+                                        assertThat(selectMergedRecipientResponse.getColumnValue(mergedRecipientIdColumnName())).isEqualTo(existingRecipient.recipientId);
+                                        assertThat(selectMergedRecipientResponse.getColumnValue(mergedDateColumnName())).isNotEmpty();
 
                                         signal.countDown();
                                     }
@@ -501,11 +501,12 @@ public class MobileIdentityManager_IT extends BaseAndroidTest {
         signal.await(20, TimeUnit.SECONDS);
     }
 
-    //[Lindsay Thurmond:1/24/15] TODO: fix me
+
+
     public void testCheckIdentity_s3_existingRecipientWithMobileUserId_multipleCustomIds() throws Exception {
         final CountDownLatch signal = new CountDownLatch(1);
 
-        final String RECIPIENT_LIST_ID = getEngageConfigManager().engageListId();
+        final String RECIPIENT_LIST_ID = getListId();
 
         setupScenario3(true, new ScenarioSetupHandler() {
             @Override
@@ -536,13 +537,13 @@ public class MobileIdentityManager_IT extends BaseAndroidTest {
                                     public void onSelectRecipientSuccess(SelectRecipientResponse selectRecipientResponse) {
 
                                         // check that properties didn't change
-                                        assertThat(selectRecipientResponse.getColumnValue(getEngageConfigManager().mobileUserIdColumnName())).isEqualTo(currentRecipient.mobileUserId);
+                                        assertThat(selectRecipientResponse.getColumnValue(mobileUserIdColumnName())).isEqualTo(currentRecipient.mobileUserId);
                                         assertThat(selectRecipientResponse.getColumnValue(CUSTOM_ID_COLUMN)).isNullOrEmpty();
                                         assertThat(selectRecipientResponse.getColumnValue(CUSTOM_ID_COLUMN_2)).isNullOrEmpty();
 
                                         // check marked as merged
-                                        assertThat(selectRecipientResponse.getColumnValue(getEngageConfigManager().mergedRecipientIdColumnName())).isEqualTo(existingRecipient.recipientId);
-                                        assertThat(selectRecipientResponse.getColumnValue(getEngageConfigManager().mergedDateColumnName())).isNotEmpty();
+                                        assertThat(selectRecipientResponse.getColumnValue(mergedRecipientIdColumnName())).isEqualTo(existingRecipient.recipientId);
+                                        assertThat(selectRecipientResponse.getColumnValue(mergedDateColumnName())).isNotEmpty();
 
                                         signal.countDown();
                                     }
@@ -565,10 +566,9 @@ public class MobileIdentityManager_IT extends BaseAndroidTest {
         signal.await(20, TimeUnit.SECONDS);
     }
 
-
     private void setupScenario3(final boolean twoCustomIds, final ScenarioSetupHandler setupHandler) throws Exception {
 
-        final String RECIPIENT_LIST_ID = getEngageConfigManager().engageListId();
+        final String RECIPIENT_LIST_ID = getListId();
 
         // setup recipient on server with recipientId and mobileUserId set
         MobileIdentityManager.get().setupRecipient(new SetupRecipientHandler() {
@@ -587,7 +587,7 @@ public class MobileIdentityManager_IT extends BaseAndroidTest {
                         .operation(XMLAPIOperation.ADD_RECIPIENT)
                         .listId(RECIPIENT_LIST_ID)
                         .column(CUSTOM_ID_COLUMN, customId)
-                        .column(getEngageConfigManager().mobileUserIdColumnName(), originalExistingMobileUserId)
+                        .column(mobileUserIdColumnName(), originalExistingMobileUserId)
                         .build();
                 if (twoCustomIds) {
                     addRecipientWithCustomIdXml.addColumn(CUSTOM_ID_COLUMN_2, customId2);
@@ -634,7 +634,7 @@ public class MobileIdentityManager_IT extends BaseAndroidTest {
             protected void scheduleCleanup(String recipientId) {
                 tearDownAPICalls.add(XMLAPI.builder()
                         .operation(XMLAPIOperation.REMOVE_RECIPIENT)
-                        .listId(getEngageConfigManager().engageListId())
+                        .listId(getListId())
                         .recipientId(recipientId)
                         .build());
             }
@@ -648,7 +648,7 @@ public class MobileIdentityManager_IT extends BaseAndroidTest {
         final String mobileUseId = uuidGenerator.generateUUID();
         final String customId = uuidGenerator.generateUUID();
         getXMLAPIManager().postXMLAPI(XMLAPI.builder().operation(XMLAPIOperation.ADD_RECIPIENT)
-                        .listId(getEngageConfigManager().engageListId())
+                        .listId(getListId())
                         .column(getEngageConfigManager().mobileUserIdColumnName(), mobileUseId)
                         .column(CUSTOM_ID_COLUMN, customId).build(),
                 new AddRecipientResponseHandler() {
@@ -656,6 +656,13 @@ public class MobileIdentityManager_IT extends BaseAndroidTest {
                     public void onAddRecipientSuccess(final AddRecipientResponse addRecipientResponse) {
                         EngageConfig.storeRecipientId(getContext(), addRecipientResponse.getRecipientId());
                         EngageConfig.storeMobileUserId(getContext(), mobileUseId);
+
+                        // schedule cleanup
+                        tearDownAPICalls.add(XMLAPI.builder()
+                                .operation(XMLAPIOperation.REMOVE_RECIPIENT)
+                                .recipientId(addRecipientResponse.getRecipientId())
+                                .listId(getListId())
+                                .build());
 
                         // recipient setup with mobile user id and custom id, lets search for that user
                         Map<String, String> customIdMap = new HashMap<String, String>();

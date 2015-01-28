@@ -96,4 +96,20 @@ public class BaseAndroidTest extends AndroidTestCase {
     protected UBFManager getUBFManager() {
         return UBFManager.get();
     }
+
+    protected String getListId() {
+        return getEngageConfigManager().engageListId();
+    }
+
+    protected String mergedDateColumnName() {
+        return getEngageConfigManager().mergedDateColumnName();
+    }
+
+    protected String mobileUserIdColumnName() {
+        return getEngageConfigManager().mobileUserIdColumnName();
+    }
+
+    protected String mergedRecipientIdColumnName() {
+        return getEngageConfigManager().mergedRecipientIdColumnName();
+    }
 }
