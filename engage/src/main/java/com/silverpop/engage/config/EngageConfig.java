@@ -47,7 +47,7 @@ public class EngageConfig {
         }
     }
 
-    public static final String PRIMARY_USER_ID_SET_EVENT = "com.silverpop.engage.PRIMARY_USER_ID_SET_EVENT";
+    public static final String MOBILE_USER_ID_SET_EVENT = "com.silverpop.engage.MOBILE_USER_ID_SET_EVENT";
 
     private static Location currentLocationCache;
     private static Date currentLocationCacheBirthday;
@@ -100,7 +100,7 @@ public class EngageConfig {
     public static void storeMobileUserId(Context context, String primaryUserId) {
         getConfigSharedPrefs(context).edit().putString(SharedProperties.PRIMARY_USER_ID.toString(), primaryUserId).commit();
 
-        context.sendBroadcast(new Intent(PRIMARY_USER_ID_SET_EVENT));
+        context.sendBroadcast(new Intent(MOBILE_USER_ID_SET_EVENT));
     }
 
     /**

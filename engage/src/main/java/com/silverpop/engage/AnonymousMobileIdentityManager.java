@@ -4,12 +4,13 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 import com.android.volley.VolleyError;
+import com.silverpop.engage.config.EngageConfig;
 import com.silverpop.engage.domain.XMLAPI;
-import com.silverpop.engage.domain.XMLAPIElement;
 import com.silverpop.engage.domain.XMLAPIOperation;
+import com.silverpop.engage.exception.XMLResponseParseException;
 import com.silverpop.engage.response.EngageResponseXML;
 
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -57,19 +58,88 @@ public class AnonymousMobileIdentityManager extends BaseManager {
      * @deprecated
      */
     public void createAnonymousUserList(String listId,
-                                        AsyncTask<EngageResponseXML, Void, Object> successTask,
-                                        AsyncTask<VolleyError, Void, Object> failureTask) {
-        XMLAPI createAnonymous = addRecipientAnonymousToList(listId);
-        XMLAPIManager.get().postXMLAPI(createAnonymous, successTask, failureTask);
+                                        final AsyncTask<EngageResponseXML, Void, Object> successTask,
+                                        final AsyncTask<VolleyError, Void, Object> failureTask) {
+        XMLAPI createAnonymous = XMLAPI.addRecipientAnonymousToList(listId);
+        getXMLAPIManager().postXMLAPI(createAnonymous, new AsyncTask<EngageResponseXML, Void, Object>() {
+            @Override
+            protected EngageResponseXML doInBackground(EngageResponseXML... engageResponseXMLs) {
+                return engageResponseXMLs[0];
+            }
+
+            @Override
+            protected void onPostExecute(Object responseObject) {
+                try {
+                    EngageResponseXML responseXML = (EngageResponseXML) responseObject;
+                    if (responseXML.isSuccess()) {
+
+                        String id = responseXML.valueForKeyPath("envelope.body.result.recipientid");
+                        EngageConfig.storeAnonymousUserId(getContext(), id);
+                        successTask.execute(responseXML);
+                    } else {
+                        callFailureTask(failureTask, null);
+                    }
+                } catch (XMLResponseParseException e) {
+                    Log.e(TAG, e.getMessage(), e);
+                    callFailureTask(failureTask, null);
+                }
+            }
+        }, failureTask);
     }
 
+    private void callFailureTask(AsyncTask<VolleyError, Void, Object> failureTask, VolleyError error) {
+        //[Lindsay Thurmond:1/29/15] TODO: handle errors better
+        if (failureTask != null) {
+            failureTask.execute(error);
+        }
+    }
 
-    //[Lindsay Thurmond:12/29/14] TODO: identical to createAnonymousUserList() - fix or delete me
-//    public void updateAnonymousUserToKnownUser(String listId, AsyncTask<EngageResponseXML, Void, Object> successTask,
-//                                               AsyncTask<VolleyError, Void, Object> failureTask) {
-//        XMLAPI createAnonymous = addRecipientAnonymousToList(listId);
-//        XMLAPIManager.get().postXMLAPI(createAnonymous, successTask, failureTask);
-//    }
+    /**
+     * @param userId
+     * @param listId
+     * @param primaryUserColumn
+     * @param mergeColumn
+     * @param successTask
+     * @param failureTask
+     * @deprecated
+     */
+    public void updateAnonymousUserToKnownUser(final String userId, final String listId, final String primaryUserColumn, final String mergeColumn,
+                                               final AsyncTask<EngageResponseXML, Void, Object> successTask,
+                                               final AsyncTask<VolleyError, Void, Object> failureTask) {
+
+        EngageConfig.storePrimaryUserId(getContext(), userId);
+
+        String anonymousId = EngageConfig.anonymousUserId(getContext());
+        XMLAPI anonymousUser = XMLAPI.updateRecipient(anonymousId, listId);
+        Map<String, Object> cols = new HashMap<String, Object>();
+        cols.put(mergeColumn, userId);
+        anonymousUser.addColumns(cols);
+        getXMLAPIManager().postXMLAPI(anonymousUser, new AsyncTask<EngageResponseXML, Void, Object>() {
+            @Override
+            protected EngageResponseXML doInBackground(EngageResponseXML... engageResponseXMLs) {
+                return engageResponseXMLs[0];
+            }
+
+            @Override
+            protected void onPostExecute(Object responseObject) {
+                EngageResponseXML responseXML = (EngageResponseXML) responseObject;
+                if (responseXML.isSuccess()) {
+
+                    XMLAPI updateRecipientXml = XMLAPI.builder()
+                            .operation(XMLAPIOperation.UPDATE_RECIPIENT)
+                            .listId(listId)
+                            .syncField(primaryUserColumn, userId)
+                            .column(mergeColumn, userId)
+                            .build();
+
+                    getXMLAPIManager().postXMLAPI(updateRecipientXml, successTask, failureTask);
+                } else {
+                    callFailureTask(failureTask, null);
+                }
+            }
+        }, failureTask);
+    }
+
 
     /**
      * @param listId
@@ -77,11 +147,8 @@ public class AnonymousMobileIdentityManager extends BaseManager {
      * @deprecated
      */
     public static XMLAPI addRecipientAnonymousToList(String listId) {
-        Map<String, Object> bodyElements = new LinkedHashMap<String, Object>();
-        bodyElements.put(XMLAPIElement.LIST_ID.toString(), listId);
-
-        XMLAPI api = new XMLAPI(XMLAPIOperation.ADD_RECIPIENT, bodyElements);
-        return api;
+        XMLAPI addRecipientXml = XMLAPI.builder().operation(XMLAPIOperation.ADD_RECIPIENT).listId(listId).build();
+        return addRecipientXml;
     }
 
 }

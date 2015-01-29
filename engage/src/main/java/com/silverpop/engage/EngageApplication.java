@@ -239,7 +239,7 @@ public class EngageApplication
                             Log.i(TAG, "Removed primary user id listener for installed event");
                         }
                     },
-                    new IntentFilter(EngageConfig.PRIMARY_USER_ID_SET_EVENT));
+                    new IntentFilter(EngageConfig.MOBILE_USER_ID_SET_EVENT));
         }
     }
 
@@ -266,7 +266,7 @@ public class EngageApplication
                             Log.i(TAG, "Removed primary user id listener for session started event");
                         }
                     },
-                    new IntentFilter(EngageConfig.PRIMARY_USER_ID_SET_EVENT));
+                    new IntentFilter(EngageConfig.MOBILE_USER_ID_SET_EVENT));
         }
     }
 
