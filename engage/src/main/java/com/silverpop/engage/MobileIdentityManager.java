@@ -203,9 +203,9 @@ public class MobileIdentityManager extends BaseManager {
      * does exist the two recipients are merged and the engage app config is switched to the existing
      * recipient.
      * <p/>
-     * When recipients are merged a history of the merged recipients is recorded using the
-     * Mobile User Id, Merged Recipient Id, and Merged Date columns.
-     * //[Lindsay Thurmond:1/15/15] TODO: update with audit table when applicable
+     * When recipients are merged a history of the merged recipients is recorded.  By default it uses the
+     * Mobile User Id, Merged Recipient Id, and Merged Date columns, however if you prefer to store
+     * the merge history in a separate AuditRecord table you can set you EngageConfig.json properties accordingly.
      * <p/>
      * WARNING: The merge process is not currently transactional.  If this method errors the data is likely to
      * be left in an inconsistent state.

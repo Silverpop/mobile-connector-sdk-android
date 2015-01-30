@@ -443,7 +443,7 @@ manual process of creating an anonymous user.
  
 In addition to the normal app security token configuration, the following setup must be configured prior to 
 using the ```MobileIdentityManager``` methods.
-- Recipient list should already be completed and the ```listId``` should be setup in the configuration.
+- Recipient list should already be created and the ```listId``` should be setup in the configuration.
 - EngageConfig.json should be configured with the columns names representing the _Mobile User Id_, _Merged Recipient Id_, and _Merged Date_.  The EngageConfigDefault.json defines default values if you prefer to use those.
 - The _Mobile User Id_, _Merged Recipient Id_, and _Merged Date_ columns must be created in the recipient list with names that match your EngageConfig.json settings
 - Optional: If you prefer to save the merge history in a separate AuditRecord relational table you can 
