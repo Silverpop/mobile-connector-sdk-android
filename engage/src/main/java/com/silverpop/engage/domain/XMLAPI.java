@@ -256,9 +256,11 @@ public class XMLAPI {
     }
 
     public static XMLAPI insertUpdateRelationalTable(String tableId) {
-        XMLAPI xmlapi = new XMLAPI(XMLAPIOperation.INSERT_UPDATE_RELATIONAL_TABLE.toString(),
-                nameValueMap(XMLAPIElement.TABLE_ID.toString(), tableId));
-        return xmlapi;
+        XMLAPI insertUpdateXml = builder()
+                .operation(XMLAPIOperation.INSERT_UPDATE_RELATIONAL_TABLE)
+                .param(XMLAPIElement.TABLE_ID, tableId)
+                .build();
+        return insertUpdateXml;
     }
 
     /**

@@ -10,7 +10,7 @@ import java.util.TimeZone;
 public class DateUtil {
 
     public static String toGmtString(Date date){
-        SimpleDateFormat sd = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat sd = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
         sd.setTimeZone(TimeZone.getTimeZone("GMT"));
         return sd.format(date);
     }

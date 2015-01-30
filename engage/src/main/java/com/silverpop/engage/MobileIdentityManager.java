@@ -477,8 +477,10 @@ public class MobileIdentityManager extends BaseManager {
     private void updateAuditRecordWithMergeChanges(final String oldRecipientId, final String newRecipientId, final CheckIdentityHandler identityHandler) {
         final String auditRecordTableId = EngageConfig.auditRecordTableId(getContext());
         if (TextUtils.isEmpty(auditRecordTableId)) {
+            String error = "Cannot update audit record without audit table id";
+            Log.e(TAG, error);
             if (identityHandler != null) {
-                identityHandler.onFailure(new CheckIdentityFailure("Cannot update audit record without audit table id"));
+                identityHandler.onFailure(new CheckIdentityFailure(error));
             }
         } else {
             XMLAPI updateAuditRecordApi = XMLAPI.insertUpdateRelationalTable(auditRecordTableId);
