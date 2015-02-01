@@ -340,11 +340,11 @@ XMLAPI selectRecipientData = XMLAPI.builder()
 
 #### <a name="XMLAPIManager"/>XMLAPIManager
 
-The XMLAPIManager manages posting XMLAPI messages to the Engage web services. A XMLAPIManager global instance
-is automatically created for you by ```java com.silverpop.engage.EngageApplication ```. XMLAPIManager
+The ```XMLAPIManager``` manages posting XMLAPI messages to the Engage web services. A ```XMLAPIManager``` global instance
+is automatically created for you by ```com.silverpop.engage.EngageApplication```. XMLAPIManager
 manages network availability and will cache requests when the network is not reachable executing them
 once the network is accessible again. All XMLAPI requests made to Engage should be made through
-this XMLAPIManager.
+the ```XMLAPIManager```.
 
 ```java
 /**
@@ -581,7 +581,7 @@ AnonymousMobileIdentityManager.get().createAnonymousUserList("EngageDBListID",
 
 Note: These methods have been moved from the ```XMLAPIManager``` to the ```AnonymousMobileIdentityManager```, 
 however it is recommended to use the ```setupRecipient()``` and ```checkIdentity()``` methods 
-in the [MobileIdentityManager](MobileIdentityManager) instead to manage mobile identities. 
+in the [MobileIdentityManager](#MobileIdentityManager) instead to manage mobile identities. 
 
 ### Local Event Storage
 
