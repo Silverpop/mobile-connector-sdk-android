@@ -40,6 +40,7 @@ public class UBF
     private Context context;
     
     private Map<String, Object> params;
+    private Map<String, Object> headerParams;
     private Map<String, Object> coreTemplate;
 
     private static final SimpleDateFormat rfc3339 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
@@ -313,8 +314,9 @@ public class UBF
                     jo.put("contactId", anonymousId);
         		}
         	}
-            jo.put("eventTypeCode", this.getCode());
-            jo.put("eventTimestamp", rfc3339.format(this.getEventTimestamp()));
+            for (Map.Entry<String, Object> entry : getHeaderParams().entrySet()) {
+                jo.put(entry.getKey(), entry.getValue());
+            }
             jo.put("attributes", initAttributes(getParams()));
         } catch (JSONException jsonEx) {
             Log.e(this.getClass().getName(), jsonEx.getMessage());
@@ -342,6 +344,7 @@ public class UBF
 
     public void setCode(int code) {
         this.code = code;
+        getHeaderParams().put("eventTypeCode", this.code);
     }
 
     public Map<String, Object> getParams() {
@@ -365,6 +368,19 @@ public class UBF
     }
 
     public void setEventTimestamp(Date eventTimestamp) {
+
         this.eventTimestamp = eventTimestamp;
+        getHeaderParams().put("eventTimestamp", rfc3339.format(this.getEventTimestamp()));
+    }
+
+    public Map<String, Object> getHeaderParams() {
+        if (headerParams == null){
+            headerParams = new HashMap<String, Object>();
+        }
+        return headerParams;
+    }
+
+    public void setHeaderParams(Map<String, Object> headerParams) {
+        this.headerParams = headerParams;
     }
 }
