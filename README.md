@@ -31,7 +31,7 @@ The Android EngageSDK is packaged as an Android archivable resource (.aar). An .
 regular jar file but contains other Android bundled resources such as a base Android.manifest file.
 You can include the EngageSDK into a new or existing application by adding a gradle dependency of 
 
-```
+```groovy
 compile(group: 'com.silverpop', name: 'engage', version: '1.1.0', ext: 'aar')
 ```
 or by manually adding the .aar file to an ```aars``` directory and adding the following to your ```build.gradle```.
