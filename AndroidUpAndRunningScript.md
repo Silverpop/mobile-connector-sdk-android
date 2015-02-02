@@ -1,13 +1,16 @@
 #Android Up And Running in Under 10 Mins Script
 
+_Note these instructions were written using Android Studio 1.0.2_
+
 ## Create Project
 1. Open Android Studio
+2. You'll need the Android 19 SDK installed, so if you haven't done that already you should do it now.  Tools > Android > SDK Manager.  *Note this will take awhile to download and install.
 1. File > New Project
 1. Name application : ```EngageSetup```
 1. Set Company Domain: ```silverpop.com```
 1. Choose project location
 1. Click Next
-1. Make sure Bthe box for 'Phone and Tablet' is checked
+1. Make sure the box for 'Phone and Tablet' is checked
 1. Set Minimum SDK to 19 or lower > Next
 1. Select 'Blank Activity with Fragment' (you can choose something different, but I'm picking this one as a very simple demo) > Next
 1. Name activity to your liking - I’m keeping the defaults
@@ -38,7 +41,7 @@ dependencies {
     compile 'com.silverpop:engage:1.1.0@aar'
 }
 ```
-1. Sync Gradle
+1. Sync Gradle to pull in your new changes
 
 
 ## Create Custom Application
@@ -53,13 +56,17 @@ import com.silverpop.engage.EngageApplication;
 public class Application extends EngageApplication {
 }
 ```
-
 1. Open ```AndroidManifest.xml```
 1. Add an attribute to the ```application``` xml with the full class name of your new ```Application.java``` class
 ```xml
 android:name="com.silverpop.engagedemo.Application"
 ```
 
+## Use Silverpop Engage Web Interface to Setup Credentials
+1. Oragnization Settings > Application Account Access > Add Application
+2. Name Application > Ok
+3. You'll see your new Client Id and Client Secret
+4. Add Account Access to setup your user.  Once setup you'll get an email with your Refresh Token.
 
 ## Add Credentials
 1. Open ```AndroidManifest.xml```
@@ -70,8 +77,7 @@ android:name="com.silverpop.engagedemo.Application"
 <meta-data android:name="ENGAGE_REFRESH_TOKEN" android:value="676476e8-2d1f-45f9-9460-a2489640f41a" />
 <meta-data android:name="ENGAGE_HOST" android:value="https://apipilot.silverpop.com/" />
 ```
-
-1. Note that you should never save your credentials in your application code and we are only doing this for demo purposes to get you up and running.  TODO - recommend a better way
+1. Note that you should never save your credentials in your application code and we are only doing this for demo purposes to get you up and running.  Ideally you'd hide your credentials behind a webservice interface so app users can't decompile the code to reveal your tokens.
 
 ## Customize Label to Show Connection Status
 1. Open ```activity_main.xml```
@@ -82,13 +88,11 @@ android:name="com.silverpop.engagedemo.Application"
 ```xml
 <string name="connection_status">Connection Status</string>
 ```
-
 1. Go back to ```activity_main.xml```
 1. Change the TextView to use the ```connection_status``` string:
 ```xml
 android:text="@string/connection_status"
 ```
-
 1. Now we're going to add code that will poll for the connection status and update the connection status text view with the current status
 1. Open ```MainActivity.java```
 1. Add a status handler field to the class
@@ -96,7 +100,6 @@ android:text="@string/connection_status"
 //android.os.Handler
 private Handler statusHandler;
 ```
-
 1. In the ```onCreate``` method initialize the handler and start monitoring the status
 ```java
 if (statusHandler == null) {
@@ -104,7 +107,6 @@ if (statusHandler == null) {
 }
 startMonitoringStatus();
 ```
-
 1. Add methods to control the ```Handler```
 ```java
 Runnable statusChecker = new Runnable() {
@@ -131,7 +133,6 @@ void stopMonitoringStatus() {
     statusHandler.removeCallbacks(statusChecker);
 }
 ```
-
 1. Override the ```onStart()``` and ```onStop()``` methods.
 ```java
 @Override
@@ -148,7 +149,6 @@ protected void onDestroy() {
     stopMonitoringStatus();
 }
 ```
-
 1. For reference the full class looks like this:
 ```java
 package com.silverpop.engagedemo;
