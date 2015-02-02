@@ -31,23 +31,38 @@ The Android EngageSDK is packaged as an Android archivable resource (.aar). An .
 regular jar file but contains other Android bundled resources such as a base Android.manifest file.
 You can include the EngageSDK into a new or existing application by adding a gradle dependency of 
 
-```
+```groovy
 compile(group: 'com.silverpop', name: 'engage', version: '1.1.0', ext: 'aar')
+```
+or if the SDK isn't in Maven yet, you can manually add the .aar file to an ```aars``` directory then add the following to your ```build.gradle```.
+
+```groovy
+repositories {
+    flatDir {
+        dirs 'aars'
+    }
+}
+
+dependencies {
+    // use this once maven support is added
+    //compile(group: 'com.silverpop', name: 'engage', version: '1.1.0', ext: 'aar')
+
+    compile 'com.silverpop:engage:1.1.0@aar'
+}
 ```
 
 Adding the dependency will result in the SDK code and all SDK dependencies being pulled into your project.
-The SDK AndroidManifest.xml file will also be included in your project and merged into your application's AndroidManifest.xml
+The SDK ```AndroidManifest.xml``` file will also be included in your project and merged into your application's ```AndroidManifest.xml```
 file at build time by the android build tools.
 
 Once the SDK code is available for you in your project you need to make some adjustments so that your
 application can properly notify the EngageSDK of important lifecycle events. To do that you will create
-an application element in your AndroidManifest.xml file. The application element that you create can either
-directly use the com.silverpop.engage.EngageApplication or create your own custom Application instance
-that extends com.silverpop.engage.EngageApplication. When doing the later it is the responsibility of 
+an application element in your ```AndroidManifest.xml``` file. The application element that you create can either
+directly use the ```com.silverpop.engage.EngageApplication``` or create your own custom Application instance
+that extends ```com.silverpop.engage.EngageApplication```. When doing the later it is the responsibility of 
 the developer to ensure that they invoke the super of each method they override otherwise certain
 SDK functionality may not perform as expected. Creating a custom Application instance and defining 
-that in your AndroidManifest.xml file might look like this. The custom Application class is
-com.silverpop.engage.demo.engagetest.Application.
+that in your ```AndroidManifest.xml``` file might look like this. The custom Application class is ```com.silverpop.engage.demo.engagetest.Application```.
 
 ```xml
 <application
@@ -340,11 +355,11 @@ XMLAPI selectRecipientData = XMLAPI.builder()
 
 #### <a name="XMLAPIManager"/>XMLAPIManager
 
-The XMLAPIManager manages posting XMLAPI messages to the Engage web services. A XMLAPIManager global instance
-is automatically created for you by ```java com.silverpop.engage.EngageApplication ```. XMLAPIManager
+The ```XMLAPIManager``` manages posting XMLAPI messages to the Engage web services. A ```XMLAPIManager``` global instance
+is automatically created for you by ```com.silverpop.engage.EngageApplication```. XMLAPIManager
 manages network availability and will cache requests when the network is not reachable executing them
 once the network is accessible again. All XMLAPI requests made to Engage should be made through
-this XMLAPIManager.
+the ```XMLAPIManager```.
 
 ```java
 /**
@@ -443,7 +458,7 @@ manual process of creating an anonymous user.
  
 In addition to the normal app security token configuration, the following setup must be configured prior to 
 using the ```MobileIdentityManager``` methods.
-- Recipient list should already be completed and the ```listId``` should be setup in the configuration.
+- Recipient list should already be created and the ```listId``` should be setup in the configuration.
 - EngageConfig.json should be configured with the columns names representing the _Mobile User Id_, _Merged Recipient Id_, and _Merged Date_.  The EngageConfigDefault.json defines default values if you prefer to use those.
 - The _Mobile User Id_, _Merged Recipient Id_, and _Merged Date_ columns must be created in the recipient list with names that match your EngageConfig.json settings
 - Optional: If you prefer to save the merge history in a separate AuditRecord relational table you can 
@@ -581,7 +596,7 @@ AnonymousMobileIdentityManager.get().createAnonymousUserList("EngageDBListID",
 
 Note: These methods have been moved from the ```XMLAPIManager``` to the ```AnonymousMobileIdentityManager```, 
 however it is recommended to use the ```setupRecipient()``` and ```checkIdentity()``` methods 
-in the [MobileIdentityManager](MobileIdentityManager) instead to manage mobile identities. 
+in the [MobileIdentityManager](#MobileIdentityManager) instead to manage mobile identities. 
 
 ### Local Event Storage
 
