@@ -241,7 +241,7 @@ public class MainActivity extends Activity {
 }
 ```
 
-## Run Project
+## Run App
 1. In the Run Configurations click the run button for ```app```
-1. Pick the emulator or Android device of your choice.  If you haven't set any up yet you can find some instructions [here](http://developer.android.com/training/basics/firstapp/running-app.html).
+1. Pick the emulator or Android device of your choice.  You can set these up under Tools > Android > AVD Manager.  Additional instructions can be found [here](http://developer.android.com/training/basics/firstapp/running-app.html).
 1. The app will start up and the text will change to "Connection Successful!" once the application has successfully authenticated with the Silverpop APIs
