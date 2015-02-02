@@ -34,20 +34,36 @@ You can include the EngageSDK into a new or existing application by adding a gra
 ```
 compile(group: 'com.silverpop', name: 'engage', version: '1.1.0', ext: 'aar')
 ```
+or by manually adding the .aar file to an ```aars``` directory and adding the following to your ```build.gradle```.
+
+```groovy
+repositories {
+    flatDir {
+        dirs 'aars'
+    }
+}
+
+dependencies {
+    // use this once maven support is added
+    //compile(group: 'com.silverpop', name: 'engage', version: '1.1.0', ext: 'aar')
+
+    compile 'com.silverpop:engage:1.1.0@aar'
+}
+```
 
 Adding the dependency will result in the SDK code and all SDK dependencies being pulled into your project.
-The SDK AndroidManifest.xml file will also be included in your project and merged into your application's AndroidManifest.xml
+The SDK ```AndroidManifest.xml``` file will also be included in your project and merged into your application's ```AndroidManifest.xml```
 file at build time by the android build tools.
 
 Once the SDK code is available for you in your project you need to make some adjustments so that your
 application can properly notify the EngageSDK of important lifecycle events. To do that you will create
-an application element in your AndroidManifest.xml file. The application element that you create can either
-directly use the com.silverpop.engage.EngageApplication or create your own custom Application instance
-that extends com.silverpop.engage.EngageApplication. When doing the later it is the responsibility of 
+an application element in your ```AndroidManifest.xml``` file. The application element that you create can either
+directly use the ```com.silverpop.engage.EngageApplication``` or create your own custom Application instance
+that extends ```com.silverpop.engage.EngageApplication```. When doing the later it is the responsibility of 
 the developer to ensure that they invoke the super of each method they override otherwise certain
 SDK functionality may not perform as expected. Creating a custom Application instance and defining 
-that in your AndroidManifest.xml file might look like this. The custom Application class is
-com.silverpop.engage.demo.engagetest.Application.
+that in your ```AndroidManifest.xml``` file might look like this. The custom Application class is
+```com.silverpop.engage.demo.engagetest.Application```.
 
 ```xml
 <application
