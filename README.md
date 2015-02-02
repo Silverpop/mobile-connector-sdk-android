@@ -62,8 +62,7 @@ directly use the ```com.silverpop.engage.EngageApplication``` or create your own
 that extends ```com.silverpop.engage.EngageApplication```. When doing the later it is the responsibility of 
 the developer to ensure that they invoke the super of each method they override otherwise certain
 SDK functionality may not perform as expected. Creating a custom Application instance and defining 
-that in your ```AndroidManifest.xml``` file might look like this. The custom Application class is
-```com.silverpop.engage.demo.engagetest.Application```.
+that in your ```AndroidManifest.xml``` file might look like this. The custom Application class is ```com.silverpop.engage.demo.engagetest.Application```.
 
 ```xml
 <application
