@@ -14,7 +14,7 @@ android {
 		abortOnError false
 	}
 	defaultConfig {
-		packageName 'com.silverpop.engage.demo.engagetest'
+        applicationId 'com.silverpop.engage.demo.engagetest'
 		minSdkVersion 14
 		targetSdkVersion 19
 		versionCode 1
