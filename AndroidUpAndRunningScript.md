@@ -19,6 +19,7 @@ _Note these instructions were written using Android Studio 1.0.2_
 
 ## IDE Setup
 1. Turn on autoscroll to/from source (This step is optional, but it makes the demo nicer because you can see where the open files live in the project tree as we access them)
+2. Uncheck 'Compact Empty Middle Packages' (Also optional, but it makes it easier to see the directory structure)
 1. Switch the Project tool window from 'Android' to 'Project'
 
 
