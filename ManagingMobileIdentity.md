@@ -78,9 +78,16 @@ android:name="com.silverpop.engagedemo.Application"
 ## Video Starts Here
 
 ### Intro Script
-Today we are going to demonstrate configuring mobile idenities using the Android Engage SDK.  Before watching this video we are making the assumption that you've already watched the Android Up And Running video so we're going to jump right in.
+Today we are going to demonstrate configuring mobile idenities using the Android Engage SDK.  We are making the assumption that you've already watched the Android Up And Running video so we're going to jump right in.
 
 I've already configured my new Android Studio project with the needed configuration settings (show them).
+
+1. Added engage-1.1.0.aar
+2. Gradle Config
+3. Custom ```Application``` that extends ```EngageApplication```
+4. ```AndroidManifest.xml``` is configured with custom ```Application```
+5. ```AndroidManifest.xml``` is configured with credentials
+6. ```EngageConfig.json``` is added to ```assets``` directory
 
 But before we can add the new functionality there are a few things you need to Setup on the silverpop side.  The first is that you'll need to configure your recipient lists with columns for 
 - Mobile User Id
@@ -97,15 +104,6 @@ if you wish to use that.  If you any help with this configuration please contact
 You'll also need to have your recipient table pre-configured with any custom id columns you wish - facebook_id, etc.
 
 My recipient table is currently setup with a custom id column called "Custom Integration Test Id" so that's what I'm going to use for the demo.
-
-
-### Check List of Already Setup
-1. Added engage-1.1.0.aar
-2. Gradle Config
-3. Custom ```Application``` that extends ```EngageApplication```
-4. ```AndroidManifest.xml``` is configured with custom ```Application```
-5. ```AndroidManifest.xml``` is configured with credentials
-6. ```EngageConfig.json``` is added to ```assets``` directory
 
 ### Setup UI
 1. Open ```activity_main.xml```
