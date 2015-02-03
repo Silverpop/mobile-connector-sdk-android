@@ -83,7 +83,8 @@ android:name="com.silverpop.engagedemo.Application"
 ## Customize Label to Show Connection Status
 1. Open ```activity_main.xml```
 1. Click on the 'Hello World' text in the preview window
-1. In the Properties window on the right set the ```id``` property to ```connectionView```
+1. Make sure you are on the 'Design' tab at the bottom
+2. In the Properties window on the right set the ```id``` property to ```connectionView```
 1. Switch to the Text view at the bottom
 1. Click through to the ```strings.xml``` and replace the hello_world line with the following:
 ```xml
