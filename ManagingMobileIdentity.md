@@ -77,7 +77,7 @@ android:name="com.silverpop.engagedemo.Application"
 ## Video Starts Here
 
 ### Setup UI
-1. Open ```fragment_main.xml```
+1. Open ```activity_main.xml```
 2. In the Design tab set the ```id``` of the Hello World ```TextView``` to ```currentConfigView```
 3. Set the ```minLines``` property to 5
 4. Set the ```layoutWidth``` to ```match_parent```
