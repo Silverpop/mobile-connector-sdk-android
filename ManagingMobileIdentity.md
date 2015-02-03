@@ -76,6 +76,14 @@ android:name="com.silverpop.engagedemo.Application"
 
 ## Video Starts Here
 
+### Check List of Already Setup
+1. Added engage-1.1.0.aar
+2. Gradle Config
+3. Custom ```Application``` that extends ```EngageApplication```
+4. ```AndroidManifest.xml``` is configured with custom ```Application```
+5. ```AndroidManifest.xml``` is configured with credentials
+6. ```EngageConfig.json``` is added to ```assets``` directory
+
 ### Setup UI
 1. Open ```activity_main.xml```
 2. In the Design tab set the ```id``` of the Hello World ```TextView``` to ```currentConfigView```
