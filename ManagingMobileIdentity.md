@@ -9,6 +9,7 @@
 6. Click next
 7. Make sure the box for 'Phone and Tablet' is checked
 8. Set Minimum SDK to 19 or lower > Next
+9. Select 'Blank Activity'
 9. Name activity to your liking - I'm keeping defaults
 10. Finish
 
@@ -74,7 +75,6 @@ android:name="com.silverpop.engagedemo.Application"
 <meta-data android:name="ENGAGE_REFRESH_TOKEN" android:value="676476e8-2d1f-45f9-9460-a2489640f41a" />
 <meta-data android:name="ENGAGE_HOST" android:value="https://apipilot.silverpop.com/" />
 ```
-1. Note that you should never save your credentials in your application code and we are only doing this for demo purposes to get you up and running.  Ideally you'd hide your credentials behind a webservice interface so app users can't decompile the code to reveal your tokens.
 
 
 ## Setup UI
@@ -84,50 +84,67 @@ android:name="com.silverpop.engagedemo.Application"
 4. Set the ```layoutWidth``` to ```match_parent```
 3. Change to Text tab and verify you changed the correct settings
 4. Change the 'Hello World' text to say 'Current Config:'
+5. Add 'Setup Recipient' button with ```setupRecipientBtn``` as the id
+6. Add 'Check Identity' button with ```checkIdentityBtn``` as the id
 
 
 ## Add Functionality
-1. Open the ```Application``` class back up to add our new functionality.
-2. Override the ```onCreate()`` method and add the following:
-```java
-@Override
-public void onCreate() {
-    super.onCreate();
-
-    MobileIdentityManager.get().setupRecipient(new SetupRecipientHandler() {
-        @Override
-        public void onSuccess(SetupRecipientResult setupRecipientResult) {
-            Log.i("application", "Identity Success");
-        }
-
-        @Override
-        public void onFailure(SetupRecipientFailure setupRecipientFailure) {
-            Log.i("application", "Identity Failure");
-        }
-    });
-    
-}
-```
 3. Open ```MainActivity.java``` and update it with the following
 ```java
 @Override
 protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
-    if (savedInstanceState == null) {
-        getFragmentManager().beginTransaction()
-                .add(R.id.container, new PlaceholderFragment())
-                .commit();
-    }
 
-    updateConfigLabel();
+    Button setupRecipientBtn = (Button)findViewById(R.id.setupRecipientBtn);
+    setupRecipientBtn.setOnClickListener(new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            MobileIdentityManager.get().setupRecipient(new SetupRecipientHandler() {
+                @Override
+                public void onSuccess(SetupRecipientResult setupRecipientResult) {
+                    updateConfigStatus();
+                    Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_SHORT);
+                }
+
+                @Override
+                public void onFailure(SetupRecipientFailure setupRecipientFailure) {
+                    Toast.makeText(getApplicationContext(), "ERROR", Toast.LENGTH_SHORT);
+                }
+            });
+        }
+    });
+
+    Button checkIdentityBtn = (Button)findViewById(R.id.checkIdentityBtn);
+    checkIdentityBtn.setOnClickListener(new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            Map<String, String> ids = new HashMap<String, String>();
+            ids.put("Custom Integration Test Id", "09890809809");
+            MobileIdentityManager.get().checkIdentity(ids, new CheckIdentityHandler() {
+                @Override
+                public void onSuccess(CheckIdentityResult checkIdentityResult) {
+                    Toast.makeText(getApplicationContext(), "Check identity success", Toast.LENGTH_SHORT);
+                }
+
+                @Override
+                public void onFailure(CheckIdentityFailure checkIdentityFailure) {
+                    Toast.makeText(getApplicationContext(), "ERROR", Toast.LENGTH_SHORT);
+                }
+            });
+        }
+    });
 }
 
-private void updateConfigLabel() {
-    String recipientId = EngageConfig.recipientId(getApplicationContext());
-    String mobileUserId = EngageConfig.mobileUserId(getApplicationContext());
-
-    TextView configView = (TextView)findViewById(R.id.currentConfigView);
-    configView.setText(String.format("Current Config:\nRecipient Id:\n%s\nMobile User Id:\n%s", recipientId, mobileUserId));
+private void updateConfigStatus() {
+    TextView config = (TextView)findViewById(R.id.configStatusText);
+    config.setText(String.format("Config\nRecipient Id:\n%s\nMobile User Id\n%s",
+            EngageConfig.recipientId(getApplicationContext()),
+            EngageConfig.mobileUserId(getApplicationContext())));
 }
 ```
+
+## Run App
+1. Click the run button and wait for the emulator to start
+2. Click Setup recipient and wait for the config to change
+3. Click Check Identity
