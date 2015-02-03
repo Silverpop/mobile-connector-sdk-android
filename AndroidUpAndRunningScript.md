@@ -1,10 +1,12 @@
 #Android Up And Running in Under 10 Mins Script
 
+This is the script used to create the 'Android Up And Running in Under 10 Mins' demo video.
+
 _Note these instructions were written using Android Studio 1.0.2_
 
 ## Create Project
 1. Open Android Studio (for the video open this ahead of time so you can close the last project you had open and start with a clean screen)
-2. You'll need the Android 19 SDK installed, so if you haven't done that already you should do it now.  Tools > Android > SDK Manager.  *Note this will take awhile to download and install.
+2. You'll need the Android 19 SDK installed, so if you haven't done that already you should do it now.  Tools > Android > SDK Manager.  *Note this will take some time to download and install so pause the video if you need to do this.
 1. File > New Project
 1. Name application : ```EngageSetup```
 1. Set Company Domain: ```silverpop.com```
