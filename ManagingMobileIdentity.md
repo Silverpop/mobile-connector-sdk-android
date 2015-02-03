@@ -111,12 +111,12 @@ protected void onCreate(Bundle savedInstanceState) {
                 @Override
                 public void onSuccess(SetupRecipientResult setupRecipientResult) {
                     updateConfigStatus();
-                    Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_SHORT);
+                    Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_SHORT).showToast();
                 }
 
                 @Override
                 public void onFailure(SetupRecipientFailure setupRecipientFailure) {
-                    Toast.makeText(getApplicationContext(), "ERROR", Toast.LENGTH_SHORT);
+                    Toast.makeText(getApplicationContext(), "ERROR", Toast.LENGTH_SHORT).showToast();
                 }
             });
         }
@@ -131,12 +131,12 @@ protected void onCreate(Bundle savedInstanceState) {
             MobileIdentityManager.get().checkIdentity(ids, new CheckIdentityHandler() {
                 @Override
                 public void onSuccess(CheckIdentityResult checkIdentityResult) {
-                    Toast.makeText(getApplicationContext(), "Check identity success", Toast.LENGTH_SHORT);
+                    Toast.makeText(getApplicationContext(), "Check identity success", Toast.LENGTH_SHORT).showToast();
                 }
 
                 @Override
                 public void onFailure(CheckIdentityFailure checkIdentityFailure) {
-                    Toast.makeText(getApplicationContext(), "ERROR", Toast.LENGTH_SHORT);
+                    Toast.makeText(getApplicationContext(), "ERROR", Toast.LENGTH_SHORT).showToast();
                 }
             });
         }
