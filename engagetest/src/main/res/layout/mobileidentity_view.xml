@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:gravity="center_horizontal"
+              android:orientation="vertical"
+              android:paddingTop="55dp" android:weightSum="1">
+
+    <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/current_config"
+            android:id="@+id/currentConfigLabelTextView" android:layout_gravity="center_horizontal"/>
+
+
+    <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="@android:style/TextAppearance.Small"
+            android:text="(config)"
+            android:id="@+id/currentConfigValuesTextView" android:layout_gravity="center_horizontal"
+            android:minLines="4"
+            android:gravity="center_horizontal"/>
+    <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Clear Config"
+            android:id="@+id/clearConfigBtn" android:layout_gravity="center_horizontal"/>
+    <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/setupRecipientButton_button"
+            android:enabled="true"
+            android:id="@+id/setupRecipientButton"/>
+
+    <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Setup Scenario 1"
+            android:id="@+id/scenario1Btn" android:layout_gravity="center_horizontal"/>
+    <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Setup Scenario 2"
+            android:id="@+id/scenario2Btn" android:layout_gravity="center_horizontal"/>
+    <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Setup Scenario 3"
+            android:id="@+id/scenario3Btn" android:layout_gravity="center_horizontal"/>
+    <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/customIdFieldText"
+            android:layout_gravity="center_horizontal"
+            android:text="customIdField"
+            android:enabled="false"
+            android:gravity="center" android:inputType="text"/>
+    <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/customIdValueText"
+            android:text="customIdValue"
+            android:enabled="false"
+            android:gravity="center"
+            android:inputType="text"/>
+    <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/checkIdentityButton_button"
+            android:enabled="true"
+            android:id="@+id/checkIdentityButton"/>
+
+</LinearLayout>

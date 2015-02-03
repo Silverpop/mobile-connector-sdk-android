@@ -43,8 +43,6 @@ public class XMLAPIFragment
     private Button mCreateAnonymousUserButton;
     private Button mUpgradeAnonymousUserButton;
     private Button mMergeAnonymousUserButton;
-    private Button setupRecipientUserButton;
-    private Button checkIdentityButton;
 
     private XMLAPIManager xmlapiManager = null;
     private TextView xmlApiResultTextView = null;
@@ -70,79 +68,8 @@ public class XMLAPIFragment
         createAnonymousUserButton(view);
         createUpgradeAnonymousUserButton(view);
         createMergeAnonymousUserButton(view);
-        setupRecipientUserButton(view);
-        createCheckIdentityButton(view);
 
         return view;
-    }
-
-    private void createCheckIdentityButton(View view) {
-        checkIdentityButton = (Button) view.findViewById(R.id.checkIdentityButton);
-        checkIdentityButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                // pass your own value(s) here
-                Map<String, String> fieldToValue = new HashMap<String, String>();
-                fieldToValue.put("Custom Integration Test Id", new DefaultUUIDGenerator().generateUUID());
-
-                MobileIdentityManager.get().checkIdentity(fieldToValue, new CheckIdentityHandler() {
-                    @Override
-                    public void onSuccess(CheckIdentityResult result) {
-                        String recipientId = result.getRecipientId();
-                        if (TextUtils.isEmpty(recipientId)) {
-                            recipientId = "Unknown";
-                        }
-                        String mergedRecipientId = result.getMergedRecipientId();
-                        if (TextUtils.isEmpty(mergedRecipientId)) {
-                            mergedRecipientId = "Unknown";
-                        }
-                        String mobileUserId = result.getMobileUserId();
-                        if (TextUtils.isEmpty(mobileUserId)) {
-                            mobileUserId = "Unknown";
-                        }
-
-                        String message = "Check Identity success.  Current recipient id: '" + recipientId
-                                + ",' merged recipient id: '" + mergedRecipientId + "', mobile user id: '"
-                                + mobileUserId;
-                        Log.i(TAG, message);
-                        showToast(message);
-                    }
-
-                    @Override
-                    public void onFailure(CheckIdentityFailure failure) {
-                        String message = "ERROR in check identity";
-                        Log.e(TAG, message + ": " + failure.getMessage(), failure.getException());
-                        showToast(message);
-                    }
-                });
-            }
-        });
-    }
-
-    private void setupRecipientUserButton(View view) {
-        setupRecipientUserButton = (Button) view.findViewById(R.id.setupRecipientButton);
-        setupRecipientUserButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                MobileIdentityManager.get().setupRecipient(new SetupRecipientHandler() {
-                    @Override
-                    public void onSuccess(SetupRecipientResult result) {
-                        String message = "Setup recipient auto configured recipient id: " + result.getRecipientId();
-                        Log.i(TAG, message);
-                        showToast(message);
-                    }
-
-                    @Override
-                    public void onFailure(SetupRecipientFailure failure) {
-                        String message = "Failed to setup recipient";
-                        Log.e(TAG, message + ": " + failure.getMessage(), failure.getException());
-                        showToast(message);
-                    }
-                });
-            }
-        });
     }
 
     private void createMergeAnonymousUserButton(View view) {

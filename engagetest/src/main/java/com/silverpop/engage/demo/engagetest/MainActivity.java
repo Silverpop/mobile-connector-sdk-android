@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.silverpop.engage.demo.engagetest.fragment.EngageConfigFragment;
+import com.silverpop.engage.demo.engagetest.fragment.MobileIdentityFragment;
 import com.silverpop.engage.demo.engagetest.fragment.UBFAPIFragment;
 import com.silverpop.engage.demo.engagetest.fragment.XMLAPIFragment;
 
@@ -23,13 +24,16 @@ public class MainActivity extends FragmentActivity {
         mTabHost = (FragmentTabHost)findViewById(R.id.mainTabHost);
         mTabHost.setup(this, getSupportFragmentManager(), R.id.mainTabHost);
 
+        mTabHost.addTab(mTabHost.newTabSpec("Mobile Identity").setIndicator("Mobile Identity"),
+                MobileIdentityFragment.class, null);
+
         mTabHost.addTab(mTabHost.newTabSpec("XML API").setIndicator("XML API"),
                 XMLAPIFragment.class, null);
 
         mTabHost.addTab(mTabHost.newTabSpec("UBF Client").setIndicator("UBF Client"),
                 UBFAPIFragment.class, null);
 
-        mTabHost.addTab(mTabHost.newTabSpec("EngageConfig").setIndicator("EngageConfig"),
+        mTabHost.addTab(mTabHost.newTabSpec("Engage Config").setIndicator("Engage Config"),
                 EngageConfigFragment.class, null);
 
         Intent intent = getIntent();
@@ -40,12 +44,14 @@ public class MainActivity extends FragmentActivity {
                 Log.d(TAG, "TabID : " + tabId);
 
                 if (tabId != null) {
-                    if (tabId.equalsIgnoreCase("xml")) {
+                    if (tabId.equalsIgnoreCase("identity")) {
                         mTabHost.setCurrentTab(0);
-                    } else if (tabId.equalsIgnoreCase("ubf")) {
+                    } else if (tabId.equalsIgnoreCase("xml")) {
                         mTabHost.setCurrentTab(1);
-                    } else if (tabId.equalsIgnoreCase("config")) {
+                    } else if (tabId.equalsIgnoreCase("ubf")) {
                         mTabHost.setCurrentTab(2);
+                    } else if (tabId.equalsIgnoreCase("config")) {
+                        mTabHost.setCurrentTab(3);
                     }
                 }
             }

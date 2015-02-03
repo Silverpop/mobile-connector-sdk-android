@@ -13,5 +13,6 @@
     <string name="mockLocalNotification_button">Mock Local Notification</string>
     <string name="mockRemoteNotification_button">Mock Remote Notification</string>
     <string name="mockOpenDeepLink_button">Mock Open DeepLink</string>
+    <string name="current_config">Current Config:</string>
 
 </resources>
