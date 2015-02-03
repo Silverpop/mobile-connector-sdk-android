@@ -4,6 +4,7 @@ import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
 import com.silverpop.engage.config.EngageConfig;
+import com.silverpop.engage.config.EngageConfigManager;
 import com.silverpop.engage.domain.RelationalTableRow;
 import com.silverpop.engage.domain.XMLAPI;
 import com.silverpop.engage.domain.XMLAPIOperation;
@@ -475,7 +476,7 @@ public class MobileIdentityManager extends BaseManager {
      * Should only be called if the 'mergeHistoryInAuditRecordTable' config property is {@code true}
      */
     private void updateAuditRecordWithMergeChanges(final String oldRecipientId, final String newRecipientId, final CheckIdentityHandler identityHandler) {
-        final String auditRecordTableId = EngageConfig.auditRecordTableId(getContext());
+        final String auditRecordTableId = EngageConfigManager.get(getContext()).auditRecordListId();
         if (TextUtils.isEmpty(auditRecordTableId)) {
             String error = "Cannot update audit record without audit table id";
             Log.e(TAG, error);

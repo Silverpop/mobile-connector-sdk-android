@@ -581,6 +581,17 @@ public class EngageConfigManager {
         return mergeHistoryInAuditRecordTable;
     }
 
+    public String auditRecordListId() {
+        String propName = "auditRecordListId";
+        String auditRecordListId = null;
+        try {
+            auditRecordListId = getAuditRecordConfigJson().getString(propName);
+        } catch (JSONException ex) {
+            Log.w(TAG, "Unable to find " + propName + " configuration.  ");
+        }
+        return auditRecordListId;
+    }
+
     private JSONObject getGeneralConfigJson() throws JSONException {
         return getConfigJson(Config.GENERAL);
     }

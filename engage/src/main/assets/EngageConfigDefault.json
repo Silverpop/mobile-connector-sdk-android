@@ -69,6 +69,7 @@
         "oldRecipientIdColumnName" : "Old Recipient Id",
         "newRecipientIdColumnName" : "New Recipient Id",
         "createDateColumnName" : "Create Date",
-        "mergeHistoryInAuditRecordTable" : false
+        "mergeHistoryInAuditRecordTable" : false,
+        "auditRecordListId" : ""
     }
 }

@@ -22,20 +22,8 @@ public class Application extends EngageApplication {
 
         super.onCreate();
 
-//        EngageConfig.storeMobileUserId(getApplicationContext(), "secret@test.com");
+        // do any custom setup you need
 
-
-//        MobileConnectorManager.get().setupRecipient(new SetupRecipientHandler() {
-//            @Override
-//            public void onSuccess(SetupRecipientResult result) {
-//                Log.i(ENGAGE_TEST_TAG, "Setup recipient auto configured recipient id: " + result.getRecipientId());
-//            }
-//
-//            @Override
-//            public void onFailure(Exception exception) {
-//                Log.e(ENGAGE_TEST_TAG, "Failed to setup recipient: " + exception.getMessage(), exception);
-//            }
-//        });
     }
 
 }

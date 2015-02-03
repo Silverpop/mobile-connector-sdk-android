@@ -156,15 +156,6 @@ public class EngageConfig {
         }
     }
 
-    public static void storeAuditRecordTableId(Context context, String tableId) {
-        getConfigSharedPrefs(context).edit().putString(SharedProperties.AUDIT_RECORD_TABLE_ID.toString(), tableId).commit();
-    }
-
-    public static String auditRecordTableId(Context context) {
-        String auditRecordTableId = getConfigSharedPrefs(context).getString(SharedProperties.AUDIT_RECORD_TABLE_ID.toString(), "");
-        return auditRecordTableId;
-    }
-
     public static String anonymousUserId(Context context) {
         return getConfigSharedPrefs(context).getString(SharedProperties.ANONYMOUS_ID.toString(), "");
     }
