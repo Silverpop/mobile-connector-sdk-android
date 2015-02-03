@@ -1,6 +1,6 @@
-#Android Up And Running in Under 10 Mins Script
+#Android Up And Running Script
 
-This is the script used to create the 'Android Up And Running in Under 10 Mins' demo video.
+This is the script used to create the 'Android Up And Running' demo video.
 
 _Note these instructions were written using Android Studio 1.0.2_
 
