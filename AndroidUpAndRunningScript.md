@@ -14,7 +14,7 @@ _Note these instructions were written using Android Studio 1.0.2_
 1. Click Next
 1. Make sure the box for 'Phone and Tablet' is checked
 1. Set Minimum SDK to 19 or lower > Next
-1. Select 'Blank Activity with Fragment' (you can choose something different, but I'm picking this one as a very simple demo) > Next
+1. Select 'Blank Activity' (you can choose something different, but I'm picking this one as a very simple demo) > Next
 1. Name activity to your liking - I’m keeping the defaults
 1. Finish
 
