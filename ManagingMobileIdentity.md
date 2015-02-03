@@ -1,6 +1,9 @@
 # Android Managing Mobile Identity Script
 
-## Create Project
+## Setup Before Video
+The following steps are covered in the Android Up and Running Demo so we can go ahead and set them up before starting the new video.
+
+### Create Project
 1. Open Android Studio
 2. New Project
 3. Name application : ```EngageIdentityDemo```
@@ -14,13 +17,13 @@
 10. Finish
 
 
-## IDE Setup
+### IDE Setup
 1. Turn on autoscroll to/from source (This step is optional, but it makes the demo nicer because you can see where the open files live in the project tree as we access them)
 2. Uncheck 'Compact Empty Middle Packages' (Also optional, but it makes it easier to see the directory structure)
 3. Switch the Project tool window from 'Android' to 'Project'
 
 
-## Add Engage SDK Dependency
+### Add Engage SDK Dependency
 1. The EngageSDK isn't in Maven yet so for now we'll manually add the dependency
 1. In the Project tool window, right click the ```app``` folder > New Directory > name ```aars``` > Ok
 1. Copy/paste the ```engage-1.1.0.aar``` into new ```aars``` directory (you can either build this yourself or have Silverpop provide it for you)
@@ -40,8 +43,9 @@ dependencies {
 }
 ```
 1. Sync Gradle to pull in your new changes
-2. 
-## Create Custom Application
+ 
+
+### Create Custom Application
 1. Right click the ```engagedemo``` package >  New > Java Class
 1. Name the new class ```Application``` > Ok
 1. Modify the ```Application``` class to extend ```EngageApplication```
@@ -60,13 +64,7 @@ android:name="com.silverpop.engagedemo.Application"
 ```
 
 
-## Use Silverpop Engage Web Interface to Setup Credentials
-1. Oragnization Settings > Application Account Access > Add Application
-2. Name Application > Ok
-3. You'll see your new Client Id and Client Secret
-4. Add Account Access to setup your user.  Once setup you'll get an email with your Refresh Token.
-
-## Add Credentials
+### Add Credentials
 1. Open ```AndroidManifest.xml```
 1. In the ```application``` xml block add your credentials
 ```xml
@@ -76,8 +74,9 @@ android:name="com.silverpop.engagedemo.Application"
 <meta-data android:name="ENGAGE_HOST" android:value="https://apipilot.silverpop.com/" />
 ```
 
+## Video Starts Here
 
-## Setup UI
+### Setup UI
 1. Open ```fragment_main.xml```
 2. In the Design tab set the ```id``` of the Hello World ```TextView``` to ```currentConfigView```
 3. Set the ```minLines``` property to 5
@@ -88,7 +87,7 @@ android:name="com.silverpop.engagedemo.Application"
 6. Add 'Check Identity' button with ```checkIdentityBtn``` as the id
 
 
-## Add Functionality
+### Add Functionality
 3. Open ```MainActivity.java``` and update it with the following
 ```java
 @Override
@@ -144,7 +143,7 @@ private void updateConfigStatus() {
 }
 ```
 
-## Run App
+### Run App
 1. Click the run button and wait for the emulator to start
 2. Click Setup recipient and wait for the config to change
 3. Click Check Identity
