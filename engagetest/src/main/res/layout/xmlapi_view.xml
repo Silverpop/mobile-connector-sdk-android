@@ -34,5 +34,4 @@
         android:enabled="true"
         android:id="@+id/mergeAnonymousUserButton"/>
 
-
 </LinearLayout>

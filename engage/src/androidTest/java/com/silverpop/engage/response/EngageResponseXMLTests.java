@@ -10,7 +10,7 @@ import com.silverpop.engage.exception.XMLResponseParseException;
 public class EngageResponseXMLTests
         extends AndroidTestCase {
 
-    public void testDateStructure() {
+    public void testResponseStructure() {
         String xml = "<Envelope>\n" +
                 "<Body>\n" +
                 "<RESULT>\n" +
@@ -24,26 +24,25 @@ public class EngageResponseXMLTests
 
         try {
             String response = responseXML.valueForKeyPath("Envelope.Body.RESULT.SUCCESS");
-            assertTrue(response.equals("TRUE"));
+            assertEquals(response, "TRUE");
         } catch (XMLResponseParseException ex) {
-            ex.printStackTrace();
-            assertFalse(true);
+            fail();
         }
 
         //Expect exception due to element described not being a leaf
         try {
             String response = responseXML.valueForKeyPath("Envelope.Body.RESULT");
-            assertTrue(false);
-        } catch (XMLResponseParseException ex) {
-            assertTrue(true);
+            fail();
+        } catch (XMLResponseParseException ignore) {
+            // this is expected!
         }
 
         //Expect exception due to element described not being a leaf
         try {
             String response = responseXML.valueForKeyPath("Body.RESULT");
-            assertTrue(false);
-        } catch (XMLResponseParseException ex) {
-            assertTrue(true);
+            fail();
+        } catch (XMLResponseParseException ignore) {
+            // this is expected!
         }
     }
 }

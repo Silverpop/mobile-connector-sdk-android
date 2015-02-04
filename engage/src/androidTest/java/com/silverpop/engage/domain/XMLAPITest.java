@@ -1,10 +1,17 @@
 package com.silverpop.engage.domain;
 
+import android.os.AsyncTask;
 import android.test.AndroidTestCase;
+import android.util.Log;
+import com.android.volley.VolleyError;
+import com.silverpop.engage.AnonymousMobileIdentityManager;
+import com.silverpop.engage.response.EngageResponseXML;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Created by jeremydyer on 5/19/14.
@@ -16,7 +23,7 @@ public class XMLAPITest
 
         String expected = "<Envelope><Body><SelectRecipientData><LIST_ID>45654</LIST_ID><EMAIL>someone@adomain.com</EMAIL><COLUMN><NAME>Customer Id</NAME><VALUE>123-45-6789</VALUE></COLUMN></SelectRecipientData></Body></Envelope>";
 
-        XMLAPI selectRecipientData = new XMLAPI("SelectRecipientData", null);
+        XMLAPI selectRecipientData = new XMLAPI(XMLAPIOperation.SELECT_RECIPIENT_DATA);
 
         //Map of XMLAPI top level parameters.
         Map<String, Object> xmlapiParams = new LinkedHashMap<String, Object>();
@@ -37,7 +44,7 @@ public class XMLAPITest
     public void testExample2() {
         String expected = "<Envelope><Body><SelectRecipientData><LIST_ID>45654</LIST_ID><RECIPIENT_ID>702003</RECIPIENT_ID></SelectRecipientData></Body></Envelope>";
 
-        XMLAPI selectRecipientData = new XMLAPI("SelectRecipientData", null);
+        XMLAPI selectRecipientData = new XMLAPI(XMLAPIOperation.SELECT_RECIPIENT_DATA);
 
         //Map of XMLAPI top level parameters.
         Map<String, Object> xmlapiParams = new LinkedHashMap<String, Object>();
@@ -52,7 +59,7 @@ public class XMLAPITest
     public void testExample3() {
         String expected = "<Envelope><Body><SelectRecipientData><LIST_ID>45654</LIST_ID><EMAIL>someone@adomain.com</EMAIL></SelectRecipientData></Body></Envelope>";
 
-        XMLAPI selectRecipientData = new XMLAPI("SelectRecipientData", null);
+        XMLAPI selectRecipientData = new XMLAPI(XMLAPIOperation.SELECT_RECIPIENT_DATA);
 
         //Map of XMLAPI top level parameters.
         Map<String, Object> xmlapiParams = new LinkedHashMap<String, Object>();
@@ -171,22 +178,22 @@ public class XMLAPITest
         syncFields.put("LNAME", "Smith");
         syncFields.put("EMAIL", "joe.smith@somedomain.com");
         api.addSyncFields(syncFields);
-        assertTrue(((Map<String, Object>) api.getBodyElements().get(XMLAPIEnum.SYNC_FIELDS.toString())).size() == 3);
+        assertTrue(((Map<String, Object>) api.getBodyElements().get(XMLAPIElement.SYNC_FIELDS.toString())).size() == 3);
         assertTrue(api.getBodyElements().size() == 1); //There should only be a XMLAPIEnum.SYNC_FIELDS instance in the map
 
         //Add some new unique fields.
         syncFields = new HashMap<String, Object>();
         syncFields.put("ADDRESS1", "1 Infinite Loop");
         api.addSyncFields(syncFields);
-        assertTrue(((Map<String, Object>) api.getBodyElements().get(XMLAPIEnum.SYNC_FIELDS.toString())).size() == 4);
+        assertTrue(((Map<String, Object>) api.getBodyElements().get(XMLAPIElement.SYNC_FIELDS.toString())).size() == 4);
 
         //Add an existing sync field.
         syncFields = new HashMap<String, Object>();
         String newFname = "Frank";
         syncFields.put("FNAME", newFname);
         api.addSyncFields(syncFields);
-        assertTrue(((Map<String, Object>) api.getBodyElements().get(XMLAPIEnum.SYNC_FIELDS.toString())).size() == 4);
-        assertTrue(((Map<String, Object>) api.getBodyElements().get(XMLAPIEnum.SYNC_FIELDS.toString())).get("FNAME").equals(newFname));
+        assertTrue(((Map<String, Object>) api.getBodyElements().get(XMLAPIElement.SYNC_FIELDS.toString())).size() == 4);
+        assertTrue(((Map<String, Object>) api.getBodyElements().get(XMLAPIElement.SYNC_FIELDS.toString())).get("FNAME").equals(newFname));
     }
 
     public void testAddColumns() {
@@ -206,16 +213,16 @@ public class XMLAPITest
         cols.put(col2Name, col2Value);
 
         api.addColumns(cols);
-        assertTrue(((Map<String, Object>) api.getBodyElements().get(XMLAPIEnum.COLUMNS.toString())).size() == 2);
-        assertTrue(((Map<String, Object>) api.getBodyElements().get(XMLAPIEnum.COLUMNS.toString())).get(col1Name).equals(col1Value));
-        assertTrue(((Map<String, Object>) api.getBodyElements().get(XMLAPIEnum.COLUMNS.toString())).get(col2Name).equals(col2Value));
+        assertTrue(((Map<String, Object>) api.getBodyElements().get(XMLAPIElement.COLUMNS.toString())).size() == 2);
+        assertTrue(((Map<String, Object>) api.getBodyElements().get(XMLAPIElement.COLUMNS.toString())).get(col1Name).equals(col1Value));
+        assertTrue(((Map<String, Object>) api.getBodyElements().get(XMLAPIElement.COLUMNS.toString())).get(col2Name).equals(col2Value));
 
         Map<String, Object> syncFields = new HashMap<String, Object>();
         syncFields.put("FNAME", "Joe");
         syncFields.put("LNAME", "Smith");
         syncFields.put("EMAIL", "joe.smith@somedomain.com");
         api.addSyncFields(syncFields);
-        assertTrue(((Map<String, Object>) api.getBodyElements().get(XMLAPIEnum.SYNC_FIELDS.toString())).size() == 3);
+        assertTrue(((Map<String, Object>) api.getBodyElements().get(XMLAPIElement.SYNC_FIELDS.toString())).size() == 3);
 
         assertTrue(api.getBodyElements().size() == 2);  //Sync_fields and columns should be present
     }
@@ -229,28 +236,25 @@ public class XMLAPITest
     public void testSelectRecipientData() {
         String email = "test@silverpop.com";
         String listId = "12345";
-        XMLAPI api = XMLAPI.selectRecipientData(email, listId);
 
         //Create the base message
-        api = XMLAPI.selectRecipientData(email, listId);
-        Map<String, Object> cols = new HashMap<String, Object>();
-        cols.put("Customer Id", "123-45-6789");
-        api.addColumns(cols);
+        XMLAPI api = XMLAPI.selectRecipientData(email, listId);
+        api.addColumn("Customer Id", "123-45-6789");
 
         String request1 = "<Envelope><Body><SelectRecipientData>" +
-                "<COLUMN><NAME>Customer Id</NAME><VALUE>123-45-6789</VALUE></COLUMN>" +
                 "<LIST_ID>12345</LIST_ID>" +
                 "<EMAIL>test@silverpop.com</EMAIL>" +
+                "<COLUMN><NAME>Customer Id</NAME><VALUE>123-45-6789</VALUE></COLUMN>" +
                 "</SelectRecipientData></Body></Envelope>";
 
         assertEquals(request1, api.envelope());
     }
 
-    public void testAddRecipient() {
+    public void testAddRecipientWithEmail() {
         String email = "somebody@domain.com";
         String listId = "85628";
 
-        XMLAPI api = XMLAPI.addRecipient(email, listId);
+        XMLAPI api = XMLAPI.addRecipientWithEmail(email, listId);
 
         //Adds the extra Params
         Map<String, Object> extraParams = new HashMap<String, Object>();
@@ -269,18 +273,13 @@ public class XMLAPITest
         api.addColumns(columns);
 
         String request1 = "<Envelope><Body><AddRecipient>" +
+                "<LIST_ID>85628</LIST_ID>" +
                 "<COLUMN><NAME>Customer Id</NAME><VALUE>123-45-6789</VALUE></COLUMN>" +
                 "<COLUMN><NAME>Fname</NAME><VALUE>John</VALUE></COLUMN>" +
                 "<COLUMN><NAME>EMAIL</NAME><VALUE>somebody@domain.com</VALUE></COLUMN>" +
-                "<LIST_ID>85628</LIST_ID>" +
-                "<CREATED_FROM>1</CREATED_FROM" +
-                "><CONTACT_LISTS>" +
-                "<CONTACT_LIST_ID>289032</CONTACT_LIST_ID>" +
-                "<CONTACT_LIST_ID>12345</CONTACT_LIST_ID>" +
-                "</CONTACT_LISTS>" +
-                "<SYNC_FIELDS>" +
-                "<SYNC_FIELD><NAME>EMAIL</NAME><VALUE>somebody@domain.com</VALUE></SYNC_FIELD>" +
-                "</SYNC_FIELDS>" +
+                "<CREATED_FROM>1</CREATED_FROM>" +
+                "<CONTACT_LISTS><CONTACT_LIST_ID>289032</CONTACT_LIST_ID><CONTACT_LIST_ID>12345</CONTACT_LIST_ID></CONTACT_LISTS>" +
+                "<SYNC_FIELDS><SYNC_FIELD><NAME>EMAIL</NAME><VALUE>somebody@domain.com</VALUE></SYNC_FIELD></SYNC_FIELDS>" +
                 "</AddRecipient></Body></Envelope>";
 
         assertEquals(request1, api.envelope());
@@ -305,13 +304,13 @@ public class XMLAPITest
         api.addColumns(columns);
 
         String request1 = "<Envelope><Body><UpdateRecipient>" +
-                "<COLUMN><NAME>Customer Id</NAME><VALUE>123-45-6789</VALUE></COLUMN>" +
-                "<COLUMN><NAME>EMAIL</NAME><VALUE>somebody@domain.com</VALUE></COLUMN>" +
-                "<COLUMN><NAME>Street_Address</NAME><VALUE>123 New Street</VALUE></COLUMN>" +
                 "<LIST_ID>85628</LIST_ID>" +
                 "<RECIPIENT_ID>somebody@domain.com</RECIPIENT_ID>" +
                 "<CREATED_FROM>2</CREATED_FROM>" +
                 "<OLD_EMAIL>somebody@domain.com</OLD_EMAIL>" +
+                "<COLUMN><NAME>Customer Id</NAME><VALUE>123-45-6789</VALUE></COLUMN>" +
+                "<COLUMN><NAME>EMAIL</NAME><VALUE>somebody@domain.com</VALUE></COLUMN>" +
+                "<COLUMN><NAME>Street_Address</NAME><VALUE>123 New Street</VALUE></COLUMN>" +
                 "</UpdateRecipient></Body></Envelope>";
 
         assertEquals(request1, api.envelope());
@@ -333,23 +332,40 @@ public class XMLAPITest
         api.addColumns(columns);
 
         String request2 = "<Envelope><Body><UpdateRecipient>" +
-                "<COLUMN><NAME>Customer Id</NAME><VALUE>123-45-6789</VALUE></COLUMN>" +
-                "<COLUMN><NAME>EMAIL</NAME><VALUE>somebody@domain.com</VALUE></COLUMN>" +
-                "<COLUMN><NAME>OPT_OUT</NAME><VALUE>false</VALUE></COLUMN>" +
-                "<COLUMN><NAME>Street_Address</NAME><VALUE>123 New Street</VALUE></COLUMN>" +
                 "<LIST_ID>85628</LIST_ID>" +
                 "<RECIPIENT_ID>somebody@domain.com</RECIPIENT_ID>" +
                 "<CREATED_FROM>2</CREATED_FROM>" +
                 "<OLD_EMAIL>somebody@domain.com</OLD_EMAIL>" +
+                "<COLUMN><NAME>Customer Id</NAME><VALUE>123-45-6789</VALUE></COLUMN>" +
+                "<COLUMN><NAME>EMAIL</NAME><VALUE>somebody@domain.com</VALUE></COLUMN>" +
+                "<COLUMN><NAME>OPT_OUT</NAME><VALUE>false</VALUE></COLUMN>" +
+                "<COLUMN><NAME>Street_Address</NAME><VALUE>123 New Street</VALUE></COLUMN>" +
                 "</UpdateRecipient></Body></Envelope>";
 
         assertEquals(request2, api.envelope());
+    }
 
+    public void testAddRecipient() {
+        XMLAPI xml = XMLAPI.addRecipient("mobile_user_id", "11111", "22222", false);
+        final String expected1 = "<Envelope><Body><AddRecipient>" +
+                "<LIST_ID>22222</LIST_ID>" +
+                "<COLUMN><NAME>mobile_user_id</NAME><VALUE>11111</VALUE></COLUMN>" +
+                "</AddRecipient></Body></Envelope>";
+        assertThat(xml.envelope()).isEqualTo(expected1);
+
+        xml = XMLAPI.addRecipient("mobile_user_id", "11111", "22222", true);
+        final String expected2 = "<Envelope><Body><AddRecipient>" +
+                "<LIST_ID>22222</LIST_ID>" +
+                "<COLUMN><NAME>mobile_user_id</NAME><VALUE>11111</VALUE></COLUMN>" +
+                "<UPDATE_IF_FOUND>true</UPDATE_IF_FOUND>" +
+                "<SYNC_FIELDS><SYNC_FIELD><NAME>mobile_user_id</NAME><VALUE>11111</VALUE></SYNC_FIELD></SYNC_FIELDS>" +
+                "</AddRecipient></Body></Envelope>";
+        assertThat(xml.envelope()).isEqualTo(expected2);
     }
 
     public void testAddRecipientAnonymousToList() {
         String listId = "85628";
-        XMLAPI api = XMLAPI.addRecipientAnonymousToList(listId);
+        XMLAPI api = AnonymousMobileIdentityManager.addRecipientAnonymousToList(listId);
 
         String expected = "<Envelope><Body><AddRecipient>" +
                 "<LIST_ID>85628</LIST_ID>" +
@@ -364,9 +380,34 @@ public class XMLAPITest
         bodyElements.put("COLUMN_NAME", "Last Known Address");
         bodyElements.put("COLUMN_TYPE", 3);
         bodyElements.put("DEFAULT", "");
-        XMLAPI createLastKnownLocationColumns = new XMLAPI("AddListColumn", bodyElements);
+        XMLAPI createLastKnownLocationColumns = new XMLAPI(XMLAPIOperation.ADD_LIST_COLUMN, bodyElements);
 
         String env = createLastKnownLocationColumns.envelope();
         System.out.println(env);
+    }
+
+    public void testInsertUpdateRelationalTable() throws Exception {
+        XMLAPI insertUpdateRelationalTable = XMLAPI.insertUpdateRelationalTable("86767");
+
+        RelationalTableRow row1 = new RelationalTableRow();
+        row1.addColumn("Record Id", "11111");
+        row1.addColumn("Purchase Date", "01/01/2015");
+        insertUpdateRelationalTable.addRow(row1);
+
+        RelationalTableRow row2 = new RelationalTableRow();
+        row2.addColumn("Record Id", "22222");
+        row2.addColumn("Purchase Date", "01/02/2015");
+        insertUpdateRelationalTable.addRow(row2);
+
+        String envelope = insertUpdateRelationalTable.envelope();
+
+        final String expected = "<Envelope><Body><InsertUpdateRelationalTable>" +
+                "<TABLE_ID>86767</TABLE_ID>" +
+                "<ROWS>" +
+                "<ROW><COLUMN name=\"Record Id\"><![CDATA[11111]]></COLUMN><COLUMN name=\"Purchase Date\"><![CDATA[01/01/2015]]></COLUMN></ROW>" +
+                "<ROW><COLUMN name=\"Record Id\"><![CDATA[22222]]></COLUMN><COLUMN name=\"Purchase Date\"><![CDATA[01/02/2015]]></COLUMN></ROW>" +
+                "</ROWS>" +
+                "</InsertUpdateRelationalTable></Body></Envelope>";
+        assertEquals(expected, envelope);
     }
 }

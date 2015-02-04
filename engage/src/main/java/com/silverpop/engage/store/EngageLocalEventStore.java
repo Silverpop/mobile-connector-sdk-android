@@ -26,6 +26,7 @@ public class EngageLocalEventStore {
     // Database fields
     private SQLiteDatabase database;
     private EngageSQLiteHelper dbHelper;
+    //[Lindsay Thurmond:12/30/14] TODO: column list isn't used, probably better to just put the columns in an enum anyway and not maintain this ourselves
     private String[] allColumns = {
             EngageSQLiteHelper.COLUMN_ID,
             EngageSQLiteHelper.COLUMN_EVENT_TYPE,

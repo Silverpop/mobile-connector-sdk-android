@@ -3,34 +3,35 @@ package com.silverpop.engage;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
-
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.silverpop.engage.domain.XMLAPI;
 import com.silverpop.engage.network.XMLAPIClient;
 import com.silverpop.engage.response.EngageResponseXML;
-
+import com.silverpop.engage.response.handler.XMLAPIResponseFailure;
+import com.silverpop.engage.response.handler.XMLAPIResponseHandler;
 
 /**
+ * Methods for interacting with the Silverpop Engage XML API.
+ * <p/>
  * Created by jeremydyer on 5/21/14.
  */
-public class XMLAPIManager {
+public class XMLAPIManager extends BaseManager {
 
     private static final String TAG = XMLAPIManager.class.getName();
 
-    private Context context;
     private XMLAPIClient xmlapiClient;
 
     private static XMLAPIManager xmlapiManager = null;
 
-    private XMLAPIManager(Context context, String clientId, String clientSecret, String refreshToken, String host) {
-        setContext(context);
-        xmlapiClient = XMLAPIClient.init(context, clientId, clientSecret, refreshToken, host);
+    private XMLAPIManager(Context context) {
+        super(context);
+        xmlapiClient = XMLAPIClient.init(context);
     }
 
-    public static XMLAPIManager initialize(Context context, String clientId, String clientSecret, String refreshToken, String host) {
+    public static synchronized XMLAPIManager init(Context context) {
         if (xmlapiManager == null) {
-            xmlapiManager = new XMLAPIManager(context, clientId, clientSecret, refreshToken, host);
+            xmlapiManager = new XMLAPIManager(context);
         }
         return xmlapiManager;
     }
@@ -39,90 +40,36 @@ public class XMLAPIManager {
         if (xmlapiManager == null) {
             Log.e(TAG, "EngageSDK - You have not yet initialized your XMLAPIManager instance! " +
                     "A null XMLAPIManager instance will be returned!");
-            return null;
-        } else {
-            return xmlapiManager;
         }
+        return xmlapiManager;
     }
 
     /**
      * Post an XMLAPI request to Engage
      *
-     * @param api
-     *      XMLAPI operation desired.
-     *
-     * @param successTask
-     *      AsyncTask to execute on successful result.
-     *
-     * @param failureTask
-     *      AsyncTask to execute on failure
+     * @param api         XMLAPI operation desired.
+     * @param successTask AsyncTask to execute on successful result.
+     * @param failureTask AsyncTask to execute on failure
      */
     public void postXMLAPI(XMLAPI api,
-                           AsyncTask<EngageResponseXML, Void, Object> successTask,
-                           AsyncTask<VolleyError, Void, Object> failureTask) {
-        Response.Listener<String> successListener = successListenerForXMLAPI(api, successTask);
-        Response.ErrorListener errorListener = null;
-        xmlapiClient.postResource(api, successListener, errorListener);
-    }
+                           final AsyncTask<EngageResponseXML, Void, Object> successTask,
+                           final AsyncTask<VolleyError, Void, Object> failureTask) {
 
-    /**
-     * Create an anonymous user for the specified listId(database identifier)
-     *
-     * @param listId
-     *      Database identifier.
-     *
-     * @param successTask
-     *      AsyncTask to execute on successful result.
-     *
-     * @param failureTask
-     *      AsyncTask to execute on failure
-     */
-    public void createAnonymousUserList(String listId,
-                                        AsyncTask<EngageResponseXML, Void, Object> successTask,
-                                        AsyncTask<VolleyError, Void, Object> failureTask) {
-        XMLAPI createAnonymous = XMLAPI.addRecipientAnonymousToList(listId);
-        postXMLAPI(createAnonymous, successTask, failureTask);
-    }
-
-
-    public void updateAnonymousUserToKnownUser(String listId, AsyncTask<EngageResponseXML, Void, Object> successTask,
-                                               AsyncTask<VolleyError, Void, Object> failureTask) {
-        XMLAPI createAnonymous = XMLAPI.addRecipientAnonymousToList(listId);
-        postXMLAPI(createAnonymous, successTask, failureTask);
-    }
-
-    /**
-     * Handles the successful completion of the UBF post
-     *
-     * @return
-     */
-    private Response.Listener<String> successListenerForXMLAPI(final XMLAPI api,
-                                                                  final AsyncTask<EngageResponseXML, Void, Object> successTask) {
-        return new Response.Listener<String>() {
+        Response.Listener<String> successListener = new Response.Listener<String>() {
             public void onResponse(String response) {
-
-                //Perform the EngageSDK internal logic before passing processing off to user defined AsyncTask.
-                EngageResponseXML responseXML = new EngageResponseXML(response);
-
                 //If null the user doesn't want anything special to happen.
                 if (successTask != null) {
+
+                    //Perform the EngageSDK internal logic before passing processing off to user defined AsyncTask.
+                    EngageResponseXML responseXML = new EngageResponseXML(response);
                     successTask.execute(responseXML);
                 }
             }
         };
-    }
-
-
-    /**
-     * Handles the failure of a UBF event post.
-     *
-     * @return
-     */
-    private Response.ErrorListener errorListenerForXMLAPI(final XMLAPI api, final AsyncTask<VolleyError, Void, Object> failureTask) {
-        return new Response.ErrorListener() {
+        Response.ErrorListener errorListener = new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.e(TAG, error.getMessage());
+                Log.e(TAG, error.getMessage(), error);
 
                 //Call the SDK user defined method.
                 if (failureTask != null) {
@@ -130,13 +77,53 @@ public class XMLAPIManager {
                 }
             }
         };
+        xmlapiClient.postResource(api, successListener, errorListener);
     }
 
-    public Context getContext() {
-        return context;
+    /**
+     * Post an XMLAPI request to Engage using a generic handler (as opposed to AsyncTasks) for the response.
+     *
+     * @param api             XMLAPI operation desired.
+     * @param responseHandler functionality to run on success or failure of the request.
+     */
+    public void postXMLAPI(XMLAPI api,
+                           final XMLAPIResponseHandler responseHandler) {
+        xmlapiClient.postResource(api, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                if (responseHandler != null) {
+                    responseHandler.onSuccess(new EngageResponseXML(response));
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError volleyError) {
+                if (responseHandler != null) {
+                    responseHandler.onFailure(new XMLAPIResponseFailure(volleyError));
+                }
+            }
+        });
     }
 
-    public void setContext(Context context) {
-        this.context = context;
+    /**
+     * Create an anonymous user for the specified listId(database identifier).
+     * <p/>
+     * Method left here for backwards compatibility, but functionality has been moved to
+     * {@link AnonymousMobileIdentityManager#createAnonymousUserList(String, android.os.AsyncTask, android.os.AsyncTask)}
+     * which you are encouraged to use instead.
+     *
+     * @param listId      Database identifier.
+     * @param successTask AsyncTask to execute on successful result.
+     * @param failureTask AsyncTask to execute on failure
+     *
+     * @deprecated Functionality has been moved to {@link
+     * com.silverpop.engage.AnonymousMobileIdentityManager#createAnonymousUserList(String, android.os.AsyncTask, android.os.AsyncTask)}
+     */
+    public void createAnonymousUserList(String listId,
+                                        AsyncTask<EngageResponseXML, Void, Object> successTask,
+                                        AsyncTask<VolleyError, Void, Object> failureTask) {
+
+        AnonymousMobileIdentityManager.get().createAnonymousUserList(listId, successTask, failureTask);
     }
+
 }

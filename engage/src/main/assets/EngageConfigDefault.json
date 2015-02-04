@@ -54,5 +54,22 @@
 		    "com.silverpop.engage.augmentation.plugin.UBFAddressAugmentationPlugin",
 		    "com.silverpop.engage.augmentation.plugin.UBFLocationNameAugmentationPlugin"
 		]
-	}
+    },
+    "Recipient": {
+        "enableAutoAnonymousTracking": true,
+        "mobileUserIdGeneratorClassName": "com.silverpop.engage.util.uuid.plugin.DefaultUUIDGenerator",
+        "mobileUserIdColumn" : "Mobile User Id",
+        "mergedRecipientIdColumn" : "Merged Recipient Id",
+        "mergedDateColumn" : "Merged Date",
+        "mergeHistoryInMarketingDatabase" : true
+    },
+    "AuditRecord": {
+        "auditRecordPrimaryKeyColumnName" : "Audit Record Id",
+        "auditRecordPrimaryKeyGeneratorClassName": "com.silverpop.engage.util.uuid.plugin.DefaultUUIDGenerator",
+        "oldRecipientIdColumnName" : "Old Recipient Id",
+        "newRecipientIdColumnName" : "New Recipient Id",
+        "createDateColumnName" : "Create Date",
+        "mergeHistoryInAuditRecordTable" : false,
+        "auditRecordListId" : ""
+    }
 }

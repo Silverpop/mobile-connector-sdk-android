@@ -1,6 +1,7 @@
 package com.silverpop.engage.config;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -9,6 +10,7 @@ import android.location.Location;
 import android.os.Build;
 import android.provider.Settings;
 
+import android.text.TextUtils;
 import com.silverpop.engage.util.EngageExpirationParser;
 
 import java.util.Date;
@@ -18,11 +20,34 @@ import java.util.Date;
  */
 public class EngageConfig {
 
-    public static final String ENGAGE_CONFIG_PREF_ID = "com.silverpop.engage.EngageSDKPrefs";
-    public static final String PRIMARY_USER_ID = "PRIMARY_USER_ID";
-    public static final String ANONYMOUS_ID = "ANONYMOUS_ID";
-    public static final String CURRENT_CAMPAIGN = "CURRENT_CAMPAIGN";
-    public static final String CURRENT_CAMPAIGN_EXPIRATION_TIMESTAMP = "CURRENT_CAMPAIGN_EXPIRATION_TIMESTAMP";
+    public enum SharedProperties {
+        ENGAGE_CONFIG_PREF_ID("com.silverpop.engage.EngageSDKPrefs"),
+        PRIMARY_USER_ID("PRIMARY_USER_ID"),
+        /**
+         * Only still supported for legacy for users who still manually configure their recipients.
+         * The new recipient setup now uses {@link #RECIPIENT_ID}
+         */
+        ANONYMOUS_ID("ANONYMOUS_ID"),
+        RECIPIENT_ID("RECIPIENT_ID"),
+        CURRENT_CAMPAIGN("CURRENT_CAMPAIGN"),
+        CURRENT_CAMPAIGN_EXPIRATION_TIMESTAMP("CURRENT_CAMPAIGN_EXPIRATION_TIMESTAMP"),
+        APP_INSTALLED("APP_INSTALLED"),
+        SESSION("SESSION"),
+        AUDIT_RECORD_TABLE_ID("AUDIT_RECORD_TABLE_ID");
+
+        private final String key;
+
+        private SharedProperties(String key) {
+            this.key = key;
+        }
+
+        @Override
+        public String toString() {
+            return key;
+        }
+    }
+
+    public static final String MOBILE_USER_ID_SET_EVENT = "com.silverpop.engage.MOBILE_USER_ID_SET_EVENT";
 
     private static Location currentLocationCache;
     private static Date currentLocationCacheBirthday;
@@ -53,8 +78,45 @@ public class EngageConfig {
         return Build.PRODUCT;
     }
 
+    /**
+     * @deprecated Since the PrimaryUserId does not represent a primary key it has been renamed
+     * to MobileUserId to make it more clear.  Use {@link #mobileUserId(android.content.Context)} instead.
+     */
     public static String primaryUserId(Context context) {
-        return context.getSharedPreferences(ENGAGE_CONFIG_PREF_ID, Context.MODE_PRIVATE).getString(PRIMARY_USER_ID, "");
+        return mobileUserId(context);
+    }
+
+    /**
+     * @deprecated Since the PrimaryUserId does not represent a primary key it has been renamed
+     * to MobileUserId to make it more clear.  Use {@link #storeMobileUserId(android.content.Context, String)} instead.
+     */
+    public static void storePrimaryUserId(Context context, String primaryUserId) {
+        storeMobileUserId(context, primaryUserId);
+    }
+
+    /**
+     * The new name for what used to be the Primary User Id.
+     */
+    public static void storeMobileUserId(Context context, String primaryUserId) {
+        getConfigSharedPrefs(context).edit().putString(SharedProperties.PRIMARY_USER_ID.toString(), primaryUserId).commit();
+
+        context.sendBroadcast(new Intent(MOBILE_USER_ID_SET_EVENT));
+    }
+
+    /**
+     * The new name for what used to be the Primary User Id.
+     */
+    public static String mobileUserId(Context context) {
+        return getConfigSharedPrefs(context).getString(SharedProperties.PRIMARY_USER_ID.toString(), "");
+    }
+
+    public static void storeRecipientId(Context context, String recipientId) {
+        getConfigSharedPrefs(context).edit().putString(SharedProperties.RECIPIENT_ID.toString(), recipientId).commit();
+    }
+
+    public static String recipientId(Context context) {
+        String recipientId = getConfigSharedPrefs(context).getString(SharedProperties.RECIPIENT_ID.toString(), "");
+        return recipientId;
     }
 
     public static String osName(Context context) {
@@ -62,66 +124,59 @@ public class EngageConfig {
     }
 
     public static String osVersion(Context context) {
-        return new Integer(Build.VERSION.SDK_INT).toString();
+        return Integer.toString(Build.VERSION.SDK_INT);
     }
 
     public static String appName(Context context) {
-        PackageInfo pInfo = null;
-        String appName = "UNKNOWN";
+        String appName = null;
         try {
-            pInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+            PackageInfo pInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
             appName = pInfo.versionName;
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
+        }
+        if (TextUtils.isEmpty(appName)) {
+            appName = "UNKNOWN";
         }
         return appName;
     }
 
     public static String appVersion(Context context) {
-        PackageInfo pInfo = null;
         int version = -1;
         try {
-            pInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+            PackageInfo pInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
             version = pInfo.versionCode;
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
         }
         if (version > -1) {
-            return new Integer(version).toString();
+            return Integer.toString(version);
         } else {
             return "UNKNOWN";
         }
     }
 
-    public static void storePrimaryUserId(Context context, String primaryUserId) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(ENGAGE_CONFIG_PREF_ID, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString(PRIMARY_USER_ID, primaryUserId);
-        editor.commit();
-    }
-
     public static String anonymousUserId(Context context) {
-        return context.getSharedPreferences(ENGAGE_CONFIG_PREF_ID, Context.MODE_PRIVATE).getString(ANONYMOUS_ID, "");
+        return getConfigSharedPrefs(context).getString(SharedProperties.ANONYMOUS_ID.toString(), "");
     }
 
     public static void storeAnonymousUserId(Context context, String anonymousUserId) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(ENGAGE_CONFIG_PREF_ID, Context.MODE_PRIVATE);
-        sharedPreferences.edit().putString(ANONYMOUS_ID, anonymousUserId).commit();
+        getConfigSharedPrefs(context).edit().putString(SharedProperties.ANONYMOUS_ID.toString(), anonymousUserId).commit();
     }
 
     public static String currentCampaign(Context context) {
         if (campaignExpirationDate != null) {
             if (campaignExpirationDate.compareTo(new Date()) > 0) {
-                return context.getSharedPreferences(ENGAGE_CONFIG_PREF_ID, Context.MODE_PRIVATE).getString(CURRENT_CAMPAIGN, "");
+                return getConfigSharedPrefs(context).getString(SharedProperties.CURRENT_CAMPAIGN.toString(), "");
             } else {
                 campaignExpirationDate = null;
-                context.getSharedPreferences(ENGAGE_CONFIG_PREF_ID, Context.MODE_PRIVATE).edit().putLong(CURRENT_CAMPAIGN_EXPIRATION_TIMESTAMP, -1).commit();
+                getConfigSharedPrefs(context).edit().putLong(SharedProperties.CURRENT_CAMPAIGN_EXPIRATION_TIMESTAMP.toString(), -1).commit();
                 return "";
             }
         } else {
             //If the campaign expiration date is null that means the campaign never expires.
             //We should load the stored expiration time to check this isn't after an app relaunch however and the campaign expired while it was closed.
-            long expirationTimeStamp = context.getSharedPreferences(ENGAGE_CONFIG_PREF_ID, Context.MODE_PRIVATE).getLong(CURRENT_CAMPAIGN_EXPIRATION_TIMESTAMP, -1);
+            long expirationTimeStamp = getConfigSharedPrefs(context).getLong(SharedProperties.CURRENT_CAMPAIGN_EXPIRATION_TIMESTAMP.toString(), -1);
             if (expirationTimeStamp == -1) {
                 Date expDate = new Date(expirationTimeStamp);
                 if (expDate.compareTo(new Date()) > 0) {
@@ -131,7 +186,7 @@ public class EngageConfig {
                     return "";
                 }
             } else if (expirationTimeStamp == 0) {
-                return context.getSharedPreferences(ENGAGE_CONFIG_PREF_ID, Context.MODE_PRIVATE).getString(CURRENT_CAMPAIGN, "");
+                return getConfigSharedPrefs(context).getString(SharedProperties.CURRENT_CAMPAIGN.toString(), "");
             } else {
                 return "";
             }
@@ -139,20 +194,20 @@ public class EngageConfig {
     }
 
     public static void storeCurrentCampaignWithExpirationTimestamp(Context context, String currentCampaign, long expirationTimestamp) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(ENGAGE_CONFIG_PREF_ID, Context.MODE_PRIVATE);
-        sharedPreferences.edit().putString(CURRENT_CAMPAIGN, currentCampaign).commit();
+        SharedPreferences sharedPreferences = getConfigSharedPrefs(context);
+        sharedPreferences.edit().putString(SharedProperties.CURRENT_CAMPAIGN.toString(), currentCampaign).commit();
 
         if (expirationTimestamp > 0) {
             campaignExpirationDate = new Date(expirationTimestamp);
-            sharedPreferences.edit().putLong(CURRENT_CAMPAIGN_EXPIRATION_TIMESTAMP, campaignExpirationDate.getTime()).commit();
+            sharedPreferences.edit().putLong(SharedProperties.CURRENT_CAMPAIGN_EXPIRATION_TIMESTAMP.toString(), campaignExpirationDate.getTime()).commit();
         } else {
             campaignExpirationDate = null;
-            sharedPreferences.edit().putLong(CURRENT_CAMPAIGN_EXPIRATION_TIMESTAMP, 0).commit();
+            sharedPreferences.edit().putLong(SharedProperties.CURRENT_CAMPAIGN_EXPIRATION_TIMESTAMP.toString(), 0).commit();
         }
     }
 
     public static String lastCampaign(Context context) {
-        return context.getSharedPreferences(ENGAGE_CONFIG_PREF_ID, Context.MODE_PRIVATE).getString(CURRENT_CAMPAIGN, null);
+        return getConfigSharedPrefs(context).getString(SharedProperties.CURRENT_CAMPAIGN.toString(), null);
     }
 
     public static Date currentCampaignExpirationDate() {
@@ -250,5 +305,38 @@ public class EngageConfig {
         } else {
             return "";
         }
+    }
+
+    public static boolean appInstalled(Context context) {
+        String appInstalled = getConfigSharedPrefs(context).getString(SharedProperties.APP_INSTALLED.toString(), "NO");
+        return "YES".equals(appInstalled);
+    }
+
+    public static void storeAppInstalled(Context context, String appInstalled) {
+        getConfigSharedPrefs(context).edit().putString(SharedProperties.APP_INSTALLED.toString(), appInstalled).commit();
+    }
+
+    /**
+     * @param context
+     * @return session started timestamp
+     */
+    public static long session(Context context) {
+        return getConfigSharedPrefs(context).getLong(SharedProperties.SESSION.toString(), -1);
+    }
+
+    /**
+     * @param context
+     * @param session session started timestamp
+     */
+    public static void storeSession(Context context, long session) {
+        getConfigSharedPrefs(context).edit().putLong(SharedProperties.SESSION.toString(), session).commit();
+    }
+
+    public static void clearSession(Context context) {
+        getConfigSharedPrefs(context).edit().putLong(SharedProperties.SESSION.toString(), -1).commit();
+    }
+
+    private static SharedPreferences getConfigSharedPrefs(Context context) {
+        return context.getSharedPreferences(SharedProperties.ENGAGE_CONFIG_PREF_ID.toString(), Context.MODE_PRIVATE);
     }
 }

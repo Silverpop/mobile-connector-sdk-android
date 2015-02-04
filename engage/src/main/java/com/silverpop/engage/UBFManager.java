@@ -41,9 +41,9 @@ public class UBFManager {
 
     private static UBFManager ubfManager = null;
 
-    private UBFManager(Context context, String clientId, String clientSecret, String refreshToken, String host) {
+    private UBFManager(Context context) {
         setContext(context);
-        ubfClient = UBFClient.init(context, clientId, clientSecret, refreshToken, host);
+        ubfClient = UBFClient.init(context);
         ubfAugmentationService = UBFAugmentationServiceImpl.get(context);
         engageConfigManager = EngageConfigManager.get(context);
 
@@ -67,15 +67,11 @@ public class UBFManager {
      * Create the initial instance of the UBFManager.
      *
      * @param context
-     * @param clientId
-     * @param clientSecret
-     * @param refreshToken
-     * @param host
      * @return
      */
-    public static UBFManager initialize(Context context, String clientId, String clientSecret, String refreshToken, String host) {
+    public static UBFManager init(Context context) {
         if (ubfManager == null) {
-            ubfManager = new UBFManager(context, clientId, clientSecret, refreshToken, host);
+            ubfManager = new UBFManager(context);
         }
         return ubfManager;
     }
@@ -83,10 +79,8 @@ public class UBFManager {
     public static UBFManager get() {
         if (ubfManager == null) {
             Log.e(TAG, "EngageSDK - You have not yet initialized your UBFManager instance! Null UBFManager will be returned!");
-            return null;
-        } else {
-            return ubfManager;
         }
+        return ubfManager;
     }
 
     public void postEventCache() {
@@ -101,6 +95,7 @@ public class UBFManager {
         return postEvent(event, null, null);
     }
 
+    //[Lindsay Thurmond:12/29/14] TODO: success failure listeners not hooked up
     public long postEvent(UBF event, Response.Listener<JSONObject> successListener, Response.ErrorListener errorListener) {
         //Save the UBF event in the SQLite DB.
         EngageEvent engageEvent = localEventStore.saveUBFEvent(event.toEngageEvent());

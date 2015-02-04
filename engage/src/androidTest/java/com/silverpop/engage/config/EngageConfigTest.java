@@ -13,20 +13,20 @@ public class EngageConfigTest
 
     public void testDeviceName() {
         String deviceName = EngageConfig.deviceName();
-        assertTrue(deviceName != null);
+        assertNotNull(deviceName);
         assertTrue(deviceName.length() > 0);
     }
 
     public void testDeviceId() {
         String deviceId = EngageConfig.deviceId(getContext());
-        assertTrue(deviceId != null);
+        assertNotNull(deviceId);
         assertTrue(deviceId.length() > 0);
     }
 
     public void testPrimaryUserId() {
         String primUser = "EngageTestPrimaryUserId@gmail.com";
-        EngageConfig.storePrimaryUserId(getContext(), primUser);
-        assertEquals(primUser, EngageConfig.primaryUserId(getContext()));
+        EngageConfig.storeMobileUserId(getContext(), primUser);
+        assertEquals(primUser, EngageConfig.mobileUserId(getContext()));
     }
 
     public void testAnonymousUserId() {
@@ -35,6 +35,11 @@ public class EngageConfigTest
         assertEquals(anonUser, EngageConfig.anonymousUserId(getContext()));
     }
 
+    public void testRecipientId() {
+        String recipientId = "1234567";
+        EngageConfig.storeRecipientId(getContext(), recipientId);
+        assertEquals(recipientId, EngageConfig.recipientId(getContext()));
+    }
 
     public void testCurrentCampaign() {
         String currentCampaign = "EngageTestCurrentCampaign";

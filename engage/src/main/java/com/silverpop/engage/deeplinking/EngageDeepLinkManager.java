@@ -246,24 +246,20 @@ public class EngageDeepLinkManager extends Activity
         }
     }
 
-    private MobileDeepLinkingConfig getConfiguration()
-    {
-        try
-        {
+    private MobileDeepLinkingConfig getConfiguration() {
+        try {
             //First attempts to find the SDK user defined file
             String jsonString = readConfigFile("MobileDeepLinkingConfig.json");
             JSONObject json = new JSONObject(jsonString);
             return new MobileDeepLinkingConfig(json);
-        }
-        catch (IOException e)
-        {
-            //Builds a default internal JSONObject to save having an extra file in the project that doesn't really do anythign.
+        } catch (IOException e) {
+            //Builds a default internal JSONObject to save having an extra file in the project that doesn't really do anything.
             try {
                 JSONObject json = new JSONObject();
                 try {
                     json = json.put(Constants.LOGGING_JSON_NAME, false);
                 } catch (JSONException e1) {
-                    e1.printStackTrace();
+                    Log.e(TAG, e1.getMessage(), e1);
                 }
 
                 //We don't want any routes by default but the object is required.
@@ -280,14 +276,10 @@ public class EngageDeepLinkManager extends Activity
 
                 return new MobileDeepLinkingConfig(json);
             } catch (JSONException ex) {
-                ex.printStackTrace();
+                Log.e(TAG, ex.getMessage(), ex);
             }
-        }
-        catch (JSONException e)
-        {
-            e.printStackTrace();
         } catch (Exception ex) {
-            ex.printStackTrace();
+            Log.e(TAG, ex.getMessage(), ex);
         }
 
         return null;

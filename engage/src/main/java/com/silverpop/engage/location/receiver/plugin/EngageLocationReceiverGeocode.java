@@ -9,22 +9,19 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.util.Log;
-
-import com.silverpop.engage.R;
 import com.silverpop.engage.XMLAPIManager;
 import com.silverpop.engage.config.EngageConfig;
 import com.silverpop.engage.config.EngageConfigManager;
 import com.silverpop.engage.domain.XMLAPI;
+import com.silverpop.engage.domain.XMLAPICreatedFrom;
+import com.silverpop.engage.domain.XMLAPIElement;
+import com.silverpop.engage.domain.XMLAPIOperation;
 import com.silverpop.engage.location.manager.EngageLocationManager;
 import com.silverpop.engage.util.EngageExpirationParser;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by jeremydyer on 6/12/14.
@@ -102,23 +99,19 @@ public class EngageLocationReceiverGeocode
         String lastKnownLocationTimestampColumn = EngageConfigManager.get(context).lastKnownLocationTimestampColumn();
 
         String lastKnownLocationTimeFormat = EngageConfigManager.get(context).lastKnownLocationDateFormat();
-        SimpleDateFormat sdf = new SimpleDateFormat(lastKnownLocationTimeFormat);
+        SimpleDateFormat dateFormat = new SimpleDateFormat(lastKnownLocationTimeFormat);
 
-        //Make XMLAPI request to update the last known location.
-        Map<String, Object> bodyElements = new HashMap<String, Object>();
-        bodyElements.put("LIST_ID", EngageConfigManager.get(context).engageListId());
-        bodyElements.put("CREATED_FROM", "1");
-        XMLAPI updateLastKnownLocation = new XMLAPI("UpdateRecipient", bodyElements);
-        Map<String, Object> syncFields = new HashMap<String, Object>();
-        syncFields.put("EMAIL", EngageConfig.primaryUserId(context));
-        updateLastKnownLocation.addSyncFields(syncFields);
-        Map<String, Object> cols = new HashMap<String, Object>();
-        cols.put(lastKnownLocationColumn, sdf.format(new Date()));
-        cols.put(lastKnownLocationTimestampColumn, EngageConfig.buildLocationAddress());
-        updateLastKnownLocation.addColumns(cols);
+        XMLAPI updateLastKnownLocationXml = XMLAPI.builder()
+                .operation(XMLAPIOperation.UPDATE_RECIPIENT)
+                .listId(EngageConfigManager.get(context).engageListId())
+                .param(XMLAPIElement.CREATED_FROM, XMLAPICreatedFrom.ADDED_MANUALLY)
+                .syncField(XMLAPIElement.EMAIL.toString(), EngageConfig.mobileUserId(context))
+                .column(lastKnownLocationColumn, dateFormat.format(new Date()))
+                .column(lastKnownLocationTimestampColumn, EngageConfig.buildLocationAddress())
+                .build();
 
-        String env = updateLastKnownLocation.envelope();
-        Log.d(TAG, env);
-        XMLAPIManager.get().postXMLAPI(updateLastKnownLocation, null, null);
+        String envelope = updateLastKnownLocationXml.envelope();
+        Log.d(TAG, envelope);
+        XMLAPIManager.get().postXMLAPI(updateLastKnownLocationXml, null, null);
     }
 }

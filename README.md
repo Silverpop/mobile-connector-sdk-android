@@ -31,23 +31,38 @@ The Android EngageSDK is packaged as an Android archivable resource (.aar). An .
 regular jar file but contains other Android bundled resources such as a base Android.manifest file.
 You can include the EngageSDK into a new or existing application by adding a gradle dependency of 
 
+```groovy
+compile(group: 'com.silverpop', name: 'engage', version: '1.1.0', ext: 'aar')
 ```
-compile(group: 'com.silverpop', name: 'engage', version: '1.0.0', ext: 'aar')
+or if the SDK isn't in Maven yet, you can manually add the .aar file to an ```aars``` directory then add the following to your ```build.gradle```.
+
+```groovy
+repositories {
+    flatDir {
+        dirs 'aars'
+    }
+}
+
+dependencies {
+    // use this once maven support is added
+    //compile(group: 'com.silverpop', name: 'engage', version: '1.1.0', ext: 'aar')
+
+    compile 'com.silverpop:engage:1.1.0@aar'
+}
 ```
 
 Adding the dependency will result in the SDK code and all SDK dependencies being pulled into your project.
-The SDK AndroidManifest.xml file will also be included in your project and merged into your application's AndroidManifest.xml
+The SDK ```AndroidManifest.xml``` file will also be included in your project and merged into your application's ```AndroidManifest.xml```
 file at build time by the android build tools.
 
 Once the SDK code is available for you in your project you need to make some adjustments so that your
 application can properly notify the EngageSDK of important lifecycle events. To do that you will create
-an application element in your AndroidManifest.xml file. The application element that you create can either
-directly use the com.silverpop.engage.EngageApplication or create your own custom Application instance
-that extends com.silverpop.engage.EngageApplication. When doing the later it is the responsibility of 
+an application element in your ```AndroidManifest.xml``` file. The application element that you create can either
+directly use the ```com.silverpop.engage.EngageApplication``` or create your own custom Application instance
+that extends ```com.silverpop.engage.EngageApplication```. When doing the later it is the responsibility of 
 the developer to ensure that they invoke the super of each method they override otherwise certain
 SDK functionality may not perform as expected. Creating a custom Application instance and defining 
-that in your AndroidManifest.xml file might look like this. The custom Application class is
-com.silverpop.engage.demo.engagetest.Application.
+that in your ```AndroidManifest.xml``` file might look like this. The custom Application class is ```com.silverpop.engage.demo.engagetest.Application```.
 
 ```xml
 <application
@@ -107,7 +122,9 @@ UBFManager.get().postEvent(namedGoalStarted);
 
 #### UBF Sessions
 
-EngageSDK implements predefined Session events for Universal Behaviors. Sessions are configured to timeout if a user leaves your app for at least 5 minutes. At the end of the Session, duration is computed excluding any portion of inactivity.
+EngageSDK implements predefined Session events for Universal Behaviors. Sessions are configured to timeout 
+if a user leaves your app for at least 5 minutes. At the end of the Session, duration is computed excluding 
+any portion of inactivity.
 
 #### UBFManager
 
@@ -137,19 +154,20 @@ by the SDK.
 * App Name
 * App Version
 * Device Id
-* Primary User Id
+* Mobile User Id/Primary User Id
 * Anonymous Id
+* Recipient Id
 
 ##### UBF Events and their Type Codes
 
 * INSTALLED - 12
-* SESSION_STARTED - 13;
+* SESSION_STARTED - 13
 * SESSION_ENDED - 14
 * GOAL_ABANDONED - 15
 * GOAL_COMPLETED - 16
 * NAMED_EVENT - 17
 * RECEIVED_NOTIFICATION - 48
-* OPENED_NOTIFICATION 49
+* OPENED_NOTIFICATION - 49
 
 #### <a nam="UBFAugmentation"/>UBF Augmentation
 
@@ -210,7 +228,7 @@ will be posted to Engage API in the same state as when it was handed off to the 
 
 The EngageSDK supports the Engage XMLAPI and also provides several convenience methods for developers.
 
-#### <a name="XMLAPIObject"/>XMLAPI Object/Helper
+#### <a name="XMLAPIObject"/>XMLAPI Object/Builder
 
 XMLAPI requests are sent to Engage in XML format. Those XML message are built using the XMLAPI object
 in the EngageSDK. 
@@ -235,20 +253,38 @@ in the EngageSDK.
 is equivalent to:
 
 ```java
-XMLAPI selectRecipientData = new XMLAPI("SelectRecipientData", null);
+XMLAPI selectRecipientData = new XMLAPI(XMLAPIOperation.SELECT_RECIPIENT_DATA);
 
-//Map of XMLAPI top level parameters.
-Map<String, Object> xmlapiParams = new HashMap<String, Object>();
-xmlapiParams.put("LIST_ID", "45654");
-xmlapiParams.put("EMAIL", "someone@adomain.com");
+// XMLAPI top level parameters
+selectRecipientData.addParam(XMLAPIElement.LIST_ID.toString(), "45654");
+selectRecipientData.addParam(XMLAPIElement.EMAIL.toString(), "someone@adomain.com");
 
-selectRecipientData.addParams(xmlapiParams);
+// XMLAPI NAME/VALUE columns
+selectRecipientData.addColumn("Customer Id", "123-45-6789");
+```
+or you can use the XMLAPI Builder class to create the same XML as:
 
-//Map of XMLAPI NAME/VALUE columns.
-Map<String, Object> columns = new HashMap<String, Object>();
-columns.put("Customer Id", "123-45-6789");
+```java
+XMLAPI selectRecipientData = XMLAPI.builder()
+        .operation(XMLAPIOperation.SELECT_RECIPIENT_DATA)
+        .listId("45654")
+        .email("someone@adomain.com")
+        .column("Customer Id", "123-45-6789")
+        .build();
+```
 
-selectRecipientData.addColumns(columns);
+or you can use a combination of the two ways:
+
+```java
+// use builder for initial creation
+XMLAPI selectRecipientData = XMLAPI.builder()
+        .operation(XMLAPIOperation.SELECT_RECIPIENT_DATA)
+        .listId("45654")
+        .email("someone@adomain.com")
+        .build();
+
+// add additional properties later
+selectRecipientData.addColumn("Customer Id", "123-45-6789");
 ```
 
 ##### Example 2
@@ -267,14 +303,21 @@ selectRecipientData.addColumns(columns);
 is equivalent to:
 
 ```java
-XMLAPI selectRecipientData = new XMLAPI("SelectRecipientData", null);
+XMLAPI selectRecipientData = new XMLAPI(XMLAPIOperation.SELECT_RECIPIENT_DATA);
 
-//Map of XMLAPI top level parameters.
-Map<String, Object> xmlapiParams = new LinkedHashMap<String, Object>();
-xmlapiParams.put("LIST_ID", "45654");
-xmlapiParams.put("RECIPIENT_ID", "702003");
+// XMLAPI top level parameters
+selectRecipientData.addParam(XMLAPIElement.LIST_ID.toString(), "45654");
+selectRecipientData.addParam(XMLAPIElement.RECIPIENT_ID.toString(), "702003");
+```
 
-selectRecipientData.addParams(xmlapiParams);
+or using the builder:
+
+```java
+XMLAPI selectRecipientData = XMLAPI.builder() 
+        .operation(XMLAPIOperation.SELECT_RECIPIENT_DATA)
+        .listId("45654")
+        .recipientId("702003")
+        .build();
 ```
 
 ##### Example 3
@@ -293,140 +336,280 @@ selectRecipientData.addParams(xmlapiParams);
 is equivalent to:
 
 ```java
-XMLAPI selectRecipientData = new XMLAPI("SelectRecipientData", null);
+XMLAPI selectRecipientData = new XMLAPI(XMLAPIOperation.SELECT_RECIPIENT_DATA);
 
-//Map of XMLAPI top level parameters.
-Map<String, Object> xmlapiParams = new LinkedHashMap<String, Object>();
-xmlapiParams.put("LIST_ID", "45654");
-xmlapiParams.put("EMAIL", "someone@adomain.com");
+// XMLAPI top level parameters.
+selectRecipientData.addParam(XMLAPIElement.LIST_ID.toString(), "45654");
+selectRecipientData.addParam(XMLAPIElement.EMAIL.toString(), "someone@adomain.com");
+```
 
-selectRecipientData.addParams(xmlapiParams);
+or using the builder:
+
+```java
+XMLAPI selectRecipientData = XMLAPI.builder()
+        .operation(XMLAPIOperation.SELECT_RECIPIENT_DATA)
+        .listId("45654")
+        .email("someone@adomain.com")
+        .build();
 ```
 
 #### <a name="XMLAPIManager"/>XMLAPIManager
 
-The XMLAPIManager manages posting XMLAPI messages to the Engage web services. A XMLAPIManager global instance
-is automatically created for you by ```java com.silverpop.engage.EngageApplication ```. XMLAPIManager
+The ```XMLAPIManager``` manages posting XMLAPI messages to the Engage web services. A ```XMLAPIManager``` global instance
+is automatically created for you by ```com.silverpop.engage.EngageApplication```. XMLAPIManager
 manages network availability and will cache requests when the network is not reachable executing them
 once the network is accessible again. All XMLAPI requests made to Engage should be made through
-this XMLAPIManager.
+the ```XMLAPIManager```.
 
 ```java
-    /**
-     * Post an XMLAPI request to Engage
-     *
-     * @param api
-     *      XMLAPI operation desired.
-     *
-     * @param successTask
-     *      AsyncTask to execute on successful result.
-     *
-     * @param failureTask
-     *      AsyncTask to execute on failure
-     */
-    public void postXMLAPI(XMLAPI api,
-                           AsyncTask<EngageResponseXML, Void, Object> successTask,
-                           AsyncTask<VolleyError, Void, Object> failureTask) {
-        Response.Listener<String> successListener = successListenerForXMLAPI(api, successTask);
-        Response.ErrorListener errorListener = null;
-        xmlapiClient.postResource(api, successListener, errorListener);
-    }
-```
+/**
+ * Post an XMLAPI request to Engage using a generic handler (as opposed to AsyncTasks) for the response.
+ *
+ * @param api             XMLAPI operation desired.
+ * @param responseHandler functionality to run on success or failure of the request.
+ */
+public void postXMLAPI(XMLAPI api,
+                       final XMLAPIResponseHandler responseHandler) {
+    xmlapiClient.postResource(api, new Response.Listener<String>() {
+        @Override
+        public void onResponse(String response) {
+            if (responseHandler != null) {
+                responseHandler.onSuccess(new EngageResponseXML(response));
+            }
+        }
+    }, new Response.ErrorListener() {
+        @Override
+        public void onErrorResponse(VolleyError volleyError) {
+            if (responseHandler != null) {
+                responseHandler.onFailure(volleyError);
+            }
+        }
+    });
+}
 
-##### Creating an anonymous user
+/**
+ * Post an XMLAPI request to Engage
+ *
+ * @param api         XMLAPI operation desired.
+ * @param successTask AsyncTask to execute on successful result.
+ * @param failureTask AsyncTask to execute on failure
+ */
+public void postXMLAPI(XMLAPI api,
+                       final AsyncTask<EngageResponseXML, Void, Object> successTask,
+                       final AsyncTask<VolleyError, Void, Object> failureTask) {
 
-```java
-//You can also provide null for parameters 2 & 3 if you don't wish to perform any custom logic in success and failure.
-XMLAPIManager.get().createAnonymousUserList("EngageDBListID", 
-                new AsyncTask<EngageResponseXML, Void, Object>() {
-                    @Override
-                    protected EngageResponseXML doInBackground(EngageResponseXML... engageResponseXMLs) {
-                        Log.d(TAG, "Successful response");
-                        return engageResponseXMLs[0];
-                    }
-                }, new AsyncTask<VolleyError, Void, Object>() {
-                    @Override
-                    protected Object doInBackground(VolleyError... volleyErrors) {
-                        Log.e(TAG, "Failure is posting create anonymous user event to Silverpop");
-                        return volleyErrors[0];
-                    }
-                });
+    Response.Listener<String> successListener = new Response.Listener<String>() {
+        public void onResponse(String response) {
+            //If null the user doesn't want anything special to happen.
+            if (successTask != null) {
+
+                //Perform the EngageSDK internal logic before passing processing off to user defined AsyncTask.
+                EngageResponseXML responseXML = new EngageResponseXML(response);
+                successTask.execute(responseXML);
+            }
+        }
+    };
+    Response.ErrorListener errorListener = new Response.ErrorListener() {
+        @Override
+        public void onErrorResponse(VolleyError error) {
+            Log.e(TAG, error.getMessage(), error);
+
+            //Call the SDK user defined method.
+            if (failureTask != null) {
+                failureTask.execute(error);
+            }
+        }
+    };
+    xmlapiClient.postResource(api, successListener, errorListener);
+}
 ```
 
 ##### Identifying a registered user
 
 ```java
+final XMLAPI selectRecipientData = XMLAPI.builder()
+        .operation(XMLAPIOperation.SELECT_RECIPIENT_DATA)
+        .listId("45654")
+        .email("someone@adomain.com")
+        .build();
 
-XMLAPI selectRecipientData = new XMLAPI("SelectRecipientData", null);
+// You can also provide null for the response handler if you don't need custom success/failure logic
+XMLAPIManager.get().postXMLAPI(selectRecipientData,
+        new SelectRecipientResponseHandler() {
+            @Override
+            public void onSelectRecipientSuccess(SelectRecipientResponse selectRecipientResponse) {
+                //custom code here
+                Toast.makeText(getActivity().getApplicationContext(), "SUCCESS", Toast.LENGTH_SHORT).show();
+            }
 
-//Map of XMLAPI top level parameters.
-Map<String, Object> xmlapiParams = new LinkedHashMap<String, Object>();
-xmlapiParams.put("LIST_ID", "45654");
-xmlapiParams.put("EMAIL", "someone@adomain.com");
-
-selectRecipientData.addParams(xmlapiParams);
-
-//You can also provide null for parameters 2 & 3 if you don't wish to perform any custom logic in success and failure.
-XMLAPIManager.get().postXMLAPI(selectRecipientData, 
-                new AsyncTask<EngageResponseXML, Void, Object>() {
-                    @Override
-                    protected EngageResponseXML doInBackground(EngageResponseXML... engageResponseXMLs) {
-                        return engageResponseXMLs[0];
-                    }
-
-                    //Remember all UI interacting logic should occur here!
-                    @Override
-                    protected void onPostExecute(Object responseObject) {
-                        try {
-                            EngageResponseXML responseXML = (EngageResponseXML)responseObject;
-                            String result = responseXML.valueForKeyPath("envelope.body.result.success");
-                            if (result.equalsIgnoreCase("true")) {
-                                String id = responseXML.valueForKeyPath("envelope.body.result.recipientid");
-                                //custom code here
-                            } else {
-                                String faultString = responseXML.valueForKeyPath("envelope.body.fault.faultstring");
-                                xmlApiResultTextView.setText("ERROR: " + faultString);
-                            }
-
-                            Toast.makeText(getActivity().getApplicationContext(), result, Toast.LENGTH_SHORT).show();
-                        } catch (XMLResponseParseException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }, new AsyncTask<VolleyError, Void, Object>() {
-                    @Override
-                    protected Object doInBackground(VolleyError... volleyErrors) {
-                        Log.e(TAG, "Failure is posting create anonymous user event to silverpop");
-                        return volleyErrors[0];
-                    }
-
-                    @Override
-                    protected void onPostExecute(Object responseObject) {
-                        VolleyError error = (VolleyError)responseObject;
-                        Toast.makeText(getActivity().getApplicationContext(), "Error creating anonymous user: "
-                                + error.getMessage(), Toast.LENGTH_SHORT).show();
-                    }
-                });
+            @Override
+            public void onFailure(Exception exception) {
+                Toast.makeText(getActivity().getApplicationContext(), "Error selecting recipient: "
+                        + exception.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
 ```
+
+### <a name="MobileIdentityManager"/>MobileIdentityManager
+
+The ```MobileIdentityManager``` can be used to manage user identities.  It can auto create new user identities 
+as well as merge existing identities if needed.  This functionality is intended to replace the 
+manual process of creating an anonymous user.
+ 
+In addition to the normal app security token configuration, the following setup must be configured prior to 
+using the ```MobileIdentityManager``` methods.
+- Recipient list should already be created and the ```listId``` should be setup in the configuration.
+- EngageConfig.json should be configured with the columns names representing the _Mobile User Id_, _Merged Recipient Id_, and _Merged Date_.  The EngageConfigDefault.json defines default values if you prefer to use those.
+- The _Mobile User Id_, _Merged Recipient Id_, and _Merged Date_ columns must be created in the recipient list with names that match your EngageConfig.json settings
+- Optional: If you prefer to save the merge history in a separate AuditRecord relational table you can 
+set ```mergeHistoryInAuditRecordTable``` to true and the ```auditRecordListId``` to the corresponding list id.  If enabled you are responsible for creating the AuditRecord
+ table with the columns for _Audit Record Id_, _Old Recipient Id_, _New Recipient Id_, and _Create Date_ prior to
+ calling ```checkIdentity()```.
+
+##### Setup recipient identity
+```java
+/**
+ * Checks if the mobile user id has been configured yet.  If not
+ * and the {@code enableAutoAnonymousTracking} flag is set to true it is auto generated
+ * using either the {@link com.silverpop.engage.util.uuid.plugin.DefaultUUIDGenerator} or
+ * the generator configured as the {@code mobileUserIdGeneratorClassName}.  If
+ * {@code enableAutoAnonymousTracking} is {@code false} you are responsible for
+ * manually setting the id using {@link com.silverpop.engage.config.EngageConfig#storeMobileUserId(android.content.Context, String)}.
+ * <p/>
+ * Once we have a mobile user id (generated or manually set) a new recipient is
+ * created with the mobile user id.
+ * <p/>
+ * On successful completion of this method the EngageConfig will contain the
+ * mobile user id and new recipient id.
+ *
+ * @param setupRecipientHandler custom behavior to run on success and failure of this method
+ */
+public void setupRecipient(SetupRecipientHandler setupRecipientHandler)
+```
+
+##### Setup Recipient Usage
+```java
+MobileIdentityManager.get().setupRecipient(new SetupRecipientHandler() {
+        @Override
+        public void onSuccess(SetupRecipientResult result) {
+            String message = "Setup recipient auto configured recipient id: " + result.getRecipientId();
+            Log.i(TAG, message);
+            showToast(message);
+        }
+    
+        @Override
+        public void onFailure(SetupRecipientFailure failure) {
+            String message = "Failed to setup recipient";
+            Log.e(TAG, message + ": " + failure.getMessage(), failure.getException());
+            showToast(message);
+        }
+    });
+```
+
+##### Check identity and merge recipients
+```java
+/**
+ * Checks for an existing recipient with all the specified ids.  If a matching recipient doesn't exist
+ * the currently configured recipient is updated with the searched ids.  If an existing recipient
+ * does exist the two recipients are merged and the engage app config is switched to the existing
+ * recipient.
+ * <p/>
+ * When recipients are merged a history of the merged recipients is recorded using the
+ * Mobile User Id, Merged Recipient Id, and Merged Date columns.
+ *
+ * WARNING: The merge process is not currently transactional.  If this method errors the data is likely to
+ * be left in an inconsistent state.
+ *
+ * @param idFieldNamesToValues Map of column name to id value for that column.  Searches for an
+ *                             existing recipient that contains ALL of the column values in this map.
+ *                             <p/>
+ *                             Examples:
+ *                             - Key: facebook_id, Value: 100
+ *                             - Key: twitter_id, Value: 9999
+ * @param identityHandler      custom behavior to run on success and failure of this method
+ */
+public void checkIdentity(final Map<String, String> idFieldNamesToValues, final CheckIdentityHandler identityHandler)
+```
+
+##### Check Identity Usage
+```java
+// pass your own value(s) here
+Map<String, String> fieldToValue = new HashMap<String, String>();
+fieldToValue.put("Custom Integration Test Id", new DefaultUUIDGenerator().generateUUID());
+
+MobileIdentityManager.get().checkIdentity(fieldToValue, new CheckIdentityHandler() {
+    @Override
+    public void onSuccess(CheckIdentityResult result) {
+        String recipientId = result.getRecipientId();
+        if (TextUtils.isEmpty(recipientId)) {
+            recipientId = "Unknown";
+        }
+        String mergedRecipientId = result.getMergedRecipientId();
+        if (TextUtils.isEmpty(mergedRecipientId)) {
+            mergedRecipientId = "Unknown";
+        }
+        String mobileUserId = result.getMobileUserId();
+        if (TextUtils.isEmpty(mobileUserId)) {
+            mobileUserId = "Unknown";
+        }
+
+        String message = "Check Identity success.  Current recipient id: '" + recipientId
+                + ",' merged recipient id: '" + mergedRecipientId + "', mobile user id: '"
+                + mobileUserId;
+        Log.i(TAG, message);
+        showToast(message);
+    }
+
+    @Override
+    public void onFailure(CheckIdentityFailure failure) {
+        String message = "ERROR in check identity";
+        Log.e(TAG, message + ": " + failure.getMessage(), failure.getException());
+        showToast(message);
+    }
+});
+```
+
+### <a name="AnonymousMobileIdentityManager"/>AnonymousMobileIdentityManager
+
+Before the ```MobileIdentityManager``` was available SDK users could create an anonymous user manually.
+That functionality still exists but the logic has been moved to a central class which is now the ```AnonymousMobileIdentityManager```.
+
+##### Creating an anonymous user
+
+```java
+// You can also provide null for parameters 2 & 3 if you don't need custom success/failure logic
+AnonymousMobileIdentityManager.get().createAnonymousUserList("EngageDBListID",
+        new AsyncTask<EngageResponseXML, Void, Object>() {
+            @Override
+            protected EngageResponseXML doInBackground(EngageResponseXML... engageResponseXMLs) {
+                Log.d(TAG, "Successful response");
+                return engageResponseXMLs[0];
+            }
+        }, new AsyncTask<VolleyError, Void, Object>() {
+            @Override
+            protected Object doInBackground(VolleyError... volleyErrors) {
+                Log.e(TAG, "Failure is posting create anonymous user event to Silverpop");
+                return volleyErrors[0];
+            }
+        });
+```
+
+Note: These methods have been moved from the ```XMLAPIManager``` to the ```AnonymousMobileIdentityManager```, 
+however it is recommended to use the ```setupRecipient()``` and ```checkIdentity()``` methods 
+in the [MobileIdentityManager](#MobileIdentityManager) instead to manage mobile identities. 
 
 ### Local Event Storage
 
 UBF events are persisted to a local SQLite DB on the user's device. The event can have only 1 of 5 status. 
 NOT_READY_TO_POST, READY_TO_POST, SUCCESSFULLY_POSTED, FAILED_POST, and EXPIRED. 
 
-* NOT_READY_TO_POST
-** UBF events that are still awaiting augmentation to complete. UBF events will stay in this state
-until the augmentation successfully completes or the augmentation times out.
-* READY_TO_POST 
-** UBF events that are ready to be sent to Engage on the next POST.
-* SUCCESSFULLY_POSTED
-** UBF events that have already been successfully posted to Engage. These events will be purged after the configurable amount of time has been reached.
-* FAILED_POST
-** UBF events that were attempted to be posted to Engage for the maximum number of retries. Once in this state no further attempts to post the UBF event will be made.
-* EXPIRED
-** UBF events in this state "timed out" during their augmentation. These events are considered "READY_TO_POST"
-and treated just like a "READY_TO_POST" UBF event when sent to Engage but are labeled differently just
-to differentiate them from the UBF events with successful augmentation.
+|Event Name|Description|
+|------------------|-------------|
+|NOT_READY_TO_POST|UBF events that are still awaiting augmentation to complete. UBF events will stay in this state until the augmentation successfully completes or the augmentation times out.|
+|READY_TO_POST|UBF events that are ready to be sent to Engage on the next POST.|
+|SUCCESSFULLY_POSTED|UBF events that have already been successfully posted to Engage. These events will be purged after the configurable amount of time has been reached.|
+|FAILED_POST|UBF events that were attempted to be posted to Engage for the maximum number of retries. Once in this state no further attempts to post the UBF event will be made.|
+|EXPIRED|UBF events in this state "timed out" during their augmentation. These events are considered "READY_TO_POST" and treated just like a "READY_TO_POST" UBF event when sent to Engage but are labeled differently just to differentiate them from the UBF events with successful augmentation.|
 
 
 ### Deeplinking
@@ -472,42 +655,54 @@ from your application to retrieve desired configuration values.
 |Configuration Name|Default Value|Meaning|Format|
 |------------------|-------------|-------|------|
 |LocalEventStore->expireLocalEventsAfterNumDays|30 days|Number of days before engage events are purged from local storage|Number|
-|General->databaseListId|{YOUR_LIST_ID}|Engage Database ListID from Engage Portal|String|
-|General->ubfEventCacheSize|3|Events to cache locally before batch post|Number|
-|General->defaultCurrentCampaignExpiration|1 day|time before current campaign expires by default|EngageExpirationParser String|
-|General->deepLinkScheme|{YOUR_DEEP_LINK_SCHEME}|Application deeplink scheme|String|
-|ParamFieldNames->ParamCampaignValidFor|CampaignValidFor|External event parameter name to parse Campaign valid from|String|
-|ParamFieldNames->ParamCampaignExpiresAt|CampaignExpiresAt|External event parameter name to parse Campaign expires at from|String|
-|ParamFieldNames->ParamCurrentCampaign|CurrentCampaign|External event parameter name to parse Current Campaign from|String|
-|ParamFieldNames->ParamCallToAction|CallToAction|External event parameter name to parse Call To Action from|String|
-|Session->sessionLifecycleExpiration|5 minutes|time local application session is valid for before triggering session ended event|EngageExpirationParser String|
-|Networking->maxNumRetries|3|Number of times that an event is retried before it is finally marked as failed in the local event store and no more attempts are made|Number|
-|Networking->secureConnection|true|true if underlying connection should be https(and it should be) false otherwise. False only available for debugging purposes.|Boolean|
-|UBFFieldNames->UBFSessionDurationFieldName|Session Duration|JSON Universal Event Session Duration field name|String|
-|UBFFieldNames->UBFTagsFieldName|Tags|JSON Universal Event Tags field name|String|
-|UBFFieldNames->UBFDisplayedMessageFieldName|Displayed Message|JSON Universal Event Displayed Message field name|String|
-|UBFFieldNames->UBFCallToActionFieldName|Call To Action|JSON Universal Event Call To Action field name|String|
-|UBFFieldNames->UBFEventNameFieldName|Event Name|JSON Universal Event name field name|String|
-|UBFFieldNames->UBFGoalNameFieldName|Goal Name|JSON Universal Event goal field name|String|
-|UBFFieldNames->UBFCurrentCampaignFieldName|Campaign Name|JSON Universal Event current campaign field name|String|
-|UBFFieldNames->UBFLastCampaignFieldName|Last Campaign|JSON Universal Event last campaign field name|String|
-|UBFFieldNames->UBFLocationAddressFieldName|Location Address|JSON Universal Event location address field name|String|
-|UBFFieldNames->UBFLocationNameFieldName|Location Name|JSON Universal Event location name field name|String|
-|UBFFieldNames->UBFLatitudeFieldName|Latitude|JSON Universal Event Latitude field name|String|
-|UBFFieldNames->UBFLongitudeFieldName|Longitude|JSON Universal Event Longitude field name|String|
-|LocationServices->lastKnownLocationDateFormat|yyyy'-'MM'-'dd|User last known location date format|String|
-|LocationServices->lastKnownLocationTimestampColumn|Last Location Address Time|Engage DB column name for the last known location time|String|
-|LocationServices->lastKnownLocationColumn|Last Location Address|Engage DB column name for the last known location|String|
-|LocationServices->locationDistanceFilter|10|meters in location change before updated location information delegate is invoked|Number|
-||LocationServices->locationPrecisionLevel|kCLLocationAccuracyBest|desired level of location accuracy|String|
-|LocationServices->locationCacheLifespan|1 hr|lifespan of location coordinates before they are considered expired|EngageExpirationParser String|
-|LocationServices->coordinatesPlacemarkTimeout|15 sec|timeout on acquiring CLPlacemark before event is posted without that information|EngageExpirationParser String|
-|LocationServices->coordinatesAcquisitionTimeout|15 sec|timeout on acquiring CLLocation before event is posted without that information|EngageExpirationParser String|
-|LocationServices->enabled|YES|Are Location services enabled for UBF events|Boolean|
-|PluggableServices->pluggableLocationManagerClassName|com.silverpop.engage.location.manager.plugin.EngageLocationManagerDefault|Java implementation that will pull the location information from the device|Java Class|
-|Augmentation->augmentationTimeout|15 sec|timeout for augmenting UBF events|EngageExpirationParser String|
-|Augmentation->ubfAugmentorClassNames||JSON Array of Java class names that should be used for augmenting|JSON Array of String Java Classnames|
-
+|General>databaseListId|{YOUR_LIST_ID}|Engage Database ListID from Engage Portal|String|
+|General>ubfEventCacheSize|3|Events to cache locally before batch post|Number|
+|General>defaultCurrentCampaignExpiration|1 day|time before current campaign expires by default|EngageExpirationParser String|
+|General>deepLinkScheme|{YOUR_DEEP_LINK_SCHEME}|Application deeplink scheme|String|
+|ParamFieldNames>ParamCampaignValidFor|CampaignValidFor|External event parameter name to parse Campaign valid from|String|
+|ParamFieldNames>ParamCampaignExpiresAt|CampaignExpiresAt|External event parameter name to parse Campaign expires at from|String|
+|ParamFieldNames>ParamCurrentCampaign|CurrentCampaign|External event parameter name to parse Current Campaign from|String|
+|ParamFieldNames>ParamCallToAction|CallToAction|External event parameter name to parse Call To Action from|String|
+|Session>sessionLifecycleExpiration|5 minutes|time local application session is valid for before triggering session ended event|EngageExpirationParser String|
+|Networking>maxNumRetries|3|Number of times that an event is retried before it is finally marked as failed in the local event store and no more attempts are made|Number|
+|Networking>secureConnection|true|true if underlying connection should be https(and it should be) false otherwise. False only available for debugging purposes.|Boolean|
+|UBFFieldNames>UBFSessionDurationFieldName|Session Duration|JSON Universal Event Session Duration field name|String|
+|UBFFieldNames>UBFTagsFieldName|Tags|JSON Universal Event Tags field name|String|
+|UBFFieldNames>UBFDisplayedMessageFieldName|Displayed Message|JSON Universal Event Displayed Message field name|String|
+|UBFFieldNames>UBFCallToActionFieldName|Call To Action|JSON Universal Event Call To Action field name|String|
+|UBFFieldNames>UBFEventNameFieldName|Event Name|JSON Universal Event name field name|String|
+|UBFFieldNames>UBFGoalNameFieldName|Goal Name|JSON Universal Event goal field name|String|
+|UBFFieldNames>UBFCurrentCampaignFieldName|Campaign Name|JSON Universal Event current campaign field name|String|
+|UBFFieldNames>UBFLastCampaignFieldName|Last Campaign|JSON Universal Event last campaign field name|String|
+|UBFFieldNames>UBFLocationAddressFieldName|Location Address|JSON Universal Event location address field name|String|
+|UBFFieldNames>UBFLocationNameFieldName|Location Name|JSON Universal Event location name field name|String|
+|UBFFieldNames>UBFLatitudeFieldName|Latitude|JSON Universal Event Latitude field name|String|
+|UBFFieldNames>UBFLongitudeFieldName|Longitude|JSON Universal Event Longitude field name|String|
+|LocationServices>lastKnownLocationDateFormat|yyyy'-'MM'-'dd|User last known location date format|String|
+|LocationServices>lastKnownLocationTimestampColumn|Last Location Address Time|Engage DB column name for the last known location time|String|
+|LocationServices>lastKnownLocationColumn|Last Location Address|Engage DB column name for the last known location|String|
+|LocationServices>locationDistanceFilter|10|meters in location change before updated location information delegate is invoked|Number|
+|LocationServices>locationPrecisionLevel|kCLLocationAccuracyBest|desired level of location accuracy|String|
+|LocationServices>locationCacheLifespan|1 hr|lifespan of location coordinates before they are considered expired|EngageExpirationParser String|
+|LocationServices>coordinatesPlacemarkTimeout|15 sec|timeout on acquiring CLPlacemark before event is posted without that information|EngageExpirationParser String|
+|LocationServices>coordinatesAcquisitionTimeout|15 sec|timeout on acquiring CLLocation before event is posted without that information|EngageExpirationParser String|
+|LocationServices>enabled|YES|Are Location services enabled for UBF events|Boolean|
+|PluggableServices>pluggableLocationManagerClassName|com.silverpop.engage.location.manager.plugin.EngageLocationManagerDefault|Java implementation that will pull the location information from the device|Java Class|
+|Augmentation>augmentationTimeout|15 sec|timeout for augmenting UBF events|EngageExpirationParser String|
+|Augmentation>ubfAugmentorClassNames||JSON Array of Java class names that should be used for augmenting|JSON Array of String Java Classnames|
+|Recipient>enableAutoAnonymousTracking|true|If set to true it allows mobile user ids to be auto generated for recipients.  If set to false you are responsible for manually setting the mobile user id.|Boolean|
+|Recipient>mobileUserIdGeneratorClassName|com.silverpop.engage.util.uuid.plugin.DefaultUUIDGenerator|The class to use for auto generating mobile user ids if the ```enableAutoAnonymousTracking``` property is set to true.|Java Class|
+|Recipient>mobileUserIdColumn|Mobile User Id|Column name to store the mobile user id in.|String|
+|Recipient>mergedRecipientIdColumn|Merged Recipient Id|Column name to store the merged recipient id in.  The merged recipient id column is populated if needed during the check identity process.|String|
+|Recipient>mergedDateColumn|Merged Date|Column name to store the merged date in. The merged recipient id column is populated if needed during the check identity process.|String|
+|Recipient>mergeHistoryInMarketingDatabase|true|If the audit history for merged recipients should be stored in the marketing database.|Boolean|
+|AuditRecord>auditRecordPrimaryKeyColumnName|Audit Record Id|Only required if ```mergeHistoryInAuditRecordTable``` is set to ```true```.  The column name for the generated primary key in the audit record table.|String|
+|AuditRecord>auditRecordPrimaryKeyGeneratorClassName|com.silverpop.engage.util.uuid.plugin.DefaultUUIDGenerator|Only required if ```mergeHistoryInAuditRecordTable``` is set to ```true```.  The class to use to generate primary keys for the audit record table.|Java Class|
+|AuditRecord>oldRecipientIdColumnName|Old Recipient Id|Only required if ```mergeHistoryInAuditRecordTable``` is set to ```true```. When a recipient is merged during the check identity process, this is the column name for old recipient id.|String|
+|AuditRecord>newRecipientIdColumnName|New Recipient Id|Only required if ```mergeHistoryInAuditRecordTable``` is set to ```true```. When a recipient is merged during the check identity process, this is the column name for assumed recipient id.|String|
+|AuditRecord>createDateColumnName|Create Date|Only required if ```mergeHistoryInAuditRecordTable``` is set to ```true```. When a recipient is merged during the check identity process, this is the column name for the timestamp for when the merge occurred.|String|
+|AuditRecord>mergeHistoryInAuditRecordTable|false|If the audit history for merged recipients should be stored in a separate audit record table.|Boolean|
+|AuditRecord->auditRecordListId||The list id for the Audit Record relational table. Only required if ```mergeHistoryInAuditRecordTable``` is set to ```true```.|String|
 
 ### <a name="EngageExpirationParser"/>EngageExpirationParser
 
@@ -567,9 +762,14 @@ and if present parses that value and stores it in the device local storage so th
 Below are some deep link examples assuming that your application is configured to open for a URL containing a host value of "Silverpop".
 
 ```
-Silverpop://campaign/TestCurrentCampaign?ParamCampaignValidFor=4hours    //Campaign Name set to "TestCurrentCampaign" and Expires 4 hours from when the link is opened
-Silverpop://campaign/TestCurrentCampaign   //Campaign Name set to "TestCurrentCampaign" and Expires 1 Day (default since none present) after the URL is opened in the application
-Silverpop://campaign/TestCurrentCampaign?ParamCampaignExpiresAt=2014/08/01 07:23:00    //Campaign Name set to "TestCurrentCampaign" and Expires on August 8th 2014 at 7:23AM. Note URL MUST be escaped but wasn't here for demonstration purposes!
+//Campaign Name set to "TestCurrentCampaign" and Expires 4 hours from when the link is opened
+Silverpop://campaign/TestCurrentCampaign?ParamCampaignValidFor=4hours
+
+//Campaign Name set to "TestCurrentCampaign" and Expires 1 Day (default since none present) after the URL is opened in the application
+Silverpop://campaign/TestCurrentCampaign   
+
+//Campaign Name set to "TestCurrentCampaign" and Expires on August 8th 2014 at 7:23AM. Note URL MUST be escaped but wasn't here for demonstration purposes!
+Silverpop://campaign/TestCurrentCampaign?ParamCampaignExpiresAt=2014/08/01 07:23:00
 ```
 
 #### Posting events to Universal Behaviors service

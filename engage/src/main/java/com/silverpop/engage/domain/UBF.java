@@ -16,6 +16,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
+import com.silverpop.engage.config.EngageConfig;
 
 /**
  * Created by jeremydyer on 5/19/14.
@@ -23,7 +24,7 @@ import java.util.TimeZone;
 public class UBF
     implements JSONable {
 
-    public static final int EXPECTED_CORE_TEMPLATE_SIZE = 9;
+    public static final int EXPECTED_CORE_TEMPLATE_SIZE = 10;
 
     public static final int INSTALLED = 12;
     public static final int SESSION_STARTED = 13;
@@ -36,8 +37,10 @@ public class UBF
 
     private int code;
     private Date eventTimestamp;
-
+    private Context context;
+    
     private Map<String, Object> params;
+    private Map<String, Object> headerParams;
     private Map<String, Object> coreTemplate;
 
     private static final SimpleDateFormat rfc3339 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
@@ -48,6 +51,7 @@ public class UBF
     }
 
     public UBF(Context context, int code, Map<String, Object> params) {
+    	this.context = context;
         setCode(code);
         setParams(params);
         setEventTimestamp(new Date());
@@ -64,8 +68,9 @@ public class UBF
         core.put("App Name", EngageConfig.appName(context));
         core.put("App Version", EngageConfig.appVersion(context));
         core.put("Device Id", EngageConfig.deviceId(context));
-        core.put("Primary User Id", EngageConfig.primaryUserId(context));
+        core.put("Primary User Id", EngageConfig.mobileUserId(context));
         core.put("Anonymous Id", EngageConfig.anonymousUserId(context));
+        core.put("Recipient Id", EngageConfig.recipientId(context));
 
         return core;
     }
@@ -300,8 +305,18 @@ public class UBF
     public JSONObject toJSONObject() {
         JSONObject jo = new JSONObject();
         try {
-            jo.put("eventTypeCode", this.getCode());
-            jo.put("eventTimestamp", rfc3339.format(this.getEventTimestamp()));
+        	String recipientId = EngageConfig.primaryUserId(this.context);
+        	if (recipientId!=null && !recipientId.equals("")){
+                jo.put("contactId", recipientId);
+        	} else {
+        		String anonymousId = EngageConfig.anonymousUserId(this.context);
+        		if (anonymousId!=null && !anonymousId.equals("")){
+                    jo.put("contactId", anonymousId);
+        		}
+        	}
+            for (Map.Entry<String, Object> entry : getHeaderParams().entrySet()) {
+                jo.put(entry.getKey(), entry.getValue());
+            }
             jo.put("attributes", initAttributes(getParams()));
         } catch (JSONException jsonEx) {
             Log.e(this.getClass().getName(), jsonEx.getMessage());
@@ -329,6 +344,7 @@ public class UBF
 
     public void setCode(int code) {
         this.code = code;
+        getHeaderParams().put("eventTypeCode", this.code);
     }
 
     public Map<String, Object> getParams() {
@@ -352,6 +368,19 @@ public class UBF
     }
 
     public void setEventTimestamp(Date eventTimestamp) {
+
         this.eventTimestamp = eventTimestamp;
+        getHeaderParams().put("eventTimestamp", rfc3339.format(this.getEventTimestamp()));
+    }
+
+    public Map<String, Object> getHeaderParams() {
+        if (headerParams == null){
+            headerParams = new HashMap<String, Object>();
+        }
+        return headerParams;
+    }
+
+    public void setHeaderParams(Map<String, Object> headerParams) {
+        this.headerParams = headerParams;
     }
 }

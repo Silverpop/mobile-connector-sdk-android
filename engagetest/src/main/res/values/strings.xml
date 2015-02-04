@@ -8,8 +8,11 @@
     <string name="createanonymoususer_button">Create Anonymous User</string>
     <string name="upgradeanonymoususer_button">Upgrade Anonymous</string>
     <string name="mergetoknownuser_button">Make Known User</string>
+    <string name="setupRecipientButton_button">Setup Recipient</string>
+    <string name="checkIdentityButton_button">Check Identity</string>
     <string name="mockLocalNotification_button">Mock Local Notification</string>
     <string name="mockRemoteNotification_button">Mock Remote Notification</string>
     <string name="mockOpenDeepLink_button">Mock Open DeepLink</string>
+    <string name="current_config">Current Config:</string>
 
 </resources>
