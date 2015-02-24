@@ -455,6 +455,8 @@ XMLAPIManager.get().postXMLAPI(selectRecipientData,
 The ```MobileIdentityManager``` can be used to manage user identities.  It can auto create new user identities 
 as well as merge existing identities if needed.  This functionality is intended to replace the 
 manual process of creating an anonymous user.
+
+To watch a quick video that demonstrates how easy this is, just [Click here](https://vimeo.com/120511788) to see it now!
  
 In addition to the normal app security token configuration, the following setup must be configured prior to 
 using the ```MobileIdentityManager``` methods.
