@@ -21,7 +21,7 @@ namely UBFManager and XMLAPIManager.
 ## Getting Started 
 The first thing you will want to do is contact your Relationship Manager at Silverpop and ask for the "Silverpop Mobile Connector".  They will assist in getting your Engage account provisioned for Universal Behaviors -- the new flexible event tracking system that is the backbone of tracked mobile app behaviors.
 
-Next, you can follow the instructions in this readme file, or as an additional offer, we've put together a short 10 minute tutorial that will walk you through the download, installation, and configuration process to get your app up and running.  [Click here](https://kb.silverpop.com/kb/engage/Silverpop_Mobile_Connector_-_***NEW***/Video_Tutorial%3A_Up_and_Running_in_10_mins!) to watch that video tutorial within our KnowledgeBase.
+Next, you can follow the instructions in this readme file, or as an additional offer, we've put together a short tutorial that will walk you through the download, installation, and configuration process to get your app up and running on Android.  [Click here](https://vimeo.com/120502161) to watch that video tutorial now.
 
 ## Integrating Application with EngageSDK
 
